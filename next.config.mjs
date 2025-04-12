@@ -27,6 +27,10 @@ const nextConfig = {
     parallelServerBuildTraces: true,
     parallelServerCompiles: true,
   },
+  // Add caching configuration
+  cacheHandler: require.resolve('./cache-handler.js'),
+  // Increase memory cache size for better performance
+  cacheMaxMemorySize: 100 * 1024 * 1024, // 100MB
 }
 
 if (userConfig) {
