@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useAuth } from "@/components/auth-provider"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -11,6 +11,7 @@ import { Separator } from "@/components/ui/separator"
 import { useToast } from "@/components/ui/use-toast"
 import { Loader2, Save, Bell, Moon, Sun, Trash2 } from "lucide-react"
 import { useTheme } from "next-themes"
+import { supabase } from "@/lib/supabase-client"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -28,6 +29,7 @@ export default function SettingsPage() {
   const { theme, setTheme } = useTheme()
   const { toast } = useToast()
   const [isSaving, setIsSaving] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
   const [activeTab, setActiveTab] = useState("preferences")
 
   // Notification settings
@@ -40,15 +42,90 @@ export default function SettingsPage() {
 
   // Language settings
   const [language, setLanguage] = useState("en")
+  
+  // Timezone settings
+  const [timezone, setTimezone] = useState("UTC")
+  
+  // Auto-save setting
+  const [autoSave, setAutoSave] = useState(true)
+  
+  // Animations settings
+  const [animations, setAnimations] = useState(true)
+  const [reducedMotion, setReducedMotion] = useState(false)
+  
+  // Load user settings from Supabase
+  useEffect(() => {
+    async function loadUserSettings() {
+      if (!user) return
+      
+      try {
+        setIsLoading(true)
+        
+        const { data, error } = await supabase
+          .from("user_settings")
+          .select("*")
+          .eq("user_id", user.id)
+          .single()
+        
+        if (error && error.code !== "PGRST116") {
+          // PGRST116 is "no rows returned" error, which is fine for new users
+          console.error("Error loading settings:", error)
+          throw error
+        }
+        
+        if (data) {
+          // Apply loaded settings to state
+          setEmailNotifications(data.email_notifications)
+          setProjectUpdates(data.project_updates)
+          setMarketingEmails(data.marketing_emails)
+          setCurrentTheme(data.theme)
+          setLanguage(data.language)
+          setTimezone(data.timezone)
+          
+          // Apply theme immediately
+          if (data.theme !== theme) {
+            setTheme(data.theme)
+          }
+        }
+      } catch (error) {
+        console.error("Failed to load settings:", error)
+        toast({
+          title: "Failed to load settings",
+          description: "Your settings could not be loaded. Using defaults instead.",
+          variant: "destructive",
+        })
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    
+    loadUserSettings()
+  }, [user, theme, setTheme, toast])
 
   // Handle save preferences
   const handleSavePreferences = async () => {
+    if (!user) return
+    
     setIsSaving(true)
 
     try {
-      // In a real app, you would save these preferences to the database
-      // For now, we'll just simulate a delay
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      // Prepare settings object
+      const settings = {
+        user_id: user.id,
+        language,
+        timezone,
+        theme: currentTheme,
+        email_notifications: emailNotifications,
+        project_updates: projectUpdates,
+        marketing_emails: marketingEmails,
+      }
+      
+      // Save settings to Supabase using upsert
+      const { error } = await supabase
+        .from("user_settings")
+        .upsert(settings, { onConflict: "user_id" })
+      
+      if (error) throw error
 
       // Update theme if changed
       if (currentTheme !== theme) {
@@ -96,6 +173,15 @@ export default function SettingsPage() {
     return (
       <div className="flex h-[calc(100vh-4rem)] items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-emerald-500" />
+      </div>
+    )
+  }
+  
+  if (isLoading) {
+    return (
+      <div className="flex h-[calc(100vh-4rem)] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-emerald-500" />
+        <span className="ml-2">Loading settings...</span>
       </div>
     )
   }
@@ -153,7 +239,11 @@ export default function SettingsPage() {
                     <p className="text-sm text-muted-foreground">Set your preferred time zone</p>
                   </div>
                   <div className="flex items-center">
-                    <select className="rounded-md border border-input bg-background px-3 py-2">
+                    <select 
+                      className="rounded-md border border-input bg-background px-3 py-2"
+                      value={timezone}
+                      onChange={(e) => setTimezone(e.target.value)}
+                    >
                       <option value="UTC">UTC (Coordinated Universal Time)</option>
                       <option value="EST">EST (Eastern Standard Time)</option>
                       <option value="PST">PST (Pacific Standard Time)</option>
@@ -169,7 +259,11 @@ export default function SettingsPage() {
                     <Label htmlFor="auto-save">Auto-Save</Label>
                     <p className="text-sm text-muted-foreground">Automatically save your work while editing</p>
                   </div>
-                  <Switch id="auto-save" defaultChecked />
+                  <Switch 
+                    id="auto-save" 
+                    checked={autoSave}
+                    onCheckedChange={setAutoSave}
+                  />
                 </div>
               </div>
             </CardContent>
@@ -232,7 +326,11 @@ export default function SettingsPage() {
                     <Label htmlFor="animations">Animations</Label>
                     <p className="text-sm text-muted-foreground">Enable or disable UI animations</p>
                   </div>
-                  <Switch id="animations" defaultChecked />
+                  <Switch 
+                    id="animations" 
+                    checked={animations}
+                    onCheckedChange={setAnimations}
+                  />
                 </div>
 
                 <Separator />
@@ -242,7 +340,11 @@ export default function SettingsPage() {
                     <Label htmlFor="reduced-motion">Reduced Motion</Label>
                     <p className="text-sm text-muted-foreground">Minimize animations for accessibility</p>
                   </div>
-                  <Switch id="reduced-motion" />
+                  <Switch 
+                    id="reduced-motion" 
+                    checked={reducedMotion}
+                    onCheckedChange={setReducedMotion}
+                  />
                 </div>
               </div>
             </CardContent>
