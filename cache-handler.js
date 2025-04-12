@@ -1,6 +1,6 @@
 const cache = new Map()
 
-module.exports = class CacheHandler {
+export default class CacheHandler {
   constructor(options) {
     this.options = options
   }
