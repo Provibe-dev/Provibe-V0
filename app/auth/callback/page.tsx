@@ -19,6 +19,16 @@ export default function AuthCallback() {
         // Get the auth code from the URL
         const hashParams = new URLSearchParams(window.location.hash.substring(1))
         const accessToken = hashParams.get("access_token")
+        const errorParam = hashParams.get("error")
+        const errorDescription = hashParams.get("error_description")
+
+        // Handle explicit OAuth errors
+        if (errorParam) {
+          console.error("OAuth error:", errorParam, errorDescription)
+          setError(`Authentication failed: ${errorDescription || errorParam}`)
+          setTimeout(() => router.push(`/auth/login?error=${encodeURIComponent(errorParam)}`), 2000)
+          return
+        }
 
         if (accessToken) {
           console.log("Found access token in URL")

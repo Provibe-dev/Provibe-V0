@@ -4,36 +4,31 @@ import { useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/components/auth-provider"
 import { Loader2 } from "lucide-react"
+import { supabase } from "@/lib/supabase-client"
 
 export default function LogoutPage() {
   const { logout } = useAuth()
   const router = useRouter()
 
   useEffect(() => {
-    // Immediately start the logout process
     const performLogout = async () => {
       try {
-        console.log("Logout page: Starting logout process")
-        // Set the logged out flag
-        localStorage.setItem("v0_user_logged_out", "true")
+        // Use the logout function from auth provider
         await logout()
-        // The logout function now handles the redirect
+        
+        // The router.push is already handled in the logout function,
+        // but we'll add a fallback just in case
+        if (window.location.pathname !== "/auth/login") {
+          router.push("/auth/login")
+        }
       } catch (error) {
-        console.error("Logout page: Error during logout:", error)
-        // Force redirect to login even if logout fails
+        console.error("Logout error:", error)
+        // Even if there's an error, force redirect to login
         router.push("/auth/login")
       }
     }
-
+    
     performLogout()
-
-    // Safety timeout - redirect to login after 3 seconds even if logout is still processing
-    const safetyTimeout = setTimeout(() => {
-      console.log("Logout page: Safety timeout triggered")
-      router.push("/auth/login")
-    }, 3000)
-
-    return () => clearTimeout(safetyTimeout)
   }, [logout, router])
 
   return (

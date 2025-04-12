@@ -18,13 +18,8 @@ import { AIToolSelector } from "@/components/ai-tool-selector"
 import { AudioRecorder } from "@/components/audio-recorder"
 import { cn } from "@/lib/utils"
 import { useAuth } from "@/components/auth-provider"
-import { createClient } from "@supabase/supabase-js"
+import { supabase } from "@/lib/supabase-client" // Import from centralized client
 import { generateDocuments } from "@/lib/generate-documents"
-
-// Initialize Supabase client
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ""
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ""
-const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
 // Form schema for Step 1: Idea
 const ideaFormSchema = z.object({

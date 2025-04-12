@@ -214,7 +214,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 updated_at: new Date().toISOString(),
               }
 
-              await supabase.from("profiles").insert([newProfile])
+              const { error: insertError } = await supabase.from("profiles").insert([newProfile])
+              
+              if (insertError) {
+                console.error("Error creating profile:", insertError)
+                // Log the error and continue with basic user info
+                const formattedUser = formatUser(session.user, null)
+                setUser(formattedUser)
+                
+                // Report error to monitoring system
+                reportAuthError("profile_creation_failed", insertError)
+                return
+              }
 
               // Fetch the newly created profile
               const { data: createdProfile } = await supabase
@@ -237,6 +248,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }
         } else if (error) {
           console.error("Supabase auth error:", error)
+          
+          // Check if token needs refresh
+          if (error.message?.includes("token") || error.status === 401) {
+            await supabase.auth.refreshSession()
+            // Retry auth check after refresh attempt
+            const { data: refreshData } = await supabase.auth.getSession()
+            if (refreshData.session) {
+              // Session refreshed successfully, restart auth check
+              checkAuth()
+              return
+            }
+          }
+          
           // If we're not on an auth page, redirect to login
           if (!pathname?.includes("/auth/")) {
             router.push("/auth/login")
@@ -277,7 +301,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               updated_at: new Date().toISOString(),
             }
 
-            await supabase.from("profiles").insert([newProfile])
+            const { error: insertError } = await supabase.from("profiles").insert([newProfile])
+            
+            if (insertError) {
+              console.error("Error creating profile on auth change:", insertError)
+              // Continue with basic user info
+              const formattedUser = formatUser(session.user, null)
+              setUser(formattedUser)
+              return
+            }
 
             // Fetch the newly created profile
             const { data: createdProfile } = await supabase
@@ -302,12 +334,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (!pathname?.includes("/auth/")) {
           router.push("/auth/login")
         }
+      } else if (event === "TOKEN_REFRESHED") {
+        // Handle token refresh event
+        console.log("Auth token refreshed")
+        checkAuth() // Re-check auth state with fresh token
       }
     })
 
-    checkAuth()
+    // Prevent race conditions by setting a flag
+    let isMounted = true
+    
+    // Only run checkAuth if component is still mounted
+    const safeCheckAuth = async () => {
+      if (isMounted) {
+        await checkAuth()
+      }
+    }
+    
+    safeCheckAuth()
 
     return () => {
+      isMounted = false
       if (!isV0Preview) {
         authListener.subscription.unsubscribe()
       }

@@ -9,14 +9,9 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { useAuth } from "@/components/auth-provider"
-import { createClient } from "@supabase/supabase-js"
+import { supabase } from "@/lib/supabase-client"
 import { formatDistanceToNow } from "date-fns"
 import ReactMarkdown from "react-markdown"
-
-// Initialize Supabase client
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ""
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ""
-const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
 // Mock document data for preview environment
 const MOCK_DOCUMENTS = {

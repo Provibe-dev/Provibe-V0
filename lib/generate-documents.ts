@@ -1,10 +1,6 @@
 import { createClient } from "@supabase/supabase-js"
 import type { Database } from "./database.types"
-
-// Initialize Supabase client
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ""
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || ""
-const supabase = createClient<Database>(supabaseUrl, supabaseServiceKey)
+import { getServiceSupabase } from "./supabase-client"
 
 // Document templates for different document types
 const documentTemplates: Record<string, { title: string; content: string }> = {
@@ -271,7 +267,7 @@ const documentTemplates: Record<string, { title: string; content: string }> = {
 }
 
 // Function to generate document content based on project data
-function generateDocumentContent(docType: string, projectData: any): string {
+export function generateDocumentContent(docType: string, projectData: any): string {
   const template = documentTemplates[docType]?.content || ""
 
   // Replace placeholders with actual project data
@@ -343,19 +339,54 @@ export async function generateDocuments(projectId: string, selectedDocuments: st
   try {
     console.log(`Generating ${selectedDocuments.length} documents for project ${projectId}`)
 
+    // Check if we're in the browser
+    const isBrowser = typeof window !== "undefined"
     // Check if we're in the v0 preview environment
-    const isV0Preview = typeof window !== "undefined" && window.location.hostname.includes("vusercontent.net")
+    const isV0Preview = isBrowser && window.location.hostname.includes("vusercontent.net")
 
-    if (isV0Preview) {
-      console.log("Using mock document generation for preview environment")
-      // Simulate document generation
-      await new Promise((resolve) => setTimeout(resolve, 2000))
-      return {
-        success: true,
-        message: `Generated ${selectedDocuments.length} documents successfully in preview mode`,
-        documentCount: selectedDocuments.length,
+    if (isBrowser) {
+      console.log("Running in browser environment")
+      
+      if (isV0Preview) {
+        console.log("Using mock document generation for preview environment")
+        // Simulate document generation
+        await new Promise((resolve) => setTimeout(resolve, 2000))
+        return {
+          success: true,
+          message: `Generated ${selectedDocuments.length} documents successfully in preview mode`,
+          documentCount: selectedDocuments.length,
+        }
+      } else {
+        // For client-side execution in production, we should call an API endpoint
+        // that runs the document generation server-side
+        console.log("Calling server-side API for document generation")
+        try {
+          const response = await fetch(`/api/projects/${projectId}/documents`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ selectedDocuments }),
+          })
+          
+          if (!response.ok) {
+            throw new Error(`API request failed with status ${response.status}`)
+          }
+          
+          const result = await response.json()
+          return result
+        } catch (error) {
+          console.error("Error calling document generation API:", error)
+          throw new Error("Failed to generate documents via API")
+        }
       }
     }
+
+    // Server-side execution
+    console.log("Running in server environment")
+    
+    // Get the service role client
+    const supabase = getServiceSupabase()
 
     // Get the project data for content generation
     const { data: projectData, error: projectError } = await supabase
