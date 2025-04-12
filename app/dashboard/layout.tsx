@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation"
 import { useAuth } from "@/components/auth-provider"
 import { DashboardSidebar } from "@/components/dashboard-sidebar"
 import { Loader2 } from "lucide-react"
-import { supabase } from "@/lib/supabase"
+import { supabase } from "@/lib/supabase-client"
 
 export default function DashboardLayout({
   children,
