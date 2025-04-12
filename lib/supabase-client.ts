@@ -19,8 +19,23 @@ if (!supabaseUrl || !supabaseAnonKey) {
   }
 }
 
+// Add singleton pattern to prevent multiple client instances
+let supabaseInstance = null;
+
 // Create a Supabase client
-export const supabase = createClient<Database>(supabaseUrl || "", supabaseAnonKey || "")
+export const supabase = (() => {
+  if (supabaseInstance) return supabaseInstance;
+  
+  supabaseInstance = createClient<Database>(supabaseUrl || "", supabaseAnonKey || "", {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: false, // Disable auto detection to prevent unnecessary checks
+    },
+  });
+  
+  return supabaseInstance;
+})();
 
 // Admin client for server-side operations
 export const getServiceSupabase = () => {

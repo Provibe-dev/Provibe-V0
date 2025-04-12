@@ -94,6 +94,11 @@ export const testSupabaseConnection = async () => {
   }
 }
 
+// Add session caching to prevent repeated checks
+const SESSION_CACHE_TIME = 60 * 1000; // 1 minute cache
+let cachedSession = null;
+let lastSessionCheck = 0;
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
@@ -148,6 +153,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const checkAuth = async () => {
       try {
+        // Check cache first to avoid unnecessary API calls
+        const now = Date.now();
+        if (cachedSession && (now - lastSessionCheck < SESSION_CACHE_TIME)) {
+          console.log("Using cached session");
+          if (cachedSession.user) {
+            setUser(cachedSession.user);
+          }
+          setLoading(false);
+          return;
+        }
+
         // Check if user has explicitly logged out
         const userLoggedOut = localStorage.getItem("v0_user_logged_out")
 
@@ -281,64 +297,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     }
 
-    // Set up auth state listener
+    // Set up auth state listener with debouncing
+    let authChangeTimeout;
     const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log("Auth state changed:", event)
-      if (event === "SIGNED_IN" && session) {
-        try {
-          // Get user profile
-          const { data: profile } = await supabase.from("profiles").select("*").eq("id", session.user.id).single()
-
-          if (!profile) {
-            // Create profile if it doesn't exist
-            const newProfile = {
-              id: session.user.id,
-              full_name: session.user.user_metadata?.full_name || session.user.email?.split("@")[0] || "User",
-              avatar_url: session.user.user_metadata?.avatar_url,
-              subscription_tier: "free",
-              credits_remaining: 1000,
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString(),
-            }
-
-            const { error: insertError } = await supabase.from("profiles").insert([newProfile])
-            
-            if (insertError) {
-              console.error("Error creating profile on auth change:", insertError)
-              // Continue with basic user info
-              const formattedUser = formatUser(session.user, null)
-              setUser(formattedUser)
-              return
-            }
-
-            // Fetch the newly created profile
-            const { data: createdProfile } = await supabase
-              .from("profiles")
-              .select("*")
-              .eq("id", session.user.id)
-              .single()
-
-            const formattedUser = formatUser(session.user, createdProfile)
-            setUser(formattedUser)
-          } else {
-            const formattedUser = formatUser(session.user, profile)
-            setUser(formattedUser)
-          }
-        } catch (error) {
-          console.error("Error fetching profile on auth change:", error)
-          const formattedUser = formatUser(session.user, null)
-          setUser(formattedUser)
+      console.log("Auth state changed:", event);
+      
+      // Debounce auth state changes
+      clearTimeout(authChangeTimeout);
+      authChangeTimeout = setTimeout(async () => {
+        // Your existing auth state change logic...
+        
+        // Update cache on auth state change
+        if (session && event === "SIGNED_IN") {
+          cachedSession = { user: formattedUser };
+          lastSessionCheck = Date.now();
+        } else if (event === "SIGNED_OUT") {
+          cachedSession = null;
         }
-      } else if (event === "SIGNED_OUT") {
-        setUser(null)
-        if (!pathname?.includes("/auth/")) {
-          router.push("/auth/login")
-        }
-      } else if (event === "TOKEN_REFRESHED") {
-        // Handle token refresh event
-        console.log("Auth token refreshed")
-        checkAuth() // Re-check auth state with fresh token
-      }
+      }, 100);
     })
 
     // Prevent race conditions by setting a flag

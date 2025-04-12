@@ -34,6 +34,10 @@ const nextConfig = {
     unoptimized: true,
   },
   experimental: {
+    staleTimes: {
+      dynamic: 30,  // Cache dynamic routes for 30 seconds
+      static: 180,  // Cache static routes for 3 minutes
+    },
     webpackBuildWorker: true,
     parallelServerBuildTraces: true,
     parallelServerCompiles: true,
