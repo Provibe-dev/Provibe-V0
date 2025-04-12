@@ -11,6 +11,17 @@ try {
   }
 }
 
+// Import the cache handler using ES module syntax
+import { fileURLToPath } from 'url';
+import { dirname, resolve } from 'path';
+
+// Get current file path and directory
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// Resolve the path to cache-handler.js
+const cacheHandlerPath = resolve(__dirname, './cache-handler.js');
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   eslint: {
@@ -27,8 +38,8 @@ const nextConfig = {
     parallelServerBuildTraces: true,
     parallelServerCompiles: true,
   },
-  // Add caching configuration
-  cacheHandler: require.resolve('./cache-handler.js'),
+  // Add caching configuration using ES module path
+  cacheHandler: cacheHandlerPath,
   // Increase memory cache size for better performance
   cacheMaxMemorySize: 100 * 1024 * 1024, // 100MB
 }
