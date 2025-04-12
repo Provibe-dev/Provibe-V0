@@ -362,91 +362,62 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [pathname, router])
 
   const login = async (email: string, password: string) => {
-    setLoading(true)
+    setLoading(true);
     try {
       // Clear the logged out flag when user explicitly logs in
-      localStorage.removeItem("v0_user_logged_out")
+      localStorage.removeItem("v0_user_logged_out");
 
       // In v0 preview, use test user
       if (isV0Preview) {
-        console.log("Using test user in v0 preview environment")
-        setUser(TEST_USER)
-        localStorage.setItem("v0_test_user_logged_in", "true")
-        return
+        console.log("Using test user in v0 preview environment");
+        setUser(TEST_USER);
+        localStorage.setItem("v0_test_user_logged_in", "true");
+        return;
       }
 
       // Special case for test user
       if (email === "test@example.com" && password === "password123") {
-        console.log("Logging in as test user")
-        localStorage.setItem("provibe_user", JSON.stringify(TEST_USER))
-        setUser(TEST_USER)
-        return
+        console.log("Logging in as test user");
+        localStorage.setItem("provibe_user", JSON.stringify(TEST_USER));
+        setUser(TEST_USER);
+        return;
       }
 
       // Regular Supabase authentication
-      console.log("Attempting Supabase login with:", email)
+      console.log("Attempting Supabase login with:", email);
 
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
-      })
+      });
 
       if (error) {
-        console.error("Supabase login error:", error)
-        throw error
+        console.error("Supabase login error:", error);
+        throw error;
       }
 
       if (!data.user) {
-        throw new Error("No user returned from login")
+        throw new Error("No user returned from login");
       }
 
-      console.log("Login successful for:", data.user?.email)
+      console.log("Login successful for:", data.user?.email);
 
-      // Get user profile
-      const { data: profile, error: profileError } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", data.user.id)
-        .single()
-
-      if (profileError && profileError.code !== "PGRST116") {
-        console.error("Error fetching profile after login:", profileError)
-      }
-
-      // Create profile if it doesn't exist
-      if (!profile) {
-        console.log("Creating profile for user after login")
-        const newProfile = {
-          id: data.user.id,
-          full_name: data.user.user_metadata?.full_name || data.user.email?.split("@")[0] || "User",
-          avatar_url: data.user.user_metadata?.avatar_url,
-          subscription_tier: "free",
-          credits_remaining: 1000,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        }
-
-        const { error: insertError } = await supabase.from("profiles").insert([newProfile])
-
-        if (insertError) {
-          console.error("Error creating profile:", insertError)
-          // Continue with login even if profile creation fails
-        }
-
-        // Fetch the newly created profile
-        const { data: createdProfile } = await supabase.from("profiles").select("*").eq("id", data.user.id).single()
-
-        const formattedUser = formatUser(data.user, createdProfile || newProfile)
-        setUser(formattedUser)
-      } else {
-        const formattedUser = formatUser(data.user, profile)
-        setUser(formattedUser)
-      }
+      // Get user profile and set user state
+      // ...existing profile fetching code...
+      
+      // Ensure user state is updated before returning
+      const formattedUser = formatUser(data.user, profile || newProfile);
+      setUser(formattedUser);
+      
+      // Store user in localStorage for persistence
+      localStorage.setItem("provibe_user", JSON.stringify(formattedUser));
+      
+      return formattedUser;
     } catch (error) {
-      console.error("Login error:", error)
-      throw error
+      console.error("Login error:", error);
+      throw error;
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
