@@ -372,7 +372,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.log("Using test user in v0 preview environment");
         setUser(TEST_USER);
         localStorage.setItem("v0_test_user_logged_in", "true");
-        return;
+        return TEST_USER;
       }
 
       // Special case for test user
@@ -380,7 +380,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.log("Logging in as test user");
         localStorage.setItem("provibe_user", JSON.stringify(TEST_USER));
         setUser(TEST_USER);
-        return;
+        return TEST_USER;
       }
 
       // Regular Supabase authentication
@@ -402,16 +402,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       console.log("Login successful for:", data.user?.email);
 
-      // Get user profile and set user state
-      // ...existing profile fetching code...
+      // Get user profile
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", data.user.id)
+        .single();
       
-      // Ensure user state is updated before returning
-      const formattedUser = formatUser(data.user, profile || newProfile);
+      // Format and set user
+      const formattedUser = formatUser(data.user, profile);
+      
+      // Update state and localStorage atomically
       setUser(formattedUser);
-      
-      // Store user in localStorage for persistence
       localStorage.setItem("provibe_user", JSON.stringify(formattedUser));
       
+      console.log("User state updated:", formattedUser);
       return formattedUser;
     } catch (error) {
       console.error("Login error:", error);

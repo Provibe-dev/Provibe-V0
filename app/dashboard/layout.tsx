@@ -1,12 +1,12 @@
 "use client"
 
 import type React from "react"
-
 import { useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/components/auth-provider"
 import { DashboardSidebar } from "@/components/dashboard-sidebar"
 import { Loader2 } from "lucide-react"
+import { supabase } from "@/lib/supabase"
 
 export default function DashboardLayout({
   children,
@@ -17,11 +17,32 @@ export default function DashboardLayout({
   const router = useRouter()
 
   useEffect(() => {
-    // If not loading and no user, redirect to login
-    if (!loading && !user) {
-      router.push("/auth/login")
-    }
-  }, [user, loading, router])
+    const checkAuth = async () => {
+      // If not loading and no user, check for session first
+      if (!loading && !user) {
+        console.log("No user in state, checking for session");
+        
+        try {
+          // Double-check session with Supabase directly
+          const { data } = await supabase.auth.getSession();
+          
+          if (!data?.session) {
+            console.log("No session found, redirecting to login");
+            router.replace("/auth/login");
+          } else {
+            console.log("Session exists but user state not updated");
+            // Session exists but user state hasn't been updated
+            // This will trigger a refresh in the auth provider
+          }
+        } catch (error) {
+          console.error("Error checking session:", error);
+          router.replace("/auth/login");
+        }
+      }
+    };
+    
+    checkAuth();
+  }, [user, loading, router]);
 
   // Show loading state while checking authentication
   if (loading) {

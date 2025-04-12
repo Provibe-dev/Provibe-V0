@@ -30,11 +30,23 @@ export default function LoginPage() {
 
   // If user is already logged in, redirect to dashboard
   useEffect(() => {
-    if (user) {
-      console.log("User is logged in, redirecting to dashboard", user);
-      router.push("/dashboard");
-    }
-  }, [user, router])
+    const checkAndRedirect = async () => {
+      if (user) {
+        console.log("User is already logged in, redirecting to dashboard", user);
+        // Use replace instead of push to prevent back button issues
+        router.replace("/dashboard");
+      } else {
+        // Check for session in case user state hasn't updated yet
+        const { data } = await supabase.auth.getSession();
+        if (data?.session) {
+          console.log("Session exists but user state not updated, redirecting to dashboard");
+          router.replace("/dashboard");
+        }
+      }
+    };
+    
+    checkAndRedirect();
+  }, [user, router]);
 
   useEffect(() => {
     // Clear the logged out flag when user visits login page
@@ -42,78 +54,34 @@ export default function LoginPage() {
   }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setErrorMessage(null)
+    e.preventDefault();
+    setIsLoading(true);
+    setErrorMessage(null);
 
     try {
       // Validate inputs
       if (!email || !password) {
-        setErrorMessage("Please enter both email and password")
-        setIsLoading(false)
-        return
+        setErrorMessage("Please enter both email and password");
+        setIsLoading(false);
+        return;
       }
 
-      // Check for test user
-      if (email === "test@example.com" && password === "password123") {
-        console.log("Logging in as test user")
-        await login(email, password)
-        toast({
-          title: "Login successful",
-          description: "Welcome back to ProVibe, Test User!",
-        })
-        // Force navigation after successful login
-        router.push("/dashboard")
-        return
-      }
-
-      // Regular login flow
-      console.log("Attempting login with:", email)
-
-      try {
-        await login(email, password)
-
-        toast({
-          title: "Login successful",
-          description: "Welcome back to ProVibe!",
-        })
-
-        // Force navigation after successful login
-        console.log("Login successful, redirecting to dashboard")
-        router.push("/dashboard")
-      } catch (loginError: any) {
-        console.error("Login error details:", loginError)
-
-        // Handle specific error cases
-        if (loginError.message?.includes("Invalid login credentials")) {
-          setErrorMessage("Invalid email or password. Please check your credentials and try again.")
-        } else if (loginError.message?.includes("Invalid API key")) {
-          setErrorMessage("System configuration error. Please contact support with error code: SUPABASE_API_KEY")
-        } else if (loginError.status === 401 || loginError.message?.includes("Unauthorized")) {
-          setErrorMessage(
-            "Authentication failed. This could be due to incorrect credentials or a system configuration issue.",
-          )
-        } else {
-          setErrorMessage(loginError.message || "Login failed. Please try again.")
-        }
-
-        toast({
-          title: "Login failed",
-          description: "Please check your credentials and try again.",
-          variant: "destructive",
-        })
-      }
-    } catch (error: any) {
-      console.error("Login error:", error)
-      setErrorMessage("An unexpected error occurred. Please try again.")
-
+      console.log("Attempting login with:", email);
+      const userData = await login(email, password);
+      
       toast({
-        title: "Login failed",
-        description: "An unexpected error occurred. Please try again.",
-        variant: "destructive",
-      })
+        title: "Login successful",
+        description: "Welcome back to ProVibe!",
+      });
+
+      // Force navigation after successful login
+      console.log("Login successful, redirecting to dashboard with user:", userData);
+      router.replace("/dashboard");
+    } catch (error: any) {
+      console.error("Login error details:", error);
+      // Handle error cases...
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
   }
 

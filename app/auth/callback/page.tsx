@@ -44,8 +44,8 @@ export default function AuthCallback() {
 
           if (data?.session) {
             console.log("Session established, redirecting to dashboard")
-            // Redirect to dashboard
-            router.push("/dashboard")
+            // Use replace instead of push to prevent back button issues
+            router.replace("/dashboard")
           } else {
             console.log("No session found after OAuth")
             setError("No session found. Please sign in again.")
@@ -65,8 +65,8 @@ export default function AuthCallback() {
 
           if (data?.session) {
             console.log("Existing session found, redirecting to dashboard")
-            // Redirect to dashboard
-            router.push("/dashboard")
+            // Use replace instead of push to prevent back button issues
+            router.replace("/dashboard")
           } else {
             console.log("No existing session found")
             setError("No session found. Please sign in again.")
