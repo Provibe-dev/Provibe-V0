@@ -309,8 +309,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         
         // Update cache on auth state change
         if (session && event === "SIGNED_IN") {
-          cachedSession = { user: formattedUser };
-          lastSessionCheck = Date.now();
+          try {
+            // Get user profile
+            const { data: profile } = await supabase
+              .from("profiles")
+              .select("*")
+              .eq("id", session.user.id)
+              .single();
+            
+            // Format user with profile data
+            const formattedUser = formatUser(session.user, profile);
+            
+            // Update cache
+            cachedSession = { user: formattedUser };
+            lastSessionCheck = Date.now();
+          } catch (error) {
+            console.error("Error updating session cache:", error);
+          }
         } else if (event === "SIGNED_OUT") {
           cachedSession = null;
         }
