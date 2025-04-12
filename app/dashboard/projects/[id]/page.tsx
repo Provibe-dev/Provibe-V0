@@ -3,8 +3,20 @@
 import { useState, useEffect } from "react"
 import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
-import { ArrowLeft, FileText, RefreshCw, Loader2, CheckCircle2, Clock, AlertCircle } from "lucide-react"
+import { ArrowLeft, FileText, RefreshCw, Loader2, CheckCircle2, Clock, AlertCircle, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+import { useToast } from "@/components/ui/use-toast"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { useAuth } from "@/components/auth-provider"
@@ -75,11 +87,13 @@ export default function ProjectDetailPage() {
   const { user } = useAuth()
   const params = useParams()
   const router = useRouter()
+  const { toast } = useToast()
   const [project, setProject] = useState<any>(null)
   const [documents, setDocuments] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [regenerating, setRegenerating] = useState<Record<string, boolean>>({})
+  const [deleting, setDeleting] = useState(false)
 
   // Check if we're in the v0 preview environment
   const isV0Preview = typeof window !== "undefined" && window.location.hostname.includes("vusercontent.net")
@@ -234,6 +248,51 @@ export default function ProjectDetailPage() {
     }
   }
 
+  const handleDeleteProject = async () => {
+    if (!user || !project) return
+    
+    try {
+      setDeleting(true)
+      
+      // Use mock data for test user or preview environment
+      if (user.id === "test_user_id" || isV0Preview || project.id === "mock-project-1") {
+        console.log("Mock delete project for test user or preview")
+        toast({
+          title: "Project deleted",
+          description: "Your project has been deleted successfully.",
+        })
+        router.push("/dashboard/projects")
+        return
+      }
+      
+      // Delete project from Supabase
+      const { error: deleteError } = await supabase
+        .from("projects")
+        .delete()
+        .eq("id", project.id)
+      
+      if (deleteError) {
+        throw deleteError
+      }
+      
+      toast({
+        title: "Project deleted",
+        description: "Your project has been deleted successfully.",
+      })
+      
+      router.push("/dashboard/projects")
+    } catch (err: any) {
+      console.error("Error deleting project:", err)
+      toast({
+        title: "Error deleting project",
+        description: err.message || "Failed to delete project",
+        variant: "destructive",
+      })
+    } finally {
+      setDeleting(false)
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex h-[400px] items-center justify-center">
@@ -285,14 +344,48 @@ export default function ProjectDetailPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center">
-        <Button variant="ghost" size="sm" asChild className="mr-4">
-          <Link href="/dashboard/projects">
-            <ArrowLeft className="mr-2 h-4 w-4" /> Back to Projects
-          </Link>
-        </Button>
-        <h1 className="text-3xl font-bold tracking-tight">{project.name}</h1>
-        <div className="ml-4">{getStatusBadge(project.status)}</div>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center">
+          <Button variant="ghost" size="sm" asChild className="mr-4">
+            <Link href="/dashboard/projects">
+              <ArrowLeft className="mr-2 h-4 w-4" /> Back to Projects
+            </Link>
+          </Button>
+          <h1 className="text-3xl font-bold tracking-tight">{project.name}</h1>
+          <div className="ml-4">{getStatusBadge(project.status)}</div>
+        </div>
+        
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button variant="destructive" size="sm">
+              <Trash2 className="mr-2 h-4 w-4" /> Delete Project
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This action cannot be undone. This will permanently delete your project and all associated documents.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction 
+                onClick={handleDeleteProject} 
+                className="bg-red-600 hover:bg-red-700"
+                disabled={deleting}
+              >
+                {deleting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Deleting...
+                  </>
+                ) : (
+                  "Delete Project"
+                )}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
