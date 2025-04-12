@@ -101,20 +101,21 @@ export default function ProjectDetailPage() {
   useEffect(() => {
     const fetchProjectData = async () => {
       if (!user) {
-        setLoading(false)
-        return
+        setLoading(false);
+        return;
       }
 
       try {
-        const projectId = params?.id as string
+        const projectId = params?.id as string;
+        console.log("Fetching project data for ID:", projectId);
 
         // Use mock data for test user or preview environment
         if (user.id === "test_user_id" || isV0Preview || projectId === "mock-project-1") {
-          console.log("Using mock project data for test user or preview")
-          setProject(MOCK_PROJECT)
-          setDocuments(MOCK_DOCUMENTS)
-          setLoading(false)
-          return
+          console.log("Using mock project data for test user or preview");
+          setProject(MOCK_PROJECT);
+          setDocuments(MOCK_DOCUMENTS);
+          setLoading(false);
+          return;
         }
 
         // Fetch project from Supabase
@@ -122,35 +123,44 @@ export default function ProjectDetailPage() {
           .from("projects")
           .select("*")
           .eq("id", projectId)
-          .single()
+          .single();
 
         if (projectError) {
-          throw projectError
+          console.error("Error fetching project data:", projectError);
+          throw projectError;
         }
+
+        if (!projectData) {
+          console.error("No project data found for ID:", projectId);
+          throw new Error("Project not found");
+        }
+
+        console.log("Project data fetched successfully:", projectData.id);
 
         // Fetch project documents
         const { data: documentsData, error: documentsError } = await supabase
           .from("project_documents")
           .select("*")
           .eq("project_id", projectId)
-          .order("created_at", { ascending: true })
+          .order("created_at", { ascending: true });
 
         if (documentsError) {
-          throw documentsError
+          console.error("Error fetching project documents:", documentsError);
+          throw documentsError;
         }
 
-        setProject(projectData)
-        setDocuments(documentsData || [])
+        setProject(projectData);
+        setDocuments(documentsData || []);
       } catch (err: any) {
-        console.error("Error fetching project data:", err)
-        setError(err.message || "Failed to load project")
+        console.error("Error fetching project data:", err);
+        setError(err.message || "Failed to load project");
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    fetchProjectData()
-  }, [user, params, isV0Preview])
+    fetchProjectData();
+  }, [user, params, isV0Preview]);
 
   const handleRegenerateDocument = async (documentId: string) => {
     if (!user) return
@@ -219,34 +229,41 @@ export default function ProjectDetailPage() {
   }
 
   const getStatusBadge = (status: string) => {
-    switch (status) {
+    if (!status) return null;
+    
+    switch (status.toLowerCase()) {
+      case "draft":
+        return (
+          <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
+            <Clock className="mr-1 h-3 w-3" /> Draft
+          </Badge>
+        );
+      case "generating":
+        return (
+          <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+            <Loader2 className="mr-1 h-3 w-3 animate-spin" /> Generating
+          </Badge>
+        );
       case "completed":
         return (
           <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
             <CheckCircle2 className="mr-1 h-3 w-3" /> Completed
           </Badge>
-        )
-      case "pending":
-      case "generating":
-        return (
-          <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
-            <Clock className="mr-1 h-3 w-3" /> {status === "pending" ? "Pending" : "Generating"}
-          </Badge>
-        )
+        );
       case "error":
         return (
           <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
             <AlertCircle className="mr-1 h-3 w-3" /> Error
           </Badge>
-        )
+        );
       default:
         return (
-          <Badge variant="outline" className="bg-gray-50 text-gray-700 border-gray-200">
-            {status}
+          <Badge variant="outline">
+            {status.charAt(0).toUpperCase() + status.slice(1)}
           </Badge>
-        )
+        );
     }
-  }
+  };
 
   const handleDeleteProject = async () => {
     if (!user || !project) return
@@ -351,38 +368,34 @@ export default function ProjectDetailPage() {
               <ArrowLeft className="mr-2 h-4 w-4" /> Back to Projects
             </Link>
           </Button>
-          <h1 className="text-3xl font-bold tracking-tight">{project.name}</h1>
-          <div className="ml-4">{getStatusBadge(project.status)}</div>
+          <h1 className="text-3xl font-bold tracking-tight">{project?.name || "Project"}</h1>
+          <div className="ml-4">{project?.status ? getStatusBadge(project.status) : null}</div>
         </div>
         
         <AlertDialog>
           <AlertDialogTrigger asChild>
-            <Button variant="destructive" size="sm">
-              <Trash2 className="mr-2 h-4 w-4" /> Delete Project
+            <Button variant="destructive" disabled={deleting}>
+              {deleting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Deleting...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="mr-2 h-4 w-4" /> Delete Project
+                </>
+              )}
             </Button>
           </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>Are you sure?</AlertDialogTitle>
               <AlertDialogDescription>
-                This action cannot be undone. This will permanently delete your project and all associated documents.
+                This will permanently delete this project and all associated documents. This action cannot be undone.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction 
-                onClick={handleDeleteProject} 
-                className="bg-red-600 hover:bg-red-700"
-                disabled={deleting}
-              >
-                {deleting ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Deleting...
-                  </>
-                ) : (
-                  "Delete Project"
-                )}
-              </AlertDialogAction>
+              <AlertDialogAction onClick={handleDeleteProject}>Delete</AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
@@ -392,33 +405,36 @@ export default function ProjectDetailPage() {
         <Card>
           <CardHeader>
             <CardTitle>Project Overview</CardTitle>
-            <CardDescription>
-              Created {formatDistanceToNow(new Date(project.created_at), { addSuffix: true })}
-            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
               <h3 className="font-medium">Idea</h3>
-              <p className="mt-1 text-sm text-muted-foreground">{project.idea}</p>
+              <p className="mt-1 text-sm text-muted-foreground">{project?.idea || "No idea specified"}</p>
             </div>
-            {project.refined_idea && (
-              <div>
-                <h3 className="font-medium">Refined Idea</h3>
-                <p className="mt-1 text-sm text-muted-foreground">{project.refined_idea}</p>
-              </div>
-            )}
-            {project.selected_tools && project.selected_tools.length > 0 && (
-              <div>
-                <h3 className="font-medium">Selected Tools</h3>
-                <div className="mt-1 flex flex-wrap gap-2">
-                  {project.selected_tools.map((tool: string, idx: number) => (
-                    <Badge key={idx} variant="secondary">
+            <div>
+              <h3 className="font-medium">Refined Idea</h3>
+              <p className="mt-1 text-sm text-muted-foreground">{project?.refined_idea || "No refined idea available"}</p>
+            </div>
+            <div>
+              <h3 className="font-medium">Selected Tools</h3>
+              <div className="mt-1 flex flex-wrap gap-2">
+                {project?.selected_tools && project.selected_tools.length > 0 ? (
+                  project.selected_tools.map((tool: string) => (
+                    <Badge key={tool} variant="outline">
                       {tool}
                     </Badge>
-                  ))}
-                </div>
+                  ))
+                ) : (
+                  <p className="text-sm text-muted-foreground">No tools selected</p>
+                )}
               </div>
-            )}
+            </div>
+            <div>
+              <h3 className="font-medium">Created</h3>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {project?.created_at ? formatDistanceToNow(new Date(project.created_at), { addSuffix: true }) : "Unknown"}
+              </p>
+            </div>
           </CardContent>
         </Card>
 
@@ -427,7 +443,7 @@ export default function ProjectDetailPage() {
             <CardTitle>Product Details</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {project.product_details ? (
+            {project?.product_details ? (
               Object.entries(project.product_details).map(([key, value]: [string, any]) => (
                 <div key={key}>
                   <h3 className="font-medium">

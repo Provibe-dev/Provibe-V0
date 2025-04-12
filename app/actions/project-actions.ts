@@ -342,17 +342,39 @@ function generateDocumentContent(docType: string, projectData: any): string {
 
 // Create a new project with better error handling and validation
 export async function createNewProject(userId: string, projectName: string) {
-  console.log("Creating new project:", { userId, projectName })
+  console.log("Creating new project:", { userId, projectName });
 
   try {
     // Validate inputs
-    if (!userId) throw new Error("User ID is required")
-    if (!projectName) throw new Error("Project name is required")
+    if (!userId) throw new Error("User ID is required");
+    if (!projectName) throw new Error("Project name is required");
+
+    // Check if a draft project already exists for this user
+    const { data: existingDrafts, error: draftCheckError } = await supabase
+      .from("projects")
+      .select("id")
+      .eq("user_id", userId)
+      .eq("status", "draft")
+      .created_at("gte", new Date(Date.now() - 5 * 60 * 1000).toISOString()); // Last 5 minutes
+    
+    if (!draftCheckError && existingDrafts && existingDrafts.length > 0) {
+      // Return the existing draft project instead of creating a new one
+      const { data: existingProject, error: fetchError } = await supabase
+        .from("projects")
+        .select()
+        .eq("id", existingDrafts[0].id)
+        .single();
+        
+      if (!fetchError && existingProject) {
+        console.log("Using existing draft project:", existingProject.id);
+        return { success: true, project: existingProject };
+      }
+    }
 
     // Create project in database with retry mechanism
-    let retryCount = 0
-    let project = null
-    let error = null
+    let retryCount = 0;
+    let project = null;
+    let error = null;
 
     while (retryCount < 3 && !project) {
       try {
@@ -368,32 +390,31 @@ export async function createNewProject(userId: string, projectName: string) {
             },
           ])
           .select()
-          .single()
+          .single();
 
-        if (projectError) throw projectError
-        project = data
-        break
-      } catch (err: any) {
-        console.error(`Project creation attempt ${retryCount + 1} failed:`, err)
-        error = err
-        retryCount++
+        if (projectError) throw projectError;
+        project = data;
+        break;
+      } catch (err) {
+        console.error(`Project creation attempt ${retryCount + 1} failed:`, err);
+        error = err;
+        retryCount++;
         // Wait before retrying
-        await new Promise((resolve) => setTimeout(resolve, 500))
+        await new Promise((resolve) => setTimeout(resolve, 500));
       }
     }
 
     if (!project) {
-      throw error || new Error("Failed to create project after multiple attempts")
+      throw error || new Error("Failed to create project after multiple attempts");
     }
 
-    console.log("Project created successfully:", project)
-    return { success: true, project }
-  } catch (error: any) {
-    console.error("Error creating project:", error)
-    return {
-      success: false,
-      error: error.message || "Failed to create project",
-    }
+    return { success: true, project };
+  } catch (error) {
+    console.error("Error in createNewProject:", error);
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : "Unknown error creating project" 
+    };
   }
 }
 

@@ -85,6 +85,7 @@ export default function NewProjectPage() {
   const projectNameInputRef = useRef<HTMLInputElement>(null)
   const [projectId, setProjectId] = useState<string>("")
   const [isTestUser, setIsTestUser] = useState(false)
+  const [hasCheckedLimits, setHasCheckedLimits] = useState(false)
 
   // Initialize forms
   const ideaForm = useForm<z.infer<typeof ideaFormSchema>>({
@@ -115,7 +116,7 @@ export default function NewProjectPage() {
   // Check project limits on mount
   useEffect(() => {
     const checkProjectLimits = async () => {
-      if (!user) return
+      if (!user || hasCheckedLimits) return
 
       try {
         // Check if this is the test user
@@ -123,6 +124,7 @@ export default function NewProjectPage() {
           setIsTestUser(true)
           // Generate a mock project ID for the test user
           setProjectId(`test-project-${Date.now()}`)
+          setHasCheckedLimits(true)
           return
         }
 
@@ -144,19 +146,24 @@ export default function NewProjectPage() {
           return
         }
 
-        // Create a new project using the improved function
-        const result = await createNewProject(user.id, projectName)
+        // Only create a new project if we don't already have a project ID
+        if (!projectId) {
+          // Create a new project using the improved function
+          const result = await createNewProject(user.id, projectName)
 
-        if (!result.success) {
-          toast({
-            title: "Error creating project",
-            description: result.error || "There was an error creating your project. Please try again.",
-            variant: "destructive",
-          })
-          return
+          if (!result.success) {
+            toast({
+              title: "Error creating project",
+              description: result.error || "There was an error creating your project. Please try again.",
+              variant: "destructive",
+            })
+            return
+          }
+
+          setProjectId(result.project.id)
         }
-
-        setProjectId(result.project.id)
+        
+        setHasCheckedLimits(true)
       } catch (error) {
         console.error("Error checking project limits:", error)
         toast({
@@ -167,8 +174,10 @@ export default function NewProjectPage() {
       }
     }
 
-    checkProjectLimits()
-  }, [user, router, toast, projectName])
+    if (user && !hasCheckedLimits) {
+      checkProjectLimits()
+    }
+  }, [user, router, toast, projectName, projectId, hasCheckedLimits, isTestUser])
 
   // Handle project name edit toggle
   const toggleEditName = () => {
@@ -721,6 +730,30 @@ Total estimated timeline: 18 weeks
       }
     }
   }
+
+  // Add cleanup effect to reset state when component unmounts
+  useEffect(() => {
+    return () => {
+      // Reset all state when navigating away from the page
+      setActiveStep(1);
+      setIsRecording(false);
+      setIsRefining(false);
+      setIsGeneratingPlan(false);
+      setIsSubmitting(false);
+      setSelectedTools([]);
+      setProjectPlan("");
+      setVoiceNoteUrl("");
+      setProjectName("Untitled Project");
+      setIsEditingName(false);
+      setProjectId("");
+      setIsTestUser(false);
+      setHasCheckedLimits(false);
+      
+      // Reset form values
+      ideaForm.reset();
+      detailsForm.reset();
+    };
+  }, [ideaForm, detailsForm]);
 
   return (
     <div className="space-y-6">
