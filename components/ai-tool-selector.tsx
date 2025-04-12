@@ -1,10 +1,13 @@
 "use client"
+import { useEffect, useState } from "react"
 import { Check } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { supabase } from "@/lib/supabase-client"
 
 interface AITool {
   id: string
   name: string
+  category: string
   logo: string
   description: string
 }
@@ -15,57 +18,34 @@ interface AIToolSelectorProps {
 }
 
 export function AIToolSelector({ selectedTools, onSelectionChange }: AIToolSelectorProps) {
-  // Mock AI tools data
-  const aiTools: AITool[] = [
-    {
-      id: "openai",
-      name: "OpenAI",
-      logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/ChatGPT_logo.svg/1024px-ChatGPT_logo.svg.png",
-      description: "GPT models for text generation and analysis",
-    },
-    {
-      id: "anthropic",
-      name: "Anthropic",
-      logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Anthropic_logo.svg/1200px-Anthropic_logo.svg.png",
-      description: "Claude models for safe and helpful AI assistants",
-    },
-    {
-      id: "midjourney",
-      name: "Midjourney",
-      logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/Midjourney_Emblem.png/600px-Midjourney_Emblem.png",
-      description: "AI image generation from text descriptions",
-    },
-    {
-      id: "stability",
-      name: "Stability AI",
-      logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Stability_AI_logo.svg/1200px-Stability_AI_logo.svg.png",
-      description: "Open source image and video generation models",
-    },
-    {
-      id: "huggingface",
-      name: "Hugging Face",
-      logo: "https://huggingface.co/front/assets/huggingface_logo-noborder.svg",
-      description: "Open-source AI models and datasets",
-    },
-    {
-      id: "cohere",
-      name: "Cohere",
-      logo: "https://assets-global.website-files.com/64f6f2c0e3f4c5a91c1e823a/654aa9e9a7ec8d7af52d7f75_cohere-logo.svg",
-      description: "Large language models for text understanding",
-    },
-    {
-      id: "replicate",
-      name: "Replicate",
-      logo: "https://replicate.com/static/favicon.e392dd9c6a07.png",
-      description: "Run open-source models with a cloud API",
-    },
-    {
-      id: "runwayml",
-      name: "Runway",
-      logo: "https://cdn.sanity.io/images/u0v1th4q/production/bc5f4e9d13a053b4594c0d55b5e3159c1910cf0c-1046x1046.jpg",
-      description: "AI video generation and editing tools",
-    },
-  ]
+  const [aiTools, setAiTools] = useState<AITool[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    async function fetchAITools() {
+      try {
+        setIsLoading(true)
+        const { data, error } = await supabase
+          .from('ai_tools')
+          .select('*')
+          .order('name')
+        
+        if (error) {
+          throw error
+        }
+        
+        setAiTools(data || [])
+      } catch (err: any) {
+        console.error('Error fetching AI tools:', err)
+        setError(err.message || 'Failed to load AI tools')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchAITools()
+  }, [])
 
   const toggleTool = (toolId: string) => {
     if (selectedTools.includes(toolId)) {
@@ -75,33 +55,53 @@ export function AIToolSelector({ selectedTools, onSelectionChange }: AIToolSelec
     }
   }
 
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center py-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-500"></div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-8 text-red-500">
+        <p>Failed to load AI tools. Please try again later.</p>
+      </div>
+    )
+  }
+
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {aiTools.map((tool) => (
         <div
           key={tool.id}
           className={cn(
-            "relative flex flex-col items-center rounded-lg border p-4 transition-colors cursor-pointer",
+            "relative flex items-center space-x-3 rounded-lg border p-4 cursor-pointer transition-colors",
             selectedTools.includes(tool.id)
-              ? "border-emerald-500 bg-emerald-50/10"
-              : "hover:border-emerald-200 hover:bg-emerald-50/5",
+              ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-950/20"
+              : "border-gray-200 dark:border-gray-800 hover:border-emerald-300 dark:hover:border-emerald-800"
           )}
           onClick={() => toggleTool(tool.id)}
         >
           {selectedTools.includes(tool.id) && (
-            <div className="absolute right-2 top-2 h-5 w-5 rounded-full bg-emerald-500 text-white flex items-center justify-center">
-              <Check className="h-3 w-3" />
+            <div className="absolute top-2 right-2">
+              <Check className="h-4 w-4 text-emerald-500" />
             </div>
           )}
-          <div className="h-12 w-12 overflow-hidden rounded-md bg-background p-1">
+          <div className="flex-shrink-0">
             <img
-              src={tool.logo || "/placeholder.svg"}
+              src={tool.logo}
               alt={`${tool.name} logo`}
-              className="h-full w-full object-contain"
+              className="h-10 w-10 rounded-md object-contain"
             />
           </div>
-          <h3 className="mt-3 font-medium text-sm">{tool.name}</h3>
-          <p className="mt-1 text-xs text-muted-foreground text-center">{tool.description}</p>
+          <div className="min-w-0 flex-1">
+            <h3 className="text-sm font-medium">{tool.name}</h3>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              {tool.description}
+            </p>
+          </div>
         </div>
       ))}
     </div>
