@@ -31,7 +31,8 @@ export default function LoginPage() {
   // If user is already logged in, redirect to dashboard
   useEffect(() => {
     if (user) {
-      router.push("/dashboard")
+      console.log("User is logged in, redirecting to dashboard", user);
+      router.push("/dashboard");
     }
   }, [user, router])
 
@@ -61,6 +62,7 @@ export default function LoginPage() {
           title: "Login successful",
           description: "Welcome back to ProVibe, Test User!",
         })
+        // Force navigation after successful login
         router.push("/dashboard")
         return
       }
@@ -76,7 +78,8 @@ export default function LoginPage() {
           description: "Welcome back to ProVibe!",
         })
 
-        // Explicitly navigate to dashboard after successful login
+        // Force navigation after successful login
+        console.log("Login successful, redirecting to dashboard")
         router.push("/dashboard")
       } catch (loginError: any) {
         console.error("Login error details:", loginError)
