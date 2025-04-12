@@ -30,20 +30,23 @@ export default function UpdatePasswordPage() {
         // Check if we have a recovery token in the URL hash
         if (typeof window !== "undefined") {
           const hash = window.location.hash
-
+        
           if (!hash || !hash.includes("type=recovery")) {
             setErrorMessage("Invalid or expired password reset link. Please request a new password reset.")
             setIsVerifying(false)
             return
           }
-
-          // The hash contains the access token that Supabase needs
-          // We need to explicitly call updateUser to verify the recovery token
-          const { data, error } = await supabase.auth.getSession()
-
-          if (error || !data.session) {
-            console.error("Recovery token verification error:", error)
+        
+          // The recovery token is automatically picked up by Supabase client
+          // We just need to check if we can get the user
+          const { data: userData, error: userError } = await supabase.auth.getUser()
+        
+          if (userError || !userData.user) {
+            console.error("Recovery token verification error:", userError)
             setErrorMessage("Invalid or expired recovery token. Please request a new password reset.")
+          } else {
+            console.log("Recovery token verified successfully")
+            // Token is valid, user can proceed with password reset
           }
         }
       } catch (error) {
