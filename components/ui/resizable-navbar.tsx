@@ -210,7 +210,7 @@ export const NavbarLogo = ({ logoText }: { logoText?: string }) => {
   return (
     <Link href="/" className="relative z-20 mr-4 flex items-center space-x-2 px-2 py-1 text-sm font-normal text-black">
       <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-500 text-white">
-        <span className="text-lg font-bold">P</span>
+        <img src="/logo.png" alt="ProVibe Logo" className="h-6 w-6" />
       </div>
       <span className="font-medium text-black dark:text-white">{logoText || "ProVibe"}</span>
       <span className="text-xs bg-emerald-500 text-white px-1 rounded">BETA</span>

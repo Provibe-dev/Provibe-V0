@@ -38,12 +38,10 @@ export default function UpdatePasswordPage() {
           }
 
           // The hash contains the access token that Supabase needs
-          // We don't need to manually extract it as Supabase will handle it
+          // We need to explicitly call updateUser to verify the recovery token
+          const { data, error } = await supabase.auth.getSession()
 
-          // Verify the recovery token
-          const { error } = await supabase.auth.getUser()
-
-          if (error) {
+          if (error || !data.session) {
             console.error("Recovery token verification error:", error)
             setErrorMessage("Invalid or expired recovery token. Please request a new password reset.")
           }
@@ -130,6 +128,7 @@ export default function UpdatePasswordPage() {
         <CardHeader className="space-y-1">
           <div className="flex items-center justify-center mb-6">
             <Link href="/" className="flex items-center">
+              <img src="/logo.png" alt="ProVibe Logo" className="h-8 w-8 mr-2" />
               <span className="text-2xl font-bold text-emerald-500">ProVibe</span>
               <span className="ml-1 text-xs text-emerald-400">LITE</span>
             </Link>

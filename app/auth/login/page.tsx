@@ -184,6 +184,7 @@ export default function LoginPage() {
         <CardHeader className="space-y-1">
           <div className="flex items-center justify-center mb-6">
             <Link href="/" className="flex items-center">
+              <img src="/logo.png" alt="ProVibe Logo" className="h-8 w-8 mr-2" />
               <span className="text-2xl font-bold text-emerald-500">ProVibe</span>
               <span className="ml-1 text-xs text-emerald-400">LITE</span>
             </Link>
