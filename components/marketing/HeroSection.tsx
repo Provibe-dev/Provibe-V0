@@ -68,7 +68,37 @@ export function HeroSection() {
 
           <div className="mb-12 w-full max-w-4xl overflow-hidden">
             <div className="relative flex w-full overflow-x-hidden">
-              <div className="animate-marquee flex whitespace-nowrap">
+              <div className="animate-scroll flex whitespace-nowrap">
+                <Button
+                  variant="outline"
+                  className="mx-2 border-slate-200 bg-slate-50/80 text-slate-800 hover:bg-slate-100 hover:text-emerald-600 backdrop-blur-sm"
+                >
+                  <FileText className="mr-2 h-4 w-4 text-emerald-500" />
+                  Product Requirement Document
+                </Button>
+                <Button
+                  variant="outline"
+                  className="mx-2 border-slate-200 bg-slate-50/80 text-slate-800 hover:bg-slate-100 hover:text-emerald-600 backdrop-blur-sm"
+                >
+                  <Layers className="mr-2 h-4 w-4 text-emerald-500" />
+                  Architecture
+                </Button>
+                <Button
+                  variant="outline"
+                  className="mx-2 border-slate-200 bg-slate-50/80 text-slate-800 hover:bg-slate-100 hover:text-emerald-600 backdrop-blur-sm"
+                >
+                  <GitBranch className="mr-2 h-4 w-4 text-emerald-500" />
+                  User Flow
+                </Button>
+                <Button
+                  variant="outline"
+                  className="mx-2 border-slate-200 bg-slate-50/80 text-slate-800 hover:bg-slate-100 hover:text-emerald-600 backdrop-blur-sm"
+                >
+                  <Zap className="mr-2 h-4 w-4 text-emerald-500" />
+                  Implementation Plan
+                </Button>
+                
+                {/* Duplicate buttons for continuous scrolling effect */}
                 <Button
                   variant="outline"
                   className="mx-2 border-slate-200 bg-slate-50/80 text-slate-800 hover:bg-slate-100 hover:text-emerald-600 backdrop-blur-sm"
@@ -115,14 +145,7 @@ export function HeroSection() {
                 <span className="absolute inset-0 z-0 translate-y-full bg-gradient-to-r from-emerald-600 to-cyan-600 transition-transform duration-300 group-hover:translate-y-0"></span>
               </Link>
             </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              className="border-slate-700 text-white transition-all duration-300 hover:bg-slate-800 hover:text-emerald-400"
-              asChild
-            >
-              <Link href="/auth/login">Sign In</Link>
-            </Button>
+            
           </div>
         </div>
       </div>

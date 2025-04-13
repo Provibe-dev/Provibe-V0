@@ -48,12 +48,16 @@ export default function Home() {
         </div>
       </AnimatedSection>
 
-      {/* Example Output Section */}
-      <ExampleOutputSection />
+        {/* Example Output Section */}
+        {/* <ExampleOutputSection /> */}
 
       {/* Tools Section */}
-      <AnimatedSection id="tools" className="bg-primary py-20" delay={0.2}>
+      <AnimatedSection id="tools" className="bg-primary py-12" delay={0.2}>
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <SectionHeader 
+            title="Compatible Tools"
+            subtitle="ProVibe integrates with your favorite development tools"
+          />
           <ToolsLogo />
         </div>
       </AnimatedSection>
@@ -66,11 +70,12 @@ export default function Home() {
       </AnimatedSection>
 
       {/* Sticky Scroll Section */}
-      <AnimatedSection id="features-detail" className="bg-primary py-20" delay={0.2}>
+      {/* <AnimatedSection id="features-detail" className="bg-primary py-20" delay={0.2}>
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <StickyScrollRevealDemo />
         </div>
-      </AnimatedSection>
+      </AnimatedSection> 
+      */}
 
       {/* Testimonials Section */}
       <AnimatedSection id="testimonials" className="bg-secondary py-20" delay={0.2}>
@@ -85,6 +90,7 @@ export default function Home() {
       </AnimatedSection>
 
       {/* CTA Section */}
+      {/*
       <AnimatedSection id="cta" className="bg-secondary py-20" delay={0.2}>
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-3xl text-center">
@@ -108,6 +114,7 @@ export default function Home() {
           </div>
         </div>
       </AnimatedSection>
+      */}
 
       {/* Footer */}
       <footer className="bg-slate-950 py-12 text-slate-400">

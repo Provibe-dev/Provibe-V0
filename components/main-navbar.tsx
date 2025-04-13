@@ -35,12 +35,12 @@ export function MainNavbar() {
       link: "/#features",
     },
     {
-      name: "Pricing",
-      link: "/#pricing",
+      name: "How It Works",
+      link: "/#how-it-works",
     },
     {
-      name: "About",
-      link: "/#about",
+      name: "Pricing",
+      link: "/#pricing",
     },
   ]
 

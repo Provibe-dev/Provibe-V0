@@ -1,23 +1,29 @@
-"use client"
+import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
 
-import { useRef } from "react"
-import { useInView } from "framer-motion"
+interface AnimatedSectionProps {
+  children: React.ReactNode;
+  id?: string;
+  className?: string;
+  delay?: number;
+}
 
-export const AnimatedSection = ({ children, id, className, delay = 0 }) => {
-  const ref = useRef(null)
-  const isInView = useInView(ref, { once: true, amount: 0.2 })
-
+export function AnimatedSection({ 
+  children, 
+  id, 
+  className, 
+  delay = 0 
+}: AnimatedSectionProps) {
   return (
-    <section id={id} ref={ref} className={className}>
-      <div
-        style={{
-          transform: isInView ? "none" : "translateY(50px)",
-          opacity: isInView ? 1 : 0,
-          transition: `all 0.9s cubic-bezier(0.17, 0.55, 0.55, 1) ${delay}s`,
-        }}
-      >
-        {children}
-      </div>
-    </section>
-  )
+    <motion.section
+      id={id}
+      className={cn("", className)} // Remove any default padding/margin here
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.5, delay }}
+    >
+      {children}
+    </motion.section>
+  );
 }

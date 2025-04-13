@@ -1,82 +1,125 @@
-import Link from "next/link"
-import { CheckCircle2 } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { AnimatedSection } from "@/components/animated-section"
+import React from 'react';
+import { Button } from '@/components/ui/button';
+import { SectionHeader } from '@/components/ui/section-header';
+import { Check } from 'lucide-react';
+import Link from 'next/link';
 
 export function PricingSection() {
   return (
-    <AnimatedSection id="pricing" className="bg-primary py-20" delay={0.2}>
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-16 text-center">
-          <h2 className="mb-4 text-3xl font-bold text-primary sm:text-4xl">Simple, Transparent Pricing</h2>
-          <p className="mx-auto max-w-2xl text-lg text-secondary">
-            Choose the plan that's right for you and start building your next big idea
-          </p>
+    <div className="w-full">
+      <SectionHeader
+        title="Simple, Transparent Pricing"
+        subtitle="Choose the plan that's right for you"
+      />
+      
+      <div className="mt-6 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {/* Free Plan */}
+        <div className="flex flex-col rounded-lg border bg-card p-6 shadow-sm">
+          <div className="mb-4">
+            <h3 className="text-xl font-bold">Free</h3>
+            <p className="text-muted-foreground mt-1">Perfect for trying out ProVibe</p>
+          </div>
+          
+          <div className="mb-4">
+            <span className="text-3xl font-bold">$0</span>
+            <span className="text-muted-foreground">/month</span>
+          </div>
+          
+          <ul className="mb-6 space-y-2">
+            <li className="flex items-center">
+              <Check className="mr-2 h-4 w-4 text-emerald-500" />
+              <span>3 projects</span>
+            </li>
+            <li className="flex items-center">
+              <Check className="mr-2 h-4 w-4 text-emerald-500" />
+              <span>Basic documentation</span>
+            </li>
+            <li className="flex items-center">
+              <Check className="mr-2 h-4 w-4 text-emerald-500" />
+              <span>Community support</span>
+            </li>
+          </ul>
+          
+          <Button className="mt-auto" asChild>
+            <Link href="/auth/register">Get Started</Link>
+          </Button>
         </div>
-
-        <div className="mx-auto grid max-w-5xl grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
-          {/* Free Plan */}
-          <div className="rounded-lg border border-slate-700 bg-slate-800 p-6 shadow-lg transition-all duration-300 hover:border-emerald-500/50 hover:shadow-emerald-500/10">
-            <div className="mb-6">
-              <h3 className="mb-2 text-xl font-bold text-white">Free</h3>
-              <p className="text-slate-400">Perfect for trying out ProVibe</p>
-              <div className="mt-4">
-                <span className="text-3xl font-bold text-white">$0</span>
-                <span className="text-slate-400">/month</span>
-              </div>
-            </div>
-            <ul className="mb-6 space-y-3">
-              <li className="flex items-start">
-                <CheckCircle2 className="mr-2 h-5 w-5 text-emerald-500" />
-                <span className="text-slate-300">3 projects</span>
-              </li>
-              <li className="flex items-start">
-                <CheckCircle2 className="mr-2 h-5 w-5 text-emerald-500" />
-                <span className="text-slate-300">Basic documentation</span>
-              </li>
-              <li className="flex items-start">
-                <CheckCircle2 className="mr-2 h-5 w-5 text-emerald-500" />
-                <span className="text-slate-300">Community support</span>
-              </li>
-            </ul>
-            <Button className="w-full" variant="outline" asChild>
-              <Link href="/auth/register">Get Started</Link>
-            </Button>
+        
+        {/* Pro Plan */}
+        <div className="flex flex-col rounded-lg border bg-card p-6 shadow-sm relative">
+          <div className="absolute -top-3 right-4 bg-emerald-500 text-white text-xs px-3 py-1 rounded-full">
+            Popular
           </div>
-
-          {/* Pro Plan */}
-          <div className="relative rounded-lg border border-emerald-500 bg-slate-800 p-6 shadow-lg shadow-emerald-500/10">
-            <div className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-emerald-500 to-cyan-500 px-4 py-1 text-xs font-bold text-white">
-              MOST POPULAR
-            </div>
-            <div className="mb-6">
-              <h3 className="mb-2 text-xl font-bold text-white">Pro</h3>
-              <p className="text-slate-400">For serious product builders</p>
-              <div className="mt-4">
-                <span className="text-3xl font-bold text-white">$19</span>
-                <span className="text-slate-400">/month</span>
-              </div>
-            </div>
-            <ul className="mb-6 space-y-3">
-              <li className="flex items-start">
-                <CheckCircle2 className="mr-2 h-5 w-5 text-emerald-500" />
-                <span className="text-slate-300">Unlimited projects</span>
-              </li>
-              <li className="flex items-start">
-                <CheckCircle2 className="mr-2 h-5 w-5 text-emerald-500" />
-                <span className="text-slate-300">Advanced documentation</span>
-              </li>
-              <li className="flex items-start">
-                <CheckCircle2 className="mr-2 h-5 w-5 text-emerald-500" />
-                <span className="text-slate-300">Priority support</span>
-              </li>
-            </ul>
-            <Button className="w-full" variant="outline" asChild>
-              <Link href="/auth/register">Get Started</Link>
-            </Button>
+          
+          <div className="mb-4">
+            <h3 className="text-xl font-bold">Pro</h3>
+            <p className="text-muted-foreground mt-1">For serious product builders</p>
           </div>
+          
+          <div className="mb-4">
+            <span className="text-3xl font-bold">$19</span>
+            <span className="text-muted-foreground">/month</span>
+          </div>
+          
+          <ul className="mb-6 space-y-2">
+            <li className="flex items-center">
+              <Check className="mr-2 h-4 w-4 text-emerald-500" />
+              <span>Unlimited projects</span>
+            </li>
+            <li className="flex items-center">
+              <Check className="mr-2 h-4 w-4 text-emerald-500" />
+              <span>Advanced documentation</span>
+            </li>
+            <li className="flex items-center">
+              <Check className="mr-2 h-4 w-4 text-emerald-500" />
+              <span>Priority support</span>
+            </li>
+            <li className="flex items-center">
+              <Check className="mr-2 h-4 w-4 text-emerald-500" />
+              <span>Export to multiple formats</span>
+            </li>
+          </ul>
+          
+          <Button variant="default" className="mt-auto bg-emerald-500 hover:bg-emerald-600" asChild>
+            <Link href="/auth/register?plan=pro">Get Started</Link>
+          </Button>
+        </div>
+        
+        {/* Enterprise Plan */}
+        <div className="flex flex-col rounded-lg border bg-card p-6 shadow-sm">
+          <div className="mb-4">
+            <h3 className="text-xl font-bold">Enterprise</h3>
+            <p className="text-muted-foreground mt-1">For teams and organizations</p>
+          </div>
+          
+          <div className="mb-4">
+            <span className="text-3xl font-bold">Custom</span>
+          </div>
+          
+          <ul className="mb-6 space-y-2">
+            <li className="flex items-center">
+              <Check className="mr-2 h-4 w-4 text-emerald-500" />
+              <span>Everything in Pro</span>
+            </li>
+            <li className="flex items-center">
+              <Check className="mr-2 h-4 w-4 text-emerald-500" />
+              <span>Custom integrations</span>
+            </li>
+            <li className="flex items-center">
+              <Check className="mr-2 h-4 w-4 text-emerald-500" />
+              <span>Dedicated support</span>
+            </li>
+            <li className="flex items-center">
+              <Check className="mr-2 h-4 w-4 text-emerald-500" />
+              <span>Team collaboration</span>
+            </li>
+          </ul>
+          
+          <Button variant="outline" className="mt-auto" asChild>
+            <Link href="/contact">Contact Sales</Link>
+          </Button>
         </div>
       </div>
-    </AnimatedSection>
-  )
+    </div>
+  );
 }

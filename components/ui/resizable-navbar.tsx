@@ -209,11 +209,8 @@ export const MobileNavToggle = ({
 export const NavbarLogo = ({ logoText }: { logoText?: string }) => {
   return (
     <Link href="/" className="relative z-20 mr-4 flex items-center space-x-2 px-2 py-1 text-sm font-normal text-black">
-      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-500 text-white">
-        <img src="/logo.png" alt="ProVibe Logo" className="h-6 w-6 object-contain" />
-      </div>
-      <span className="font-medium text-black dark:text-white">{logoText || "ProVibe"}</span>
-      <span className="text-xs bg-emerald-500 text-white px-1 rounded">BETA</span>
+      <img src="/logo.png" alt="ProVibe Logo" className="h-8 w-8 object-contain" />
+      <span className="font-heading text-2xl font-bold text-black dark:text-white">{logoText || "ProVibe"}</span>
     </Link>
   )
 }
@@ -233,7 +230,7 @@ export const NavbarButton = ({
   variant?: "primary" | "secondary" | "dark" | "gradient" | "emerald"
 } & (React.ComponentPropsWithoutRef<"a"> | React.ComponentPropsWithoutRef<"button">)) => {
   const baseStyles =
-    "px-4 py-2 rounded-md bg-white button bg-white text-black text-sm font-bold relative cursor-pointer hover:-translate-y-0.5 transition duration-200 inline-block text-center"
+    "px-4 py-2 rounded-md bg-white button bg-white text-black font-heading text-base font-medium relative cursor-pointer hover:-translate-y-0.5 transition duration-200 inline-block text-center"
 
   const variantStyles = {
     primary:

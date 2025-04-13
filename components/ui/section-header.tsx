@@ -1,25 +1,31 @@
 import React from 'react';
+import { cn } from "@/lib/utils";
 
 interface SectionHeaderProps {
   title: string;
   subtitle?: string;
-  centered?: boolean;
   className?: string;
+  align?: "left" | "center" | "right";
 }
 
-export function SectionHeader({ 
-  title, 
-  subtitle, 
-  centered = true, 
-  className = '' 
+export function SectionHeader({
+  title,
+  subtitle,
+  className,
+  align = "center",
 }: SectionHeaderProps) {
   return (
-    <div className={`mb-16 ${centered ? 'text-center' : ''} ${className}`}>
-      <h2 className="mb-4 text-section-title font-heading text-primary">
-        {title}
-      </h2>
+    <div
+      className={cn(
+        "mb-8",
+        align === "center" && "text-center",
+        align === "right" && "text-right",
+        className
+      )}
+    >
+      <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">{title}</h2>
       {subtitle && (
-        <p className="mx-auto text-section-subtitle text-secondary max-w-2xl">
+        <p className="mt-2 text-lg text-muted-foreground max-w-3xl mx-auto">
           {subtitle}
         </p>
       )}
