@@ -17,7 +17,7 @@ module.exports = class CacheHandler {
     })
   }
 
-  async revalidateTag(tags) {
+  revalidateTag(tags) {
     tags = [tags].flat()
     for (let [key, value] of cache) {
       if (value.tags && value.tags.some((tag) => tags.includes(tag))) {
