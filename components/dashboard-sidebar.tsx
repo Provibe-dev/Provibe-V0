@@ -48,6 +48,11 @@ export function DashboardSidebar({ className }: SidebarProps) {
       href: "/dashboard/settings",
       icon: <Settings className="h-5 w-5" />,
     },
+    {
+      name: "Profile",
+      href: "/dashboard/profile",
+      icon: <Settings className="h-5 w-5" />,
+    },
   ]
 
   const sidebarContent = (
@@ -55,7 +60,6 @@ export function DashboardSidebar({ className }: SidebarProps) {
       <div className="flex items-center px-4 py-6">
         <Link href="/dashboard" className="flex items-center" onClick={closeMobileMenu}>
           <span className="text-2xl font-bold text-primary">ProVibe</span>
-          <span className="ml-1 text-xs text-primary">BETA</span>
         </Link>
       </div>
       <div className="space-y-1 px-3">
