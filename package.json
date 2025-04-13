@@ -6,9 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "postinstall": "pnpm install --no-frozen-lockfile",
-    "vercel-build": "pnpm install --no-frozen-lockfile && next build"
+    "lint": "next lint"
+   
   },
   "dependencies": {
     "@emotion/is-prop-valid": "latest",
