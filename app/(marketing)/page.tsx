@@ -54,10 +54,6 @@ export default function Home() {
       {/* Tools Section */}
       <AnimatedSection id="tools" className="bg-primary py-20" delay={0.2}>
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <SectionHeader 
-            title="Compatible with Your Favorite Tools"
-            subtitle="ProVibe integrates seamlessly with the tools and platforms you already use"
-          />
           <ToolsLogo />
         </div>
       </AnimatedSection>
@@ -65,7 +61,6 @@ export default function Home() {
       {/* Pricing Section */}
       <AnimatedSection id="pricing" className="bg-primary py-20" delay={0.2}>
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <SectionHeader title="Pricing Plans" />
           <PricingSection />
         </div>
       </AnimatedSection>
@@ -73,7 +68,6 @@ export default function Home() {
       {/* Sticky Scroll Section */}
       <AnimatedSection id="features-detail" className="bg-primary py-20" delay={0.2}>
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <SectionHeader title="Explore Features" />
           <StickyScrollRevealDemo />
         </div>
       </AnimatedSection>

@@ -1,3 +1,25 @@
+/* Font imports - add these at the top of your file */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+/* Or if you prefer to self-host fonts, use @font-face declarations */
+/*
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/Inter-Regular.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Montserrat';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/Montserrat-Bold.woff2') format('woff2');
+}
+*/
+
 /* Enable Tailwind CSS framework */
 @tailwind base;
 @tailwind components;
@@ -126,7 +148,41 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+  
+  h1 {
+    @apply font-heading text-heading-1 mb-6;
+  }
+  
+  h2 {
+    @apply font-heading text-heading-2 mb-5;
+  }
+  
+  h3 {
+    @apply font-heading text-heading-3 mb-4;
+  }
+  
+  h4 {
+    @apply font-heading text-heading-4 mb-3;
+  }
+  
+  h5 {
+    @apply font-heading text-heading-5 mb-2;
+  }
+  
+  h6 {
+    @apply font-heading text-heading-6 mb-2;
+  }
+  
+  p {
+    @apply text-body mb-4;
+  }
+  
+  /* Add font smoothing for better text rendering */
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }
 

@@ -59,8 +59,8 @@ const config = {
       },
       keyframes: {
         "accordion-down": {
-          from: { height: 0 },
-          to: { height: "var(--radix-accordion-content-height)" },
+          from: { height: "0" },
+          to: { height: "var(--radix-accordion-content-height)"},
         },
         "accordion-up": {
           from: { height: "var(--radix-accordion-content-height)" },
@@ -76,6 +76,22 @@ const config = {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         scroll: "scroll var(--duration, 40s) var(--direction, linear) infinite",
+      },
+      fontFamily: {
+        sans: ['Inter', 'system-ui', 'sans-serif'],
+        heading: ['Montserrat', 'system-ui', 'sans-serif'],
+        mono: ['JetBrains Mono', 'monospace'],
+      },
+      fontSize: {
+        // Custom font sizes with line heights
+        'heading-1': ['3.5rem', { lineHeight: '1.2', fontWeight: '700' }],
+        'heading-2': ['2.75rem', { lineHeight: '1.2', fontWeight: '700' }],
+        'heading-3': ['2.25rem', { lineHeight: '1.3', fontWeight: '600' }],
+        'heading-4': ['1.75rem', { lineHeight: '1.4', fontWeight: '600' }],
+        'heading-5': ['1.25rem', { lineHeight: '1.5', fontWeight: '600' }],
+        'heading-6': ['1rem', { lineHeight: '1.5', fontWeight: '600' }],
+        'body': ['1rem', { lineHeight: '1.5' }],
+        'body-sm': ['0.875rem', { lineHeight: '1.5' }],
       },
     },
   },
