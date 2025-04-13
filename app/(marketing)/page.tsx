@@ -10,15 +10,18 @@ import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Separator } from "@/components/ui/separator"
 import { AnimatedSection } from "@/components/animated-section"
-import { BackgroundBeams } from "@/components/ui/background-beams"
+// Removed BackgroundBeams import
 import InfiniteMovingCardsDemo from "@/components/infinite-moving-cards-demo"
 import HowItWorksCards from "@/components/how-it-works-cards"
 import FeaturesBentoDemo from "@/components/features-bento-demo"
 import { ToolsMarqueeDemo } from "@/components/tools-marquee-demo"
 
+// Removed particles array
+
 export default function Home() {
   const [activeTab, setActiveTab] = useState("requirements")
   const [activeWord, setActiveWord] = useState(0)
+  const [isClient, setIsClient] = useState(false)
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -28,39 +31,26 @@ export default function Home() {
     return () => clearInterval(interval)
   }, [])
 
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
+
   return (
     <div className="flex flex-col min-h-screen">
       {/* Hero Section */}
-      <section className="relative w-full overflow-hidden bg-gradient-to-br from-black to-slate-900 text-white">
-        <BackgroundBeams />
-        <div className="absolute inset-0 z-0 opacity-20">
-          <div className="absolute inset-0 bg-grid-white/10 bg-grid-pattern"></div>
-          <div className="h-full w-full bg-binary-pattern"></div>
-        </div>
-
-        {/* Animated particles */}
-        <div className="absolute inset-0 z-0">
-          {[...Array(20)].map((_, i) => (
-            <div
-              key={i}
-              className="absolute h-1 w-1 rounded-full bg-emerald-400/70"
-              style={{
-                top: `${Math.random() * 100}%`,
-                left: `${Math.random() * 100}%`,
-                animation: `float ${5 + Math.random() * 10}s linear infinite`,
-                opacity: Math.random() * 0.5 + 0.3,
-              }}
-            />
-          ))}
+      <section className="relative w-full overflow-hidden bg-primary text-primary">
+        <div className="absolute inset-0 z-0 opacity-10">
+          <div className="absolute inset-0 bg-grid-pattern"></div>
+          <div className="h-full w-full bg-binary-pattern opacity-5"></div>
         </div>
 
         <div className="container relative z-10 mx-auto px-4 py-24 sm:px-6 lg:px-8">
           <div className="flex flex-col items-center text-center">
             <Badge
               variant="outline"
-              className="mb-6 animate-pulse border-emerald-500/30 bg-emerald-500/10 px-4 py-1.5 text-sm font-medium text-emerald-400"
+              className="mb-6 animate-pulse border-emerald-500/30 bg-emerald-500/10 px-4 py-1.5 text-sm font-medium text-emerald-600"
             >
-              <span className="mr-1.5 h-2 w-2 rounded-full bg-emerald-400"></span>
+              <span className="mr-1.5 h-2 w-2 rounded-full bg-emerald-500"></span>
               Transform ideas into products with AI
             </Badge>
 
@@ -70,7 +60,7 @@ export default function Home() {
                   {["Dream It", "Build It"].map((word, index) => (
                     <motion.span
                       key={index}
-                      className="absolute left-0 right-0 text-center bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent"
+                      className="absolute left-0 right-0 text-center gradient-text"
                       initial={{ opacity: 0, y: 50 }}
                       animate={{
                         opacity: activeWord === index ? 1 : 0,
@@ -85,7 +75,7 @@ export default function Home() {
               </div>
             </h1>
 
-            <p className="mb-8 max-w-2xl animate-fade-in-up animation-delay-300 text-lg text-slate-300 sm:text-xl">
+            <p className="mb-8 max-w-2xl animate-fade-in-up animation-delay-300 text-lg text-secondary sm:text-xl">
               ProVibe transforms your ideas into detailed product documentation for AI agents to build faster for you
             </p>
 
@@ -95,90 +85,90 @@ export default function Home() {
                 <div className="document-carousel-track flex py-2 whitespace-nowrap">
                   <Button
                     variant="outline"
-                    className="mx-2 border-slate-700 bg-slate-800/50 text-white hover:bg-slate-700 hover:text-emerald-400 backdrop-blur-sm"
+                    className="mx-2 border-slate-200 bg-slate-50/80 text-slate-800 hover:bg-slate-100 hover:text-emerald-600 backdrop-blur-sm"
                   >
-                    <FileText className="mr-2 h-4 w-4 text-emerald-400" />
+                    <FileText className="mr-2 h-4 w-4 text-emerald-500" />
                     Product Requirement Document
                   </Button>
                   <Button
                     variant="outline"
-                    className="mx-2 border-slate-700 bg-slate-800/50 text-white hover:bg-slate-700 hover:text-emerald-400 backdrop-blur-sm"
+                    className="mx-2 border-slate-200 bg-slate-50/80 text-slate-800 hover:bg-slate-100 hover:text-emerald-600 backdrop-blur-sm"
                   >
-                    <Layers className="mr-2 h-4 w-4 text-emerald-400" />
+                    <Layers className="mr-2 h-4 w-4 text-emerald-500" />
                     Architecture
                   </Button>
                   <Button
                     variant="outline"
-                    className="mx-2 border-slate-700 bg-slate-800/50 text-white hover:bg-slate-700 hover:text-emerald-400 backdrop-blur-sm"
+                    className="mx-2 border-slate-200 bg-slate-50/80 text-slate-800 hover:bg-slate-100 hover:text-emerald-600 backdrop-blur-sm"
                   >
-                    <GitBranch className="mr-2 h-4 w-4 text-emerald-400" />
+                    <GitBranch className="mr-2 h-4 w-4 text-emerald-500" />
                     User Flow
                   </Button>
                   <Button
                     variant="outline"
-                    className="mx-2 border-slate-700 bg-slate-800/50 text-white hover:bg-slate-700 hover:text-emerald-400 backdrop-blur-sm"
+                    className="mx-2 border-slate-200 bg-slate-50/80 text-slate-800 hover:bg-slate-100 hover:text-emerald-600 backdrop-blur-sm"
                   >
-                    <Zap className="mr-2 h-4 w-4 text-emerald-400" />
+                    <Zap className="mr-2 h-4 w-4 text-emerald-500" />
                     Implementation Plan
                   </Button>
 
                   {/* Duplicate buttons for continuous scrolling effect */}
                   <Button
                     variant="outline"
-                    className="mx-2 border-slate-700 bg-slate-800/50 text-white hover:bg-slate-700 hover:text-emerald-400 backdrop-blur-sm"
+                    className="mx-2 border-slate-200 bg-slate-50/80 text-slate-800 hover:bg-slate-100 hover:text-emerald-600 backdrop-blur-sm"
                   >
-                    <FileText className="mr-2 h-4 w-4 text-emerald-400" />
+                    <FileText className="mr-2 h-4 w-4 text-emerald-500" />
                     Product Requirement Document
                   </Button>
                   <Button
                     variant="outline"
-                    className="mx-2 border-slate-700 bg-slate-800/50 text-white hover:bg-slate-700 hover:text-emerald-400 backdrop-blur-sm"
+                    className="mx-2 border-slate-200 bg-slate-50/80 text-slate-800 hover:bg-slate-100 hover:text-emerald-600 backdrop-blur-sm"
                   >
-                    <Layers className="mr-2 h-4 w-4 text-emerald-400" />
+                    <Layers className="mr-2 h-4 w-4 text-emerald-500" />
                     Architecture
                   </Button>
                   <Button
                     variant="outline"
-                    className="mx-2 border-slate-700 bg-slate-800/50 text-white hover:bg-slate-700 hover:text-emerald-400 backdrop-blur-sm"
+                    className="mx-2 border-slate-200 bg-slate-50/80 text-slate-800 hover:bg-slate-100 hover:text-emerald-600 backdrop-blur-sm"
                   >
-                    <GitBranch className="mr-2 h-4 w-4 text-emerald-400" />
+                    <GitBranch className="mr-2 h-4 w-4 text-emerald-500" />
                     User Flow
                   </Button>
                   <Button
                     variant="outline"
-                    className="mx-2 border-slate-700 bg-slate-800/50 text-white hover:bg-slate-700 hover:text-emerald-400 backdrop-blur-sm"
+                    className="mx-2 border-slate-200 bg-slate-50/80 text-slate-800 hover:bg-slate-100 hover:text-emerald-600 backdrop-blur-sm"
                   >
-                    <Zap className="mr-2 h-4 w-4 text-emerald-400" />
+                    <Zap className="mr-2 h-4 w-4 text-emerald-500" />
                     Implementation Plan
                   </Button>
 
                   {/* Add more duplicates to ensure continuous scrolling */}
                   <Button
                     variant="outline"
-                    className="mx-2 border-slate-700 bg-slate-800/50 text-white hover:bg-slate-700 hover:text-emerald-400 backdrop-blur-sm"
+                    className="mx-2 border-slate-200 bg-slate-50/80 text-slate-800 hover:bg-slate-100 hover:text-emerald-600 backdrop-blur-sm"
                   >
-                    <FileText className="mr-2 h-4 w-4 text-emerald-400" />
+                    <FileText className="mr-2 h-4 w-4 text-emerald-500" />
                     Product Requirement Document
                   </Button>
                   <Button
                     variant="outline"
-                    className="mx-2 border-slate-700 bg-slate-800/50 text-white hover:bg-slate-700 hover:text-emerald-400 backdrop-blur-sm"
+                    className="mx-2 border-slate-200 bg-slate-50/80 text-slate-800 hover:bg-slate-100 hover:text-emerald-600 backdrop-blur-sm"
                   >
-                    <Layers className="mr-2 h-4 w-4 text-emerald-400" />
+                    <Layers className="mr-2 h-4 w-4 text-emerald-500" />
                     Architecture
                   </Button>
                   <Button
                     variant="outline"
-                    className="mx-2 border-slate-700 bg-slate-800/50 text-white hover:bg-slate-700 hover:text-emerald-400 backdrop-blur-sm"
+                    className="mx-2 border-slate-200 bg-slate-50/80 text-slate-800 hover:bg-slate-100 hover:text-emerald-600 backdrop-blur-sm"
                   >
-                    <GitBranch className="mr-2 h-4 w-4 text-emerald-400" />
+                    <GitBranch className="mr-2 h-4 w-4 text-emerald-500" />
                     User Flow
                   </Button>
                   <Button
                     variant="outline"
-                    className="mx-2 border-slate-700 bg-slate-800/50 text-white hover:bg-slate-700 hover:text-emerald-400 backdrop-blur-sm"
+                    className="mx-2 border-slate-200 bg-slate-50/80 text-slate-800 hover:bg-slate-100 hover:text-emerald-600 backdrop-blur-sm"
                   >
-                    <Zap className="mr-2 h-4 w-4 text-emerald-400" />
+                    <Zap className="mr-2 h-4 w-4 text-emerald-500" />
                     Implementation Plan
                   </Button>
                 </div>
@@ -215,13 +205,13 @@ export default function Home() {
       </section>
 
       {/* Features Section */}
-      <AnimatedSection id="features" className="bg-slate-900 py-20">
+      <AnimatedSection id="features" className="bg-secondary py-20" >
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mb-16 text-center">
-            <h2 className="mb-4 text-3xl font-bold text-white sm:text-4xl">
+            <h2 className="mb-4 text-3xl font-bold text-primary sm:text-4xl">
               Everything you need to build your next big idea
             </h2>
-            <p className="mx-auto max-w-2xl text-lg text-slate-300">
+            <p className="mx-auto max-w-2xl text-lg text-secondary">
               ProVibe generates comprehensive documentation and plans that you can use to build your product or feed to
               AI agents and no-code platforms.
             </p>
@@ -232,11 +222,11 @@ export default function Home() {
       </AnimatedSection>
 
       {/* How It Works Section */}
-      <AnimatedSection id="how-it-works" className="bg-slate-800 py-20">
+      <AnimatedSection id="how-it-works" className="bg-primary py-20" >
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mb-16 text-center">
-            <h2 className="mb-4 text-3xl font-bold text-white sm:text-4xl">How ProVibe Works</h2>
-            <p className="mx-auto max-w-2xl text-lg text-slate-300">
+            <h2 className="mb-4 text-3xl font-bold text-primary sm:text-4xl">How ProVibe Works</h2>
+            <p className="mx-auto max-w-2xl text-lg text-secondary">
               A simple process to transform your ideas into comprehensive documentation
             </p>
           </div>
@@ -246,12 +236,12 @@ export default function Home() {
       </AnimatedSection>
 
       {/* Example Output Section */}
-      <AnimatedSection id="example" className="bg-slate-900 py-20" delay={0.2}>
+      <AnimatedSection id="example" className="bg-secondary py-20" delay={0.2} >
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mb-16 text-center">
-            <h2 className="mb-4 text-3xl font-bold text-white sm:text-4xl">See What ProVibe Generates</h2>
-            <p className="mx-auto max-w-2xl text-lg text-slate-300">
-              Explore the different types of documentation ProVibe can create for your product idea
+            <h2 className="mb-4 text-3xl font-bold text-primary sm:text-4xl">See ProVibe in Action</h2>
+            <p className="mx-auto max-w-2xl text-lg text-secondary">
+              Explore the comprehensive documentation ProVibe generates
             </p>
           </div>
 
@@ -357,13 +347,13 @@ export default function Home() {
         </div>
       </AnimatedSection>
 
-      {/* Tools Integration Section */}
-      <AnimatedSection id="tools" className="bg-slate-800 py-20 overflow-hidden" delay={0.2}>
+      {/* Tools Section */}
+      <AnimatedSection id="tools" className="bg-primary py-20" delay={0.2} >
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mb-16 text-center">
-            <h2 className="mb-4 text-3xl font-bold text-white sm:text-4xl">Works With Your Favorite Tools</h2>
-            <p className="mx-auto max-w-2xl text-lg text-slate-300">
-              ProVibe integrates seamlessly with popular AI development tools
+            <h2 className="mb-4 text-3xl font-bold text-primary sm:text-4xl">Compatible with Your Favorite Tools</h2>
+            <p className="mx-auto max-w-2xl text-lg text-secondary">
+              ProVibe integrates seamlessly with the tools and platforms you already use
             </p>
           </div>
 
@@ -372,12 +362,12 @@ export default function Home() {
       </AnimatedSection>
 
       {/* Testimonials Section */}
-      <AnimatedSection id="testimonials" className="bg-slate-900 py-20" delay={0.3}>
+      <AnimatedSection id="testimonials" className="bg-secondary py-20" delay={0.2} >
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mb-16 text-center">
-            <h2 className="mb-4 text-3xl font-bold text-white sm:text-4xl">What Our Users Say</h2>
-            <p className="mx-auto max-w-2xl text-lg text-slate-300">
-              Developers and product managers love how ProVibe accelerates their workflow
+            <h2 className="mb-4 text-3xl font-bold text-primary sm:text-4xl">What Our Users Say</h2>
+            <p className="mx-auto max-w-2xl text-lg text-secondary">
+              Hear from developers, founders, and product managers who use ProVibe
             </p>
           </div>
 
@@ -386,11 +376,13 @@ export default function Home() {
       </AnimatedSection>
 
       {/* Pricing Section */}
-      <AnimatedSection id="pricing" className="bg-slate-800 py-20" delay={0.2}>
+      <AnimatedSection id="pricing" className="bg-primary py-20" delay={0.2} >
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mb-16 text-center">
-            <h2 className="mb-4 text-3xl font-bold text-white sm:text-4xl">Simple, Transparent Pricing</h2>
-            <p className="mx-auto max-w-2xl text-lg text-slate-300">Choose the plan that works best for your needs</p>
+            <h2 className="mb-4 text-3xl font-bold text-primary sm:text-4xl">Simple, Transparent Pricing</h2>
+            <p className="mx-auto max-w-2xl text-lg text-secondary">
+              Choose the plan that's right for you and your team
+            </p>
           </div>
 
           <div className="grid gap-8 md:grid-cols-3">
@@ -652,46 +644,23 @@ export default function Home() {
       </AnimatedSection>
 
       {/* CTA Section */}
-      <AnimatedSection id="cta" className="bg-gradient-to-br from-emerald-900 to-cyan-900 py-20" delay={0.2}>
+      <AnimatedSection id="cta" className="bg-secondary py-20" delay={0.2} >
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-3xl text-center">
-            <h2 className="mb-6 text-3xl font-bold text-white sm:text-4xl">
-              Ready to transform your ideas into products?
+            <h2 className="mb-6 text-3xl font-bold text-primary sm:text-4xl">
+              Ready to transform your ideas into reality?
             </h2>
-            <p className="mb-8 text-lg text-emerald-100">
-              Join thousands of developers who are building faster with ProVibe's AI-powered documentation.
+            <p className="mb-8 text-lg text-secondary">
+              Join thousands of developers, founders, and product managers who are building faster with ProVibe.
             </p>
             <div className="flex flex-col items-center justify-center space-y-4 sm:flex-row sm:space-x-4 sm:space-y-0">
-              <Button
-                size="lg"
-                className="group relative overflow-hidden bg-white text-emerald-900 transition-all duration-300 hover:bg-emerald-100"
-                asChild
-              >
-                <Link href="/auth/register">
-                  <span className="relative z-10 flex items-center">
-                    Get Started For Free{" "}
-                    <ArrowRight className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
-                  </span>
-                </Link>
+              <Button size="lg" className="gradient-bg text-white">
+                Get Started Free
+                <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                className="border-white text-white transition-all duration-300 hover:bg-white/20"
-              >
+              <Button variant="outline" size="lg">
                 Schedule a Demo
               </Button>
-            </div>
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
-              <Badge variant="outline" className="border-emerald-200/30 bg-emerald-500/10 text-emerald-100">
-                <CheckCircle2 className="mr-1 h-3 w-3" /> Free 14-day trial
-              </Badge>
-              <Badge variant="outline" className="border-emerald-200/30 bg-emerald-500/10 text-emerald-100">
-                <CheckCircle2 className="mr-1 h-3 w-3" /> No credit card required
-              </Badge>
-              <Badge variant="outline" className="border-emerald-200/30 bg-emerald-500/10 text-emerald-100">
-                <CheckCircle2 className="mr-1 h-3 w-3" /> Cancel anytime
-              </Badge>
             </div>
           </div>
         </div>

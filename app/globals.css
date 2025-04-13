@@ -1,71 +1,124 @@
+/* Enable Tailwind CSS framework */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* theme.css - Variation 3: Ocean Depths */
 @layer base {
   :root {
-    /* Light Theme Variables */
-    --background: 210 40% 98%; /* Very light gray */
-    --foreground: 222.2 84% 11.2%; /* Slightly darker, but still light, text */
+    /* Ocean Depths - Light Mode */
+    --background: 210 30% 98%;      /* Very light cool gray (original bg) */
+    --foreground: 220 15% 25%;      /* Dark cool gray */
 
-    --card: 0 0% 100%; /* White */
-    --card-foreground: 222.2 84% 11.2%; /* Match foreground */
+    --card: 210 20% 100%;      /* Slightly cool white */
+    --card-foreground: 220 15% 20%; /* Dark cool gray */
 
-    --popover: 0 0% 100%; /* White */
-    --popover-foreground: 222.2 84% 11.2%; /* Match foreground */
+    --popover: 210 20% 100%;     /* Slightly cool white */
+    --popover-foreground: 220 15% 20%; /* Dark cool gray */
 
-    --primary: 220.9 39.3% 83.5%; /* Light blue */
-    --primary-foreground: 222.1 83.3% 7.8%; /* Very dark blue */
+    --primary: 190 70% 45%;       /* Strong teal/cyan */
+    --primary-foreground: 190 20% 98%; /* Very light cyan/white */
 
-    --secondary: 210 40% 96.1%; /* Very light gray */
-    --secondary-foreground: 222.2 47.4% 11.2%; /* Darker text */
+    --secondary: 210 25% 95%;      /* Light cool gray */
+    --secondary-foreground: 215 10% 35%; /* Medium cool gray */
 
-    --muted: 210 40% 96.1%; /* Very light gray */
-    --muted-foreground: 215.4 16.3% 46.9%; /* Medium gray */
+    --muted: 210 25% 95%;         /* Light cool gray */
+    --muted-foreground: 215 12% 50%; /* Lighter cool gray */
 
-    --accent: 210 40% 96.1%; /* Very light gray */
-    --accent-foreground: 222.2 47.4% 11.2%; /* Darker text */
+    --accent: 190 60% 93%;        /* Very light teal accent bg */
+    --accent-foreground: 190 55% 35%; /* Darker teal text on accent */
 
-    --destructive: 0 84.2% 60.2%; /* Red */
-    --destructive-foreground: 210 40% 98%; /* Very light text */
+    --destructive: 355 75% 58%;     /* Slightly cooler red */
+    --destructive-foreground: 0 0% 100%; /* White */
 
-    --border: 214.3 31.8% 91.4%; /* Very light gray border */
-    --input: 214.3 31.8% 91.4%; /* Very light gray input background */
-    --ring: 222.2 84% 4.9%; /* Dark ring color */
+    --border: 210 20% 90%;        /* Soft cool gray border */
+    --input: 210 20% 92%;         /* Soft cool gray input bg */
+    --ring: 190 70% 50%;         /* Primary teal for focus */
 
     --radius: 0.5rem;
+
+    /* Color scheme variables */
+    --bg-primary: var(--background);
+    --bg-secondary: 210 25% 98%;  /* Light gray for alternating sections */
+    --bg-accent: var(--accent);
+  
+    --text-primary: var(--foreground);
+    --text-secondary: 215 12% 50%;
+    --text-accent: var(--primary);
+  
+    --gradient-start: 190 70% 45%;  /* Teal/cyan */
+    --gradient-end: 160 84% 39%;    /* Emerald */
   }
 
   .dark {
-    /* Dark Theme Variables (No changes needed, assuming they're correct) */
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    /* Ocean Depths - Dark Mode (using some original dark values) */
+    --background: 222.2 84% 4.9%; /* Original dark blue/gray */
+    --foreground: 210 40% 98%;    /* Original light text */
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 220 40% 9%;        /* Darker blue/gray card */
+    --card-foreground: 210 40% 98%; /* Original light text */
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 225 50% 7%;       /* Even darker popover */
+    --popover-foreground: 210 40% 98%; /* Original light text */
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 185 75% 65%;       /* Bright, vibrant teal/cyan */
+    --primary-foreground: 190 90% 5%; /* Very dark teal/black */
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 217.2 32.6% 17.5%; /* Original dark secondary */
+    --secondary-foreground: 210 30% 80%; /* Lighter cool gray */
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 217.2 32.6% 17.5%;    /* Original dark muted */
+    --muted-foreground: 215 20.2% 65.1%; /* Original dark muted text */
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 190 40% 25%;        /* Dark teal accent bg */
+    --accent-foreground: 185 70% 75%; /* Bright teal text on accent */
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;  /* Original dark destructive */
+    --destructive-foreground: 0 20% 95%; /* Light cool gray */
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    --border: 217.2 32.6% 17.5%;   /* Original dark border */
+    --input: 217.2 32.6% 17.5%;    /* Original dark input */
+    --ring: 185 75% 70%;         /* Brighter teal focus ring */
+
+    /* --radius: 0.5rem; */
   }
+}
+
+/* Utility classes for backgrounds */
+.bg-primary {
+  background-color: hsl(var(--bg-primary));
+}
+
+.bg-secondary {
+  background-color: hsl(var(--bg-secondary));
+}
+
+.bg-accent {
+  background-color: hsl(var(--bg-accent));
+}
+
+.text-primary {
+  color: hsl(var(--text-primary));
+}
+
+.text-secondary {
+  color: hsl(var(--text-secondary));
+}
+
+.text-accent {
+  color: hsl(var(--text-accent));
+}
+
+.gradient-text {
+  background: linear-gradient(to right, hsl(var(--gradient-start)), hsl(var(--gradient-end)));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+}
+
+.gradient-bg {
+  background: linear-gradient(to bottom right, hsl(var(--gradient-start)), hsl(var(--gradient-end)));
 }
 
 @layer base {

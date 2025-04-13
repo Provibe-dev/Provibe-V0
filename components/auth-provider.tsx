@@ -11,6 +11,7 @@ import type { Database } from "@/lib/database.types"
 type Profile = Database["public"]["Tables"]["profiles"]["Row"]
 
 type User = {
+  
   id: string
   name: string
   email: string
@@ -19,6 +20,11 @@ type User = {
   credits_remaining: number
   projects_limit: number
 }
+
+// Define a function to report errors
+const reportError = (errorType: string, error: Error) => {
+  console.error(`Error of type ${errorType}:`, error);
+};
 
 type AuthContextType = {
   user: User | null
@@ -63,7 +69,7 @@ export const testSupabaseConnection = async () => {
     const { data, error } = await supabase.auth.getSession()
 
     if (error) {
-      console.error("Supabase connection test failed:", error)
+      console.error("Supabase connection test failed:", error.message)
       return {
         success: false,
         error: error.message,
@@ -82,10 +88,14 @@ export const testSupabaseConnection = async () => {
       },
     }
   } catch (error) {
-    console.error("Supabase connection test error:", error)
+    console.error("Supabase connection test error:", (error as Error).message)
+    const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+
     return {
       success: false,
-      error: error.message,
+      error: errorMessage,
+
+
       details: {
         url: process.env.NEXT_PUBLIC_SUPABASE_URL ? "Set" : "Missing",
         key: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? "Set" : "Missing",
@@ -96,8 +106,14 @@ export const testSupabaseConnection = async () => {
 
 // Add session caching to prevent repeated checks
 const SESSION_CACHE_TIME = 60 * 1000; // 1 minute cache
-let cachedSession = null;
+
+type CachedSession = { user: User } | null;
+
+let cachedSession: CachedSession = null;
 let lastSessionCheck = 0;
+
+// Add this array of public routes that don't require authentication
+const PUBLIC_ROUTES = ['/', '/auth/login', '/auth/register', '/auth/callback', '/auth/update-password'];
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
@@ -239,7 +255,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 setUser(formattedUser)
                 
                 // Report error to monitoring system
-                reportAuthError("profile_creation_failed", insertError)
+                reportError("profile_creation_failed", insertError)
                 return
               }
 
@@ -281,8 +297,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           if (!pathname?.includes("/auth/")) {
             router.push("/auth/login")
           }
-        } else if (!pathname?.includes("/auth/")) {
-          // If no session and not on auth page, redirect to login
+        } else if (!pathname?.includes("/auth/") && !PUBLIC_ROUTES.includes(pathname)) {
+          // Only redirect to login if not on a public route
           console.log("No active session, redirecting to login")
           router.push("/auth/login")
         }
@@ -298,7 +314,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     // Set up auth state listener with debouncing
-    let authChangeTimeout;
+    let authChangeTimeout: NodeJS.Timeout | undefined;
     const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log("Auth state changed:", event);
       
@@ -549,7 +565,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // Don't throw here, as the user is already created
       }
 
-      const formattedUser = formatUser(data.user, newProfile)
+      const formattedUser = formatUser(data.user, newProfile as Profile)
       setUser(formattedUser)
     } catch (error) {
       console.error("Registration error:", error)
@@ -560,7 +576,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, loginWithSSO, logout, register, refreshUser }}>
+    <AuthContext.Provider value={{ user, loading, login: login as (email: string, password: string) => Promise<void>, loginWithSSO, logout, register, refreshUser: refreshUser as () => Promise<void> }}>
       {children}
     </AuthContext.Provider>
   )

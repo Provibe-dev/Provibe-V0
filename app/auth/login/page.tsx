@@ -79,7 +79,19 @@ export default function LoginPage() {
       router.replace("/dashboard");
     } catch (error: any) {
       console.error("Login error details:", error);
-      // Handle error cases...
+      
+      // Improved error handling with specific messages
+      if (error.message?.includes("Invalid login credentials")) {
+        setErrorMessage("Invalid email or password. Please try again.");
+      } else {
+        setErrorMessage(error.message || "An error occurred during login. Please try again.");
+      }
+      
+      toast({
+        title: "Login failed",
+        description: "Please check your credentials and try again.",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
