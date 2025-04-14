@@ -15,47 +15,6 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ""
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ""
 const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
-// Mock projects data for preview environment
-const MOCK_PROJECTS = [
-  {
-    id: "mock-project-1",
-    name: "Mobile App Documentation",
-    status: "completed",
-    created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 days ago
-    updated_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
-    idea: "A comprehensive mobile app for managing personal finances and investments",
-    documents: [
-      { type: "prd", status: "completed" },
-      { type: "user_flow", status: "completed" },
-      { type: "architecture", status: "completed" },
-    ],
-  },
-  {
-    id: "mock-project-2",
-    name: "E-commerce Platform",
-    status: "completed",
-    created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(), // 5 days ago
-    updated_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 days ago
-    idea: "An online marketplace for handmade crafts and artisanal products",
-    documents: [
-      { type: "prd", status: "completed" },
-      { type: "schema", status: "completed" },
-      { type: "api_spec", status: "completed" },
-    ],
-  },
-  {
-    id: "mock-project-3",
-    name: "Task Management Tool",
-    status: "pending",
-    created_at: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(), // 1 hour ago
-    updated_at: new Date(Date.now() - 30 * 60 * 1000).toISOString(), // 30 minutes ago
-    idea: "A collaborative task management tool for remote teams",
-    documents: [
-      { type: "prd", status: "pending" },
-      { type: "user_flow", status: "pending" },
-    ],
-  },
-]
 
 export default function ProjectsPage() {
   const { user } = useAuth()
@@ -160,7 +119,7 @@ export default function ProjectsPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold tracking-tight">Projects</h1>
         <Button asChild>
-          <Link href="/dashboard/projects/new">
+          <Link href="/dashboard/create">
             <Plus className="mr-2 h-4 w-4" /> New Project
           </Link>
         </Button>
@@ -185,7 +144,7 @@ export default function ProjectsPage() {
             <FolderKanban className="h-12 w-12 text-muted-foreground" />
             <p className="mt-4 text-center text-muted-foreground">You don't have any projects yet.</p>
             <Button asChild className="mt-4">
-              <Link href="/dashboard/projects/new">Create Your First Project</Link>
+              <Link href="/dashboard/create">Create Your First Project</Link>
             </Button>
           </CardContent>
         </Card>

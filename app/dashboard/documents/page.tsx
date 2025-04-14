@@ -216,7 +216,7 @@ export default function DocumentsPage() {
           <p className="text-muted-foreground">Create and manage your documentation</p>
         </div>
         <Button asChild>
-          <Link href="/dashboard/projects/new">
+          <Link href="/dashboard/create">
             <FileText className="mr-2 h-4 w-4" /> New Document
           </Link>
         </Button>
@@ -266,7 +266,7 @@ export default function DocumentsPage() {
                 <FileText className="h-12 w-12 text-muted-foreground" />
                 <p className="mt-4 text-center text-muted-foreground">No documents found</p>
                 <Button asChild className="mt-4">
-                  <Link href="/dashboard/projects/new">Create Your First Document</Link>
+                  <Link href="/dashboard/create">Create Your First Document</Link>
                 </Button>
               </CardContent>
             </Card>

@@ -216,7 +216,7 @@ export default function DashboardPage() {
         </div>
         <div className="flex space-x-4">
           <Button asChild>
-            <Link href="/dashboard/projects/new">
+            <Link href="/dashboard/create">
               <Plus className="mr-2 h-4 w-4" /> New Project
             </Link>
           </Button>
@@ -293,7 +293,7 @@ export default function DashboardPage() {
                 <div className="flex flex-col items-center justify-center h-40">
                   <p className="text-muted-foreground mb-4">No projects yet</p>
                   <Button asChild>
-                    <Link href="/dashboard/projects/new">
+                    <Link href="/dashboard/create">
                       <Plus className="mr-2 h-4 w-4" /> Create Your First Project
                     </Link>
                   </Button>
@@ -302,7 +302,7 @@ export default function DashboardPage() {
             </CardContent>
             <CardFooter>
               <Button variant="outline" className="w-full" asChild>
-                <Link href="/dashboard/projects/new">
+                <Link href="/dashboard/create">
                   <Plus className="mr-2 h-4 w-4" /> Create New Project
                 </Link>
               </Button>

@@ -34,6 +34,11 @@ export function DashboardSidebar({ className }: SidebarProps) {
       icon: <LayoutDashboard className="h-5 w-5" />,
     },
     {
+      name: "Create",
+      href: "/dashboard/create",
+      icon: <FileText className="h-5 w-5" />,
+    },
+    {
       name: "Documents",
       href: "/dashboard/documents",
       icon: <FileText className="h-5 w-5" />,

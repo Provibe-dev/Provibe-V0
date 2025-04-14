@@ -13,177 +13,6 @@ import { supabase } from "@/lib/supabase-client"
 import { formatDistanceToNow } from "date-fns"
 import ReactMarkdown from "react-markdown"
 
-// Mock document data for preview environment
-const MOCK_DOCUMENTS = {
-  "doc-1": {
-    id: "doc-1",
-    title: "Product Requirements Document",
-    type: "prd",
-    project: { name: "Mobile App Documentation", id: "mock-project-1" },
-    updated_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-    status: "completed",
-    content: `# Product Requirements Document
-
-## Overview
-
-### Product Name
-Mobile App Documentation
-
-### Product Summary
-A comprehensive mobile app for managing personal finances and investments
-
-### Objectives
-- Solve: The difficulty of tracking multiple financial accounts, investments, and spending habits in one place
-- Improve user experience
-- Improve user experience
-
-### Target Audience
-Young professionals aged 25-40 who are looking to better manage their finances and investments
-
-## Goals & Success Metrics
-
-### Goals
-- Achieve market adoption
-- Achieve market adoption
-
-### Success Metrics
-- User engagement rate
-- User engagement rate
-
-## Features & Functionality
-
-### Core Features
-1. Expense tracking
-2. Investment portfolio management
-3. Financial goal setting
-
-### Future Enhancements
-- Future improvement
-- Future improvement
-
-## Technical Requirements
-
-### Platform
-Mobile (iOS and Android)
-
-### Technologies
-- React Native
-- Node.js
-
-### Integration Points
-- Third-party service
-- Third-party service
-
-## Timeline & Milestones
-
-### Phase 1
-- Development milestone
-- Development milestone
-
-### Phase 2
-- Development milestone
-- Development milestone`,
-  },
-  "doc-2": {
-    id: "doc-2",
-    title: "User Flow",
-    type: "user_flow",
-    project: { name: "Mobile App Documentation", id: "mock-project-1" },
-    updated_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-    status: "completed",
-    content: `# User Flow
-
-## Overview
-This document outlines the primary user journeys for Mobile App Documentation.
-
-## User Journey 1: User Registration
-
-### Trigger
-User clicks 'Sign Up' button
-
-### Steps
-1. User completes form
-2. System processes request
-3. User completes form
-4. System processes request
-
-### End State
-User is registered and logged in
-
-## User Journey 2: User Registration
-
-### Trigger
-User clicks 'Sign Up' button
-
-### Steps
-1. User completes form
-2. System processes request
-3. User completes form
-4. System processes request
-
-### End State
-User is registered and logged in
-
-## Error Flows
-
-### Error Flow 1: Form Validation Error
-System displays validation errors and allows correction`,
-  },
-  "doc-3": {
-    id: "doc-3",
-    title: "Architecture Document",
-    type: "architecture",
-    project: { name: "Mobile App Documentation", id: "mock-project-1" },
-    updated_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-    status: "completed",
-    content: `# Architecture Document
-
-## Overview
-This document outlines the technical architecture for Mobile App Documentation.
-
-## Tech Stack
-
-### Frontend
-- React Native
-- Custom component library
-- Redux
-
-### Backend
-- Node.js
-- Express
-- JWT
-
-### Database
-- MongoDB
-- Prisma
-
-### Infrastructure
-- Vercel
-- GitHub Actions
-- Datadog
-
-## System Architecture
-
-### Component Diagram
-Microservices architecture with API Gateway
-
-### Data Flow
-1. Data processing step
-2. Data processing step
-3. Data processing step
-
-## Security Considerations
-
-- Input validation and sanitization
-- Input validation and sanitization
-
-## Scalability Strategy
-
-- Horizontal scaling with load balancing
-- Horizontal scaling with load balancing`,
-  },
-}
-
 export default function DocumentDetailPage() {
   const { user } = useAuth()
   const params = useParams()
@@ -194,9 +23,6 @@ export default function DocumentDetailPage() {
   const [activeTab, setActiveTab] = useState("preview")
   const [regenerating, setRegenerating] = useState(false)
 
-  // Check if we're in the v0 preview environment
-  const isV0Preview = typeof window !== "undefined" && window.location.hostname.includes("vusercontent.net")
-
   useEffect(() => {
     const fetchDocument = async () => {
       if (!user) {
@@ -206,19 +32,6 @@ export default function DocumentDetailPage() {
 
       try {
         const documentId = params?.id as string
-
-        // Use mock data for test user or preview environment
-        if (user.id === "test_user_id" || isV0Preview || documentId.startsWith("doc-")) {
-          console.log("Using mock document data for test user or preview")
-          const mockDoc = MOCK_DOCUMENTS[documentId as keyof typeof MOCK_DOCUMENTS]
-          if (mockDoc) {
-            setDocument(mockDoc)
-          } else {
-            setError("Document not found")
-          }
-          setLoading(false)
-          return
-        }
 
         // Fetch document from Supabase
         const { data: documentData, error: documentError } = await supabase
@@ -261,29 +74,13 @@ export default function DocumentDetailPage() {
     }
 
     fetchDocument()
-  }, [user, params, isV0Preview])
+  }, [user, params])
 
   const handleRegenerateDocument = async () => {
     if (!user || !document) return
 
     try {
       setRegenerating(true)
-
-      // For test user or preview environment, simulate regeneration
-      if (user.id === "test_user_id" || isV0Preview) {
-        await new Promise((resolve) => setTimeout(resolve, 2000))
-
-        // Update the document in the local state
-        setDocument((prev) => ({
-          ...prev,
-          updated_at: new Date().toISOString(),
-          content:
-            prev.content + "\n\n## Regenerated Content\nThis document has been regenerated with updated information.",
-        }))
-
-        setRegenerating(false)
-        return
-      }
 
       // Call the server action to regenerate the document
       const response = await fetch("/api/regenerate-document", {
