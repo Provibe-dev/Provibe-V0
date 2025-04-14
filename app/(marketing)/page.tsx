@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button"
 import { SectionHeader } from "@/components/ui/section-header"
 import Link from "next/link"
 import { ArrowRight } from "lucide-react"
+import WhyProVibeSection from "@/components/marketing/WhyProVibeSection"
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState("requirements")
@@ -25,17 +26,8 @@ export default function Home() {
       {/* Hero Section */}
       <HeroSection />
 
-      {/* Features Section */}
-      <AnimatedSection id="features" className="bg-secondary py-20">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <SectionHeader 
-            title="Everything you need to build your next big idea"
-            subtitle="ProVibe generates comprehensive documentation and plans that you can use to build your product or feed to AI agents and no-code platforms."
-          />
-
-          <FeaturesSection />
-        </div>
-      </AnimatedSection>
+      {/* Why ProVibe Section */}
+       <WhyProVibeSection /> 
 
       {/* How It Works Section */}
       <AnimatedSection id="how-it-works" className="bg-primary py-20">
@@ -44,10 +36,22 @@ export default function Home() {
             title="How ProVibe Works"
             subtitle="A simple process to transform your ideas into comprehensive documentation"
           />
-
           <HowItWorksCards />
         </div>
       </AnimatedSection>
+
+      {/* Features Section */}
+      <AnimatedSection id="features" className="bg-secondary py-20">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <SectionHeader 
+            title="Everything you need to build your next big idea"
+            subtitle="ProVibe generates comprehensive documentation and plans that you can use to build your product or feed to AI agents and no-code platforms."
+          />
+          <FeaturesSection />
+        </div>
+      </AnimatedSection>
+
+      
 
         {/* Example Output Section */}
         {/* <ExampleOutputSection /> */}

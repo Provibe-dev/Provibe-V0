@@ -1,35 +1,38 @@
-"use client"
+// HeroSection.jsx
+"use client";
 
-import { useState, useEffect } from "react"
-import Link from "next/link"
-import { motion } from "framer-motion"
-import { ArrowRight, FileText, Layers, Zap, GitBranch } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { TypewriterHeadline } from "./TypewriterHeadline"
-
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { motion } from "framer-motion";
+import { ArrowRight, FileText, Layers, Zap, GitBranch } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { TypewriterHeadline } from "./TypewriterHeadline";
+import { FloatingIcons } from "./FloatingIcons"; // Import the new component
 
 export function HeroSection() {
-  const [activeWord, setActiveWord] = useState(0)
-  const [isClient, setIsClient] = useState(false)
+  const [activeWord, setActiveWord] = useState(0);
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setActiveWord((prev) => (prev === 0 ? 1 : 0))
-    }, 3000)
+      setActiveWord((prev) => (prev === 0 ? 1 : 0));
+    }, 3000);
 
-    return () => clearInterval(interval)
-  }, [])
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
-    setIsClient(true)
-  }, [])
+    setIsClient(true);
+  }, []);
 
   return (
     <section className="relative w-full overflow-hidden bg-primary text-primary">
-      <div className="absolute inset-0 z-0 opacity-10">
+      <div className="absolute inset-0 z-0"> {/* Removed opacity-10 */}
         <div className="absolute inset-0 bg-grid-pattern"></div>
         <div className="h-full w-full bg-binary-pattern opacity-5"></div>
+        {/* Use the FloatingIcons component */}
+        <FloatingIcons />
       </div>
 
       <div className="container relative z-10 mx-auto px-4 py-24 sm:px-6 lg:px-8">
@@ -43,10 +46,10 @@ export function HeroSection() {
           </Badge>
 
           <TypewriterHeadline />
-
-
+          
           <p className="mb-8 max-w-2xl text-lg text-secondary">
-          ProVibe refines your idea into build-ready documents so your no-code tool builds it right.
+            ProVibe refines your idea into build-ready documents so your no-code
+            tool builds it right.
           </p>
 
           <div className="mb-12 w-full max-w-4xl overflow-hidden">
@@ -80,7 +83,7 @@ export function HeroSection() {
                   <Zap className="mr-2 h-4 w-4 text-emerald-500" />
                   Implementation Plan
                 </Button>
-                
+
                 {/* Duplicate buttons for continuous scrolling effect */}
                 <Button
                   variant="outline"
@@ -128,11 +131,9 @@ export function HeroSection() {
                 <span className="absolute inset-0 z-0 translate-y-full bg-gradient-to-r from-emerald-600 to-cyan-600 transition-transform duration-300 group-hover:translate-y-0"></span>
               </Link>
             </Button>
-            
           </div>
         </div>
       </div>
-
     </section>
-  )
+  );
 }

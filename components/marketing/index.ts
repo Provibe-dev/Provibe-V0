@@ -5,3 +5,4 @@ export * from './PricingSection';
 export * from './StickyScrollRevealDemo';
 export * from './ToolsLogo'
 export * from './FeaturesSection'
+export * from './WhyProVibeSection'

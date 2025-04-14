@@ -1,51 +1,52 @@
+"use client"
+
 import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 
-const words = ["Go from Vibe to Vision", "in just a few minutes"]
-const typingSpeed = 80
-const pauseTime = 1200
+// Two lines of headline text
+const headlineText = {
+  line1: "Your AI whisperer",
+  line2: "for Vibe coding"
+}
 
 export function TypewriterHeadline() {
-  const [displayedText, setDisplayedText] = useState("")
-  const [wordIndex, setWordIndex] = useState(0)
-  const [charIndex, setCharIndex] = useState(0)
-  const [isDeleting, setIsDeleting] = useState(false)
+  const [isVisible, setIsVisible] = useState(false)
 
   useEffect(() => {
-    const currentWord = words[wordIndex]
+    // Simple fade-in effect after component mounts
+    const timer = setTimeout(() => {
+      setIsVisible(true)
+    }, 300)
 
-    let timeout = setTimeout(() => {
-      if (!isDeleting) {
-        setDisplayedText(currentWord.substring(0, charIndex + 1))
-        setCharIndex(charIndex + 1)
-        if (charIndex === currentWord.length) {
-          setIsDeleting(true)
-          setTimeout(() => {}, pauseTime)
-        }
-      } else {
-        setDisplayedText(currentWord.substring(0, charIndex - 1))
-        setCharIndex(charIndex - 1)
-        if (charIndex === 0) {
-          setIsDeleting(false)
-          setWordIndex((prev) => (prev + 1) % words.length)
-        }
-      }
-    }, isDeleting ? typingSpeed / 2 : typingSpeed)
-
-    return () => clearTimeout(timeout)
-  }, [charIndex, isDeleting, wordIndex])
+    return () => clearTimeout(timer)
+  }, [])
 
   return (
-    <h1 className="mb-6 text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
-      <motion.span
-        className="gradient-text"
+    <h1 className="mb-6 text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl text-center">
+      <motion.div
+        className="flex flex-col items-center"
         initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.75 }}
+        animate={{ opacity: isVisible ? 1 : 0 }}
+        transition={{ duration: 0.8 }}
       >
-        {displayedText}
-        <span className="text-emerald-400">|</span>
-      </motion.span>
+        <motion.span
+          className="block bg-gradient-to-r from-emerald-400 to-cyan-500 bg-clip-text text-transparent"
+          initial={{ y: 20 }}
+          animate={{ y: isVisible ? 0 : 20 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+        >
+          {headlineText.line1}
+        </motion.span>
+        
+        <motion.span
+          className="block bg-gradient-to-r from-emerald-400 to-cyan-500 bg-clip-text text-transparent"
+          initial={{ y: 20 }}
+          animate={{ y: isVisible ? 0 : 20 }}
+          transition={{ duration: 0.6, delay: 0.4 }}
+        >
+          {headlineText.line2}
+        </motion.span>
+      </motion.div>
     </h1>
   )
 }
