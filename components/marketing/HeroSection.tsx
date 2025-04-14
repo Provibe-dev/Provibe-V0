@@ -6,6 +6,8 @@ import { motion } from "framer-motion"
 import { ArrowRight, FileText, Layers, Zap, GitBranch } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { TypewriterHeadline } from "./TypewriterHeadline"
+
 
 export function HeroSection() {
   const [activeWord, setActiveWord] = useState(0)
@@ -37,33 +39,14 @@ export function HeroSection() {
             className="mb-6 animate-pulse border-emerald-500/30 bg-emerald-500/10 px-4 py-1.5 text-sm font-medium text-emerald-600"
           >
             <span className="mr-1.5 h-2 w-2 rounded-full bg-emerald-500"></span>
-            Transform ideas into products with AI
+            Turn raw ideas into build-ready blueprints
           </Badge>
 
-          <h1 className="mb-6 text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
-            <div className="flex items-center justify-center overflow-hidden">
-              <div className="relative h-[1.2em] w-[5em] overflow-hidden">
-                {["Dream It", "Build It"].map((word, index) => (
-                  <motion.span
-                    key={index}
-                    className="absolute left-0 right-0 text-center gradient-text"
-                    initial={{ opacity: 0, y: 50 }}
-                    animate={{
-                      opacity: activeWord === index ? 1 : 0,
-                      y: activeWord === index ? 0 : -50,
-                    }}
-                    transition={{ duration: 0.5, ease: "easeInOut" }}
-                  >
-                    {word}
-                  </motion.span>
-                ))}
-              </div>
-            </div>
-          </h1>
+          <TypewriterHeadline />
+
 
           <p className="mb-8 max-w-2xl text-lg text-secondary">
-            ProVibe transforms your ideas into comprehensive product documentation using AI. Get detailed requirements,
-            architecture diagrams, user flows, and implementation plans in minutes.
+          ProVibe refines your idea into build-ready documents so your no-code tool builds it right.
           </p>
 
           <div className="mb-12 w-full max-w-4xl overflow-hidden">

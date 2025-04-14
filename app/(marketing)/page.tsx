@@ -10,6 +10,7 @@ import { ToolsLogo } from "@/components/marketing/ToolsLogo"
 import InfiniteMovingCardsDemo from "@/components/infinite-moving-cards-demo"
 import HowItWorksCards from "@/components/how-it-works-cards"
 import FeaturesBentoDemo from "@/components/features-bento-demo"
+import FeaturesSection from "@/components/marketing/FeaturesSection"
 import { ToolsMarqueeDemo } from "@/components/tools-marquee-demo"
 import { Button } from "@/components/ui/button"
 import { SectionHeader } from "@/components/ui/section-header"
@@ -32,7 +33,7 @@ export default function Home() {
             subtitle="ProVibe generates comprehensive documentation and plans that you can use to build your product or feed to AI agents and no-code platforms."
           />
 
-          <FeaturesBentoDemo />
+          <FeaturesSection />
         </div>
       </AnimatedSection>
 
@@ -123,7 +124,6 @@ export default function Home() {
             <div className="mb-6 md:mb-0">
               <div className="flex items-center">
                 <span className="text-2xl font-bold text-white">ProVibe</span>
-                <span className="ml-1 text-xs text-emerald-400">BETA</span>
               </div>
               <p className="mt-2 text-body">Transform ideas into products with AI</p>
             </div>

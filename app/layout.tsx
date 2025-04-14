@@ -10,9 +10,9 @@ import { SpeedInsights } from "@vercel/speed-insights/next"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "ProVibe Lite - AI-Powered Documentation Platform",
-  description: "Transform your ideas into detailed product documentation using AI",
-  generator: 'v0.dev'
+  title: "ProVibe - AI-Powered Documentation Platform",
+  description: "ProVibe refines your idea into build-ready documents—PRDs, flows, architecture & plans—so your no-code tool builds it right.",
+  keywords: ["documentation", "product development", "PRD", "architecture", "no-code", "AI", "product planning", "user flows", "technical specifications"]
 }
 
 export default function RootLayout({
@@ -23,6 +23,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <link rel="icon" href="/favicon.ico" sizes="any" />
         <script
           dangerouslySetInnerHTML={{
             __html: `
