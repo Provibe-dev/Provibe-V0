@@ -280,7 +280,7 @@ export default function DashboardPage() {
                     </div>
 
                     <div className="mt-4 flex items-center justify-between">
-                      <Badge variant={project.status === "completed" ? "emerald" : "secondary"} className="text-xs">
+                      <Badge variant={project.status === "completed" ? "default" : "secondary"} className="text-xs">
                         {project.status === "completed" ? "Completed" : "Draft"}
                       </Badge>
                       <div className="text-xs text-muted-foreground">
