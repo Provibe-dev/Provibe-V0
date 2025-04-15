@@ -731,6 +731,27 @@ Total estimated timeline: 18 weeks
     };
   }, [ideaForm, detailsForm]);
 
+  // Function to create a new project
+  const createNewProject = async (userId: string, projectName: string) => {
+    try {
+      const { data: project, error } = await supabase
+        .from("projects")
+        .insert([{ user_id: userId, name: projectName }])
+        .select()
+        .single()
+
+      if (error) {
+        console.error("Error creating project:", error)
+        return { success: false, error: error.message }
+      }
+
+      return { success: true, project }
+    } catch (error: any) {
+      console.error("Error creating project:", error)
+      return { success: false, error: error.message }
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -913,23 +934,11 @@ Total estimated timeline: 18 weeks
 
         {/* Step 2: Tools */}
         {activeStep === 2 && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Step 2: Select Tools</CardTitle>
-              <CardDescription>Choose the technologies and tools you plan to use for this project.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <AIToolSelector selectedTools={selectedTools} onSelectionChange={setSelectedTools} />
-            </CardContent>
-            <CardFooter className="flex justify-between">
-              <Button variant="outline" type="button" onClick={() => navigateToStep(1)}>
-                <ArrowLeft className="mr-2 h-4 w-4" /> Back
-              </Button>
-              <Button type="button" onClick={() => navigateToStep(3)}>
-                Next <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </CardFooter>
-          </Card>
+          <Step2 
+            selectedTools={selectedTools} 
+            onSelectionChange={setSelectedTools} 
+            navigateToStep={navigateToStep} 
+          />
         )}
 
         {/* Step 3: Details */}
