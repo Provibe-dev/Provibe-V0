@@ -5,8 +5,8 @@ import { motion } from "framer-motion"
 
 // Two lines of headline text
 const headlineText = {
-  line1: "Your AI whisperer",
-  line2: "for Vibe coding"
+  line1: "Go from ideas",
+  line2: "to blueprint"
 }
 
 export function TypewriterHeadline() {

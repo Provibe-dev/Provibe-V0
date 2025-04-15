@@ -42,14 +42,14 @@ export function HeroSection() {
             className="mb-6 animate-pulse border-emerald-500/30 bg-emerald-500/10 px-4 py-1.5 text-sm font-medium text-emerald-600"
           >
             <span className="mr-1.5 h-2 w-2 rounded-full bg-emerald-500"></span>
-            Turn raw ideas into build-ready blueprints
+            Turn raw ideas into build-ready documentation
           </Badge>
 
           <TypewriterHeadline />
           
           <p className="mb-8 max-w-2xl text-lg text-secondary">
-            ProVibe refines your idea into build-ready documents so your no-code
-            tool builds it right.
+            ProVibe refines your idea into detailed documentation for your no-code
+            tools, to build it right the first time.
           </p>
 
           <div className="mb-12 w-full max-w-4xl overflow-hidden">

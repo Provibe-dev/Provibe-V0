@@ -143,7 +143,7 @@ export default function CreateProjectPage() {
           throw fetchError; // Propagate error to catch block
         }
 
-        const projectCount = projects?.count ?? 0;
+        const projectCount = projects?.length ?? 0;
         console.log(`User ${user.id} has ${projectCount} projects. Limit: ${user.projects_limit}`);
 
         if (projectCount >= user.projects_limit) {
@@ -320,49 +320,93 @@ export default function CreateProjectPage() {
     else if (e.key === "Escape") setIsEditingName(false);
   };
 
+  // Handle idea refinement
   const handleRefineIdea = async () => {
-    const idea = ideaForm.getValues("idea");
-    if (!idea || idea.length < 10) {
-      toast({ title: "Idea too short", variant: "destructive" });
-      return;
-    }
-    if (!projectId) {
-        toast({ title: "Project not initialized", description: "Please wait or refresh.", variant: "destructive" });
-        return;
-    }
-
     setIsRefining(true);
     try {
-      if (!isTestUser && user && user.credits_remaining < 50) {
-        toast({ title: "Insufficient credits (50 needed)", variant: "destructive" });
+      const idea = ideaForm.getValues("idea");
+      
+      if (!idea || idea.length < 10) {
+        toast({
+          title: "Idea too short",
+          description: "Please provide a more detailed idea before refining.",
+          variant: "destructive",
+        });
+        setIsRefining(false);
         return;
       }
 
-      // --- Simulate API Call ---
-      console.log("Simulating AI Idea Refinement for project:", projectId);
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      const refinedIdea = `${idea}\n\n**AI Refinement:** This concept targets [refined audience] facing [refined problem]. Key differentiators include [unique aspect 1] and [unique aspect 2]. Potential success hinges on [key factor].`;
-      // --- End Simulation ---
-
-      ideaForm.setValue("idea", refinedIdea, { shouldValidate: true }); // Update form
-
-      if (!isTestUser && user) {
-        // Update DB (idea is already handled by debounced watcher, but update refined_idea and credits)
-        const { error: updateError } = await supabase
-          .from("projects")
-          .update({ refined_idea: refinedIdea }) // Store refined version separately if needed
-          .eq("id", projectId);
-        if (updateError) throw updateError;
-
-        // Log credit usage & update user credits (combine into a function/transaction if possible)
-        await logCreditUsage(user.id, projectId, "idea_refinement", 50);
-        await updateUserCredits(user.id, user.credits_remaining - 50); // Make sure to refresh user context after this
+      // Check credits for real users
+      if (!isTestUser && user && user.credits_remaining < 50) {
+        toast({
+          title: "Insufficient credits",
+          description: "You need 50 credits to refine your idea.",
+          variant: "destructive",
+        });
+        setIsRefining(false);
+        return;
       }
 
-      toast({ title: "Idea refined by AI" });
+      console.log("Calling enhance-idea API endpoint with idea:", idea.substring(0, 30) + "...");
+      
+      // Call the API endpoint
+      try {
+        const response = await fetch('/api/enhance-idea', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ idea }),
+        });
+
+        console.log("API response status:", response.status);
+        
+        // Check if the response is JSON
+        const contentType = response.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+          const text = await response.text();
+          console.error("Non-JSON response:", text);
+          throw new Error("API returned non-JSON response");
+        }
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || `API call failed with status ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log("API response received:", data);
+        
+        // Update form with enhanced idea
+        const refinedIdea = data.enhancedIdea;
+        ideaForm.setValue("idea", refinedIdea);
+
+        // Update database for real users
+        if (!isTestUser && projectId) {
+          const { error: updateError } = await supabase
+            .from("projects")
+            .update({ refined_idea: refinedIdea })
+            .eq("id", projectId);
+          if (updateError) throw updateError;
+
+          // Log credit usage & update user credits
+          await logCreditUsage(user.id, projectId, "idea_refinement", 50);
+          await updateUserCredits(user.id, user.credits_remaining - 50);
+        }
+
+        toast({
+          title: "Idea refined",
+          description: "Your idea has been enhanced with AI assistance.",
+        });
+      } catch (fetchError) {
+        console.error("Fetch error:", fetchError);
+        throw fetchError;
+      }
     } catch (error) {
       console.error("Error refining idea:", error);
-      toast({ title: "Refinement failed", variant: "destructive" });
+      toast({
+        title: "Refinement failed",
+        description: error instanceof Error ? error.message : "Unknown error occurred",
+        variant: "destructive",
+      });
     } finally {
       setIsRefining(false);
     }

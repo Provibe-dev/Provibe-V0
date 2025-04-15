@@ -9,6 +9,9 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { ArrowRight, Mic, MicOff, Sparkles, Loader2 } from "lucide-react" // Import needed icons
 import Link from "next/link"
 import { AudioRecorder } from "@/components/audio-recorder"
+import { useState } from "react";
+import { toast } from "@/components/ui/use-toast";
+
 // No need to redefine schema here if managed in parent
 // const ideaFormSchema = z.object({
 //   idea: z.string().min(10, { message: "Your idea must be at least 10 characters" }),
@@ -42,9 +45,55 @@ export default function Step1({
   projectId,
   isTestUser
 }: Step1Props) {
+  const [isGenerating, setIsGenerating] = useState(false);
+  const ideaValue = ideaForm.watch("idea");
 
-  // Get the idea value to disable the Next button correctly
-  const ideaValue = ideaForm.watch("idea"); // Watch the value for disabling button
+  // New function to generate AI-enhanced idea
+  const enhanceIdeaWithAI = async () => {
+    const currentIdea = ideaForm.getValues("idea");
+    
+    if (!currentIdea || currentIdea.length < 10) {
+      toast({
+        title: "Idea too short",
+        description: "Please provide at least 10 characters to enhance your idea.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    setIsGenerating(true);
+    
+    try {
+      const response = await fetch('/api/enhance-idea', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ idea: currentIdea }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to enhance idea');
+      }
+      
+      const data = await response.json();
+      ideaForm.setValue("idea", data.enhancedIdea);
+      
+      toast({
+        title: "Idea enhanced!",
+        description: "Your idea has been expanded with AI assistance.",
+      });
+    } catch (error) {
+      console.error('Error enhancing idea:', error);
+      toast({
+        title: "Enhancement failed",
+        description: "There was an error enhancing your idea. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
 
   return (
     <Card>
