@@ -11,6 +11,12 @@ import Link from "next/link"
 import { AudioRecorder } from "@/components/audio-recorder"
 import { useState } from "react";
 import { toast } from "@/components/ui/use-toast";
+import { forwardRef, useImperativeHandle } from "react";
+
+// Add a ref type for the component
+export type Step1Ref = {
+  refineIdea: (idea: string) => Promise<string | undefined>;
+};
 
 // No need to redefine schema here if managed in parent
 // const ideaFormSchema = z.object({
@@ -34,66 +40,56 @@ type Step1Props = {
   isTestUser?: boolean; // Optional: if behavior differs for test user
 }
 
-export default function Step1({
+const Step1 = forwardRef<Step1Ref, Step1Props>(({
   ideaForm,
   isRecording,
   toggleRecording,
   handleTranscription,
   navigateToStep,
-  isRefining, // Destructure new props
+  isRefining,
   handleRefineIdea,
   projectId,
   isTestUser
-}: Step1Props) {
-  const [isGenerating, setIsGenerating] = useState(false);
+}, ref) => {
   const ideaValue = ideaForm.watch("idea");
+  
+  // Expose the refineIdea function to the parent via ref
+  useImperativeHandle(ref, () => ({
+    refineIdea: async (idea: string): Promise<string | undefined> => {
+      console.log("Step1: Calling enhance-idea API endpoint with idea:", idea.substring(0, 30) + "...");
+      
+      try {
+        const response = await fetch('/api/enhance-idea', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ idea }),
+        });
 
-  // New function to generate AI-enhanced idea
-  const enhanceIdeaWithAI = async () => {
-    const currentIdea = ideaForm.getValues("idea");
-    
-    if (!currentIdea || currentIdea.length < 10) {
-      toast({
-        title: "Idea too short",
-        description: "Please provide at least 10 characters to enhance your idea.",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    setIsGenerating(true);
-    
-    try {
-      const response = await fetch('/api/enhance-idea', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ idea: currentIdea }),
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to enhance idea');
+        console.log("API response status:", response.status);
+        
+        const contentType = response.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+          const text = await response.text();
+          console.error("Non-JSON response:", text);
+          throw new Error("API returned non-JSON response");
+        }
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || `API call failed with status ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log("API response received:", data);
+        
+        // Return the enhanced idea to the parent
+        return data.enhancedIdea;
+      } catch (error) {
+        console.error("Error refining idea in Step1:", error);
+        throw error; // Re-throw to let parent handle it
       }
-      
-      const data = await response.json();
-      ideaForm.setValue("idea", data.enhancedIdea);
-      
-      toast({
-        title: "Idea enhanced!",
-        description: "Your idea has been expanded with AI assistance.",
-      });
-    } catch (error) {
-      console.error('Error enhancing idea:', error);
-      toast({
-        title: "Enhancement failed",
-        description: "There was an error enhancing your idea. Please try again.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsGenerating(false);
     }
-  };
+  }));
 
   return (
     <Card>
@@ -186,5 +182,10 @@ export default function Step1({
         </Button>
       </CardFooter>
     </Card>
-  )
-}
+  );
+});
+
+// Add display name
+Step1.displayName = "Step1";
+
+export default Step1;

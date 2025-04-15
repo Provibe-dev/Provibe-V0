@@ -25,6 +25,7 @@ import Step2 from "./steps/Step2"
 import Step3 from "./steps/Step3"
 import Step4 from "./steps/Step4"
 import Step5, { DOCUMENT_TYPES } from "./steps/Step5" // Ensure DOCUMENT_TYPES is exported if needed here, otherwise just import Step5
+import { Step1Ref } from "./steps/Step1";
 
 // Form schemas (keep these here as the forms are managed in this parent component)
 const ideaFormSchema = z.object({
@@ -51,6 +52,7 @@ export default function CreateProjectPage() {
   const [isRecording, setIsRecording] = useState(false)
   const [isRefining, setIsRefining] = useState(false) // Used for Idea refinement
   const [isGeneratingAnswer, setIsGeneratingAnswer] = useState(false); // New state for Step 3 AI answers
+  const step1Ref = useRef<Step1Ref>(null);
 
   // *** FIX: Use the specific DetailField type for the state ***
   const [generatingAnswerField, setGeneratingAnswerField] = useState<DetailField | null>(null); // Track which field is generating
@@ -326,59 +328,33 @@ export default function CreateProjectPage() {
     try {
       const idea = ideaForm.getValues("idea");
       
+      // Basic validation
       if (!idea || idea.length < 10) {
         toast({
           title: "Idea too short",
           description: "Please provide a more detailed idea before refining.",
           variant: "destructive",
         });
-        setIsRefining(false);
         return;
       }
 
-      // Check credits for real users
+      // Credit check
       if (!isTestUser && user && user.credits_remaining < 50) {
         toast({
           title: "Insufficient credits",
           description: "You need 50 credits to refine your idea.",
           variant: "destructive",
         });
-        setIsRefining(false);
         return;
       }
-
-      console.log("Calling enhance-idea API endpoint with idea:", idea.substring(0, 30) + "...");
       
-      // Call the API endpoint
-      try {
-        const response = await fetch('/api/enhance-idea', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ idea }),
-        });
-
-        console.log("API response status:", response.status);
-        
-        // Check if the response is JSON
-        const contentType = response.headers.get("content-type");
-        if (!contentType || !contentType.includes("application/json")) {
-          const text = await response.text();
-          console.error("Non-JSON response:", text);
-          throw new Error("API returned non-JSON response");
-        }
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || `API call failed with status ${response.status}`);
-        }
-
-        const data = await response.json();
-        console.log("API response received:", data);
-        
-        // Update form with enhanced idea
-        const refinedIdea = data.enhancedIdea;
+      // Let Step1 handle the API call and get the refined idea back
+      const refinedIdea = await step1Ref.current?.refineIdea(idea);
+      
+      if (refinedIdea) {
+        // Update form with refined idea
         ideaForm.setValue("idea", refinedIdea);
-
+        
         // Update database for real users
         if (!isTestUser && projectId) {
           const { error: updateError } = await supabase
@@ -391,14 +367,11 @@ export default function CreateProjectPage() {
           await logCreditUsage(user.id, projectId, "idea_refinement", 50);
           await updateUserCredits(user.id, user.credits_remaining - 50);
         }
-
+        
         toast({
           title: "Idea refined",
           description: "Your idea has been enhanced with AI assistance.",
         });
-      } catch (fetchError) {
-        console.error("Fetch error:", fetchError);
-        throw fetchError;
       }
     } catch (error) {
       console.error("Error refining idea:", error);
@@ -811,6 +784,7 @@ export default function CreateProjectPage() {
             handleRefineIdea={handleRefineIdea} // Pass refine handler
             projectId={projectId} // Pass projectId if needed for direct updates within Step1 (though debouncing here is better)
             isTestUser={isTestUser}
+            ref={step1Ref}
           />
         )}
 

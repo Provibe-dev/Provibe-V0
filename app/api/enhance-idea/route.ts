@@ -51,7 +51,7 @@ export async function POST(request: Request) {
       messages: [
         {
           role: "system",
-          content: "You are a product development expert. Your task is to take a brief product idea and expand it into a well-structured paragraph that includes: the problem being solved, target audience, unique value proposition, and potential market opportunity. Keep your response concise (max 200 words) and focused on the core concept."
+          content: "You are a product development expert. Your task is to take a brief product idea and expand it into a well-structured product idea. Focus on key elements: the problem being solved, target audience, unique value proposition. Keep your response concise (max 200 words) and focused on the core concept."
         },
         {
           role: "user",
