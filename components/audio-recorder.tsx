@@ -7,10 +7,10 @@ import { Progress } from "@/components/ui/progress"
 import { useToast } from "@/components/ui/use-toast"
 
 interface AudioRecorderProps {
-  onTranscription: (text: string) => void
+  onTranscription: (text: string, audioUrl: string) => void;
 }
 
-export function AudioRecorder({ onTranscription }: AudioRecorderProps) {
+export const AudioRecorder: React.FC<AudioRecorderProps> = ({ onTranscription }) => {
   const [isRecording, setIsRecording] = useState(false)
   const [recordingTime, setRecordingTime] = useState(0)
   const [isTranscribing, setIsTranscribing] = useState(false)

@@ -1,6 +1,7 @@
 "use client"
 
-import { useState, useRef, useEffect, type React } from "react"
+import { useState, useRef, useEffect } from "react"
+import type { ReactElement } from "react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -13,7 +14,12 @@ import { useAuth } from "@/components/auth-provider"
 import { useToast } from "@/components/ui/use-toast"
 import { supabase } from "@/lib/supabase-client"
 import { generateDocuments } from "@/lib/generate-documents"
-import { ArrowLeft, ArrowRight, Mic, MicOff, Loader2, Sparkles, FileText } from "lucide-react"
+import { ArrowLeft, ArrowRight, Mic, MicOff, Loader2, Sparkles, FileText, Edit2, Save } from "lucide-react"
+import { AudioRecorder } from "@/components/audio-recorder"
+import { Input } from "@/components/ui/input"
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card"
+import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form"
+import { Textarea } from "@/components/ui/textarea"
 
 // Import step components
 import Step1 from "./steps/Step1"
