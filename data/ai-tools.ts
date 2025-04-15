@@ -8,18 +8,45 @@ export interface AiTool {
 
 export const aiTools: AiTool[] = [
   {
-    id: "augment",
-    name: "Augment",
-    logo: "https://logo.clearbit.com/augmentcode.com",
-    description: "AI dev environment that learns your codebase and acts like an AI teammate",
+    id: "cursor",
+    name: "Cursor IDE",
+    logo: "/assets/img/ai/cursor-logo-png_seeklogo-611587.png",
+    description: "AI-first IDE powered by GPT-4 to write, refactor, and explain code using chat-like interface",
     category: "AI IDE"
   },
   {
     id: "bolt",
     name: "Bolt AI",
-    logo: "./public/assets/img/ai/02_bolt.svg",
+    logo: "/assets/img/ai/02_bolt.svg",
     description: "Build full-stack apps from a prompt using an open-source AI agent framework",
     category: "Low-Code/No-Code"
+  },
+  {
+    id: "lovable",
+    name: "Lovable",
+    logo: "/assets/img/ai/lovable.jpeg",
+    description: "Generate mobile and web apps with a single prompt – code, UI, and logic included",
+    category: "Low-Code/No-Code"
+  },
+  {
+    id: "replit",
+    name: "Replit Ghostwriter",
+    logo: "/assets/img/ai/replit-icon-logo-png_seeklogo-453824.png",
+    description: "In-browser IDE with Ghostwriter AI assistant for prompt-based coding and debugging",
+    category: "AI IDE"
+  },
+  {
+    id: "v0",
+    name: "Vercel v0",
+    logo: "/assets/img/ai/07_v0_dev.svg",
+    description: "Convert UI descriptions into Tailwind + React components instantly",
+    category: "Prompt-to-UI"
+  },{
+    id: "augment",
+    name: "Augment",
+    logo: "https://logo.clearbit.com/augmentcode.com",
+    description: "AI dev environment that learns your codebase and acts like an AI teammate",
+    category: "AI IDE"
   },
   {
     id: "cogram",
@@ -41,34 +68,6 @@ export const aiTools: AiTool[] = [
     logo: "https://logo.clearbit.com/github.com",
     description: "AI pair programmer that suggests code based on comments and context",
     category: "Code Assistant"
-  },
-  {
-    id: "cursor",
-    name: "Cursor IDE",
-    logo: "./public/assets/img/ai/04_cursor.svg",
-    description: "AI-first IDE powered by GPT-4 to write, refactor, and explain code using chat-like interface",
-    category: "AI IDE"
-  },
-  {
-    id: "lovable",
-    name: "Lovable",
-    logo: "./public/assets/img/ai/06_lovable.svg",
-    description: "Generate mobile and web apps with a single prompt – code, UI, and logic included",
-    category: "Low-Code/No-Code"
-  },
-  {
-    id: "replit",
-    name: "Replit Ghostwriter",
-    logo: "./public/assets/img/ai/09_replit.svg",
-    description: "In-browser IDE with Ghostwriter AI assistant for prompt-based coding and debugging",
-    category: "AI IDE"
-  },
-  {
-    id: "v0",
-    name: "Vercel v0",
-    logo: "./public/assets/img/ai/07_v0_dev.svg",
-    description: "Convert UI descriptions into Tailwind + React components instantly",
-    category: "Prompt-to-UI"
   },
   {
     id: "vscode",
@@ -108,7 +107,7 @@ export const aiTools: AiTool[] = [
   {
     id: "gemini",
     name: "Gemini Code Assist",
-    logo: "https://logo.clearbit.com/gemini.google.com",
+    logo: "/assets/img/ai/Gemini-Icon.png",
     description: "AI pair programmer that suggests code based on comments and context",
     category: "Code Assistant"
   }
