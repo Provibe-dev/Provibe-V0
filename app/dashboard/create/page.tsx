@@ -26,7 +26,8 @@ import Step1 from "./steps/Step1"
 import Step2 from "./steps/Step2"
 import Step3 from "./steps/Step3"
 import Step4 from "./steps/Step4"
-import Step5 from "./steps/Step5"
+import step5 from "./steps/Step5"
+import Step5, { DOCUMENT_TYPES } from "./steps/Step5"
 
 // Form schemas
 const ideaFormSchema = z.object({
@@ -1220,6 +1221,7 @@ Total estimated timeline: 18 weeks
                 </p>
               </div>
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {/* Import DOCUMENT_TYPES from Step5 */}
                 {DOCUMENT_TYPES.map((doc) => (
                   <div
                     key={doc.id}

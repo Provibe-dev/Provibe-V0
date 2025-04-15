@@ -4,7 +4,7 @@ import { ArrowLeft, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 // Document types available for generation
-const DOCUMENT_TYPES = [
+export const DOCUMENT_TYPES = [
   { id: "prd", title: "Product Requirements Document", icon: "📄" },
   { id: "user_flow", title: "User Flow", icon: "🔄" },
   { id: "architecture", title: "Architecture Document", icon: "🏗️" },
