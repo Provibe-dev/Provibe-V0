@@ -17,7 +17,7 @@ export const aiTools: AiTool[] = [
   {
     id: "bolt",
     name: "Bolt AI",
-    logo: "https://logo.clearbit.com/bolt.new",
+    logo: "./public/assets/img/ai/02_bolt.svg",
     description: "Build full-stack apps from a prompt using an open-source AI agent framework",
     category: "Low-Code/No-Code"
   },
@@ -45,28 +45,28 @@ export const aiTools: AiTool[] = [
   {
     id: "cursor",
     name: "Cursor IDE",
-    logo: "https://brandfetch.com/cursor.com/logo.png",
+    logo: "./public/assets/img/ai/04_cursor.svg",
     description: "AI-first IDE powered by GPT-4 to write, refactor, and explain code using chat-like interface",
     category: "AI IDE"
   },
   {
     id: "lovable",
     name: "Lovable",
-    logo: "https://lovable.so/favicon.ico",
+    logo: "./public/assets/img/ai/06_lovable.svg",
     description: "Generate mobile and web apps with a single prompt – code, UI, and logic included",
     category: "Low-Code/No-Code"
   },
   {
     id: "replit",
     name: "Replit Ghostwriter",
-    logo: "https://replit.com/public/images/favicon.png",
+    logo: "./public/assets/img/ai/09_replit.svg",
     description: "In-browser IDE with Ghostwriter AI assistant for prompt-based coding and debugging",
     category: "AI IDE"
   },
   {
     id: "v0",
     name: "Vercel v0",
-    logo: "https://v0.dev/favicon.ico",
+    logo: "./public/assets/img/ai/07_v0_dev.svg",
     description: "Convert UI descriptions into Tailwind + React components instantly",
     category: "Prompt-to-UI"
   },
