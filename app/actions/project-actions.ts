@@ -656,7 +656,7 @@ export async function regenerateDocument(documentId: string, userId: string) {
 }
 
 // Create a new function for generating documents
-export async function generateDocuments(projectId: string, selectedDocuments: string[]) {
+export async function generateDocuments(projectId: string, selectedDocuments: string[], projectPlan?: string) {
   try {
     console.log(`Generating ${selectedDocuments.length} documents for project ${projectId}`)
 
@@ -672,6 +672,9 @@ export async function generateDocuments(projectId: string, selectedDocuments: st
       throw new Error("Failed to fetch project data")
     }
 
+    // Use projectPlan if provided
+    const contextForGeneration = projectPlan || projectData.description;
+    
     // Create document placeholders
     const documentPromises = selectedDocuments.map(async (docType) => {
       const docTemplate = documentTemplates[docType]

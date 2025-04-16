@@ -199,7 +199,7 @@ export default function ProjectDetailPage() {
         },
         body: JSON.stringify({
           documentId,
-          userId: user.id,
+          projectId: project.id, // Send projectId instead of userId
         }),
       })
 

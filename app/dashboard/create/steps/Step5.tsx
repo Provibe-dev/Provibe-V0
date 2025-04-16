@@ -3,28 +3,31 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { ArrowLeft, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useToast } from "@/components/ui/use-toast"
+import { useRouter } from "next/navigation"
+import { supabase } from "@/lib/supabase-client"
 
-// Document types available for generation (assuming this is correct)
+// Document types available for generation
 export const DOCUMENT_TYPES = [
   { id: "prd", title: "Product Requirements Document", icon: "📄", cost: 200 },
   { id: "user_flow", title: "User Flow Diagram", icon: "🔄", cost: 200 },
   { id: "architecture", title: "System Architecture", icon: "🏗️", cost: 200 },
   { id: "schema", title: "Database Schema", icon: "🗄️", cost: 200 },
   { id: "api_spec", title: "API Specification", icon: "🔌", cost: 200 },
-  // Add more as needed
 ]
 
 // Placeholder for the actual user type from your useAuth hook
-// Replace 'any' with the imported type if available, e.g., import { User } from '@/path/to/auth';
 type UserType = any; // Replace 'any' with your actual User type
 
 type Step5Props = {
-  user: UserType | null; // Allow null if user might not be loaded yet
+  user: UserType | null;
   selectedDocuments: string[];
   setSelectedDocuments: (docs: string[]) => void;
   isSubmitting: boolean;
-  handleGenerateDocuments: () => Promise<void>; // Renamed from handleSubmit
+  setIsSubmitting: (isSubmitting: boolean) => void; // Add setter for isSubmitting
   navigateToStep: (step: number) => void;
+  projectId: string;
+  projectPlan: string;
 }
 
 export default function Step5({
@@ -32,9 +35,13 @@ export default function Step5({
   selectedDocuments,
   setSelectedDocuments,
   isSubmitting,
-  handleGenerateDocuments, // Use the correct prop name
-  navigateToStep
+  setIsSubmitting,
+  navigateToStep,
+  projectId,
+  projectPlan
 }: Step5Props) {
+  const { toast } = useToast()
+  const router = useRouter()
 
   const totalCost = selectedDocuments.reduce((sum, docId) => {
     const doc = DOCUMENT_TYPES.find(d => d.id === docId);
@@ -48,6 +55,61 @@ export default function Step5({
       setSelectedDocuments(selectedDocuments.filter((d) => d !== docId));
     } else {
       setSelectedDocuments([...selectedDocuments, docId]);
+    }
+  };
+
+  // Handle document generation and redirect to documents page
+  const handleGenerateAndRedirect = async () => {
+    setIsSubmitting(true);
+    try {
+      if (!projectId) {
+        toast({
+          title: "Project not initialized",
+          description: "Please wait or refresh the page.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Call the API to generate documents
+      const response = await fetch(`/api/projects/${projectId}/documents`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          selectedDocuments,
+          projectPlan
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to generate documents');
+      }
+
+      const result = await response.json();
+      console.log("Document generation result:", result);
+      setIsSubmitting(false);
+
+      // Show success toast
+      toast({
+        title: "Documents Generated",
+        description: "Your project documents have been created successfully.",
+      });
+
+      // Redirect to the documents page for this project
+      router.push(`/dashboard/projects/${projectId}/documents`);
+    } catch (error) {
+      console.error("Error generating documents:", error);
+      setIsSubmitting(false); // Ensure loading state is reset on error
+
+      // Show error toast
+      toast({
+        title: "Generation Failed",
+        description: "There was an error generating your documents. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -101,7 +163,7 @@ export default function Step5({
           <ArrowLeft className="mr-2 h-4 w-4" /> Back
         </Button>
         <Button
-          onClick={handleGenerateDocuments} // Use the correct handler
+          onClick={handleGenerateAndRedirect} // Use our new handler that calls API and redirects
           disabled={isSubmitting || selectedDocuments.length === 0 || !canAfford} // Disable if submitting, nothing selected, or cannot afford
         >
           {isSubmitting ? (

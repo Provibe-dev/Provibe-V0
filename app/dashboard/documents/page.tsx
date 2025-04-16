@@ -315,14 +315,12 @@ export default function DocumentsPage() {
                   </CardHeader>
                   <CardContent className="p-4 pt-0">
                     <CardTitle className="line-clamp-1">{doc.title}</CardTitle>
-                    <CardDescription className="flex items-center">
+                    <div className="text-sm text-muted-foreground mt-1">
                       <Badge variant="outline" className="mr-2">
-                        {doc.type.replace("_", " ")}
+                        {doc.type}
                       </Badge>
-                      <span className="text-xs">
-                        From <Link href={`/dashboard/projects/${doc.project.id}`}>{doc.project.name}</Link>
-                      </span>
-                    </CardDescription>
+                      <span>{doc.project.name}</span>
+                    </div>
                   </CardContent>
                   <CardFooter className="border-t p-4">
                     <div className="flex w-full items-center justify-between text-sm text-muted-foreground">
@@ -386,14 +384,12 @@ export default function DocumentsPage() {
                 </CardHeader>
                 <CardContent className="p-4 pt-0">
                   <CardTitle className="line-clamp-1">{doc.title}</CardTitle>
-                  <CardDescription className="flex items-center">
+                  <div className="text-sm text-muted-foreground mt-1">
                     <Badge variant="outline" className="mr-2">
-                      {doc.type.replace("_", " ")}
+                      {doc.type}
                     </Badge>
-                    <span className="text-xs">
-                      From <Link href={`/dashboard/projects/${doc.project.id}`}>{doc.project.name}</Link>
-                    </span>
-                  </CardDescription>
+                    <span>{doc.project.name}</span>
+                  </div>
                 </CardContent>
                 <CardFooter className="border-t p-4">
                   <div className="flex w-full items-center justify-between text-sm text-muted-foreground">
@@ -457,14 +453,12 @@ export default function DocumentsPage() {
                   </CardHeader>
                   <CardContent className="p-4 pt-0">
                     <CardTitle className="line-clamp-1">{doc.title}</CardTitle>
-                    <CardDescription className="flex items-center">
+                    <div className="text-sm text-muted-foreground mt-1">
                       <Badge variant="outline" className="mr-2">
-                        {doc.type.replace("_", " ")}
+                        {doc.type}
                       </Badge>
-                      <span className="text-xs">
-                        From <Link href={`/dashboard/projects/${doc.project.id}`}>{doc.project.name}</Link>
-                      </span>
-                    </CardDescription>
+                      <span>{doc.project.name}</span>
+                    </div>
                   </CardContent>
                   <CardFooter className="border-t p-4">
                     <div className="flex w-full items-center justify-between text-sm text-muted-foreground">

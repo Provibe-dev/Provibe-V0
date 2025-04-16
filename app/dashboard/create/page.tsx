@@ -4,7 +4,7 @@
 import { useState, useRef, useEffect } from "react"
 // ... other imports ...
 import { supabase } from "@/lib/supabase-client"
-import { generateDocuments } from "@/lib/generate-documents"
+// import { generateDocuments } from "@/lib/generate-documents" // Removed as it's not needed here
 import { ArrowLeft, ArrowRight, Mic, MicOff, Loader2, Sparkles, FileText, Edit2, Save, Check } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card" // Keep Card imports if needed for structure around steps, but remove step-specific ones if fully delegated
@@ -53,6 +53,7 @@ export default function CreateProjectPage() {
   const [isRefining, setIsRefining] = useState(false) // Used for Idea refinement
   const [isGeneratingAnswer, setIsGeneratingAnswer] = useState(false); // New state for Step 3 AI answers
   const step1Ref = useRef<Step1Ref>(null);
+  const step4Ref = useRef<{ generateGeminiPlan: () => Promise<string> }>(null);
 
   // *** FIX: Use the specific DetailField type for the state ***
   const [generatingAnswerField, setGeneratingAnswerField] = useState<DetailField | null>(null); // Track which field is generating
@@ -364,8 +365,10 @@ export default function CreateProjectPage() {
           if (updateError) throw updateError;
 
           // Log credit usage & update user credits
-          await logCreditUsage(user.id, projectId, "idea_refinement", 50);
-          await updateUserCredits(user.id, user.credits_remaining - 50);
+          if (user) {
+            await logCreditUsage(user.id, projectId, "idea_refinement", 50);
+            await updateUserCredits(user.id, user.credits_remaining - 50);
+          }
         }
         
         toast({
@@ -387,190 +390,74 @@ export default function CreateProjectPage() {
 
   // *** FIX: Ensure the 'field' parameter uses the DetailField type ***
   const handleGenerateAnswer = async (field: DetailField) => {
-     const idea = ideaForm.getValues("idea");
-     if (!idea || idea.length < 10) {
-        toast({ title: "Please provide your idea first", variant: "destructive" });
-        return;
+    const idea = ideaForm.getValues("idea");
+    if (!idea || idea.length < 10) {
+      toast({ title: "Please provide your idea first", variant: "destructive" });
+      return;
     }
     if (!projectId) {
-        toast({ title: "Project not initialized", description: "Please wait or refresh.", variant: "destructive" });
-        return;
+      toast({ title: "Project not initialized", description: "Please wait or refresh.", variant: "destructive" });
+      return;
     }
 
     setGeneratingAnswerField(field); // Indicate which field is loading
     setIsGeneratingAnswer(true); // General loading state for Step 3
 
     try {
-        if (!isTestUser && user && user.credits_remaining < 25) {
-            toast({ title: "Insufficient credits (25 needed)", variant: "destructive" });
-            return;
-        }
+      if (!isTestUser && user && user.credits_remaining < 25) {
+        toast({ title: "Insufficient credits (25 needed)", variant: "destructive" });
+        return;
+      }
 
-        // --- Simulate API Call ---
-        console.log(`Simulating AI Answer Generation for ${field} (Project: ${projectId})`);
-        await new Promise((resolve) => setTimeout(resolve, 1200));
-        let answer = `AI-generated answer for ${field} based on the idea: "${idea.substring(0, 30)}...". Consider [Example Detail 1] and [Example Detail 2].`;
-        // Add more specific simulated answers if needed based on 'field'
-         switch (field) {
-            case "targetAudience":
-              answer = `Based on your idea, the target audience could be [Specific Group A] and [Specific Group B] who need [Specific Need].`;
-              break;
-            case "problemSolved":
-              answer = `Your product likely solves the problem of [Inefficiency/Lack] by offering [Core Benefit].`;
-              break;
-            // Add cases for other DetailField values if needed
-            case "keyFeatures":
-              answer = `Key features could include [Feature A], [Feature B], and [Feature C] to address the core problem.`;
-              break;
-            case "successMetrics":
-              answer = `Success could be measured by [Metric X] (e.g., user engagement) and [Metric Y] (e.g., conversion rate).`;
-              break;
-            case "timeline":
-              answer = `A potential timeline involves [Phase 1 Duration] for MVP and [Phase 2 Duration] for launch.`;
-              break;
-          }
-        // --- End Simulation ---
+      // No simulation here - we'll let Step3's handleGenerateGeminiAnswer handle the API call
+      // and update the form value. We're just setting up loading states and checking credits.
+      
+      // Credit usage will be handled after successful API call
+      console.log(`Preparing to generate AI answer for ${field} (Project: ${projectId})`);
 
-        detailsForm.setValue(field, answer, { shouldValidate: true }); // Update form
-
-        if (!isTestUser && user) {
-            // DB update is handled by debounced watcher for detailsForm
-            // Log credit usage & update user credits
-            await logCreditUsage(user.id, projectId, "ai_answer", 25);
-            await updateUserCredits(user.id, user.credits_remaining - 25); // Refresh user context
-        }
-
-        toast({ title: `AI answer generated for ${field}` });
-
+      // No need to refresh here, it's done in Step3 after the API call
+      // await refreshUser();
+      // console.log(`User credits after update: ${user.credits_remaining}`);
     } catch (error) {
-        console.error(`Error generating answer for ${field}:`, error);
-        toast({ title: "Answer generation failed", variant: "destructive" });
-    } finally {
-        setIsGeneratingAnswer(false);
-        setGeneratingAnswerField(null);
+      // Ensure loading states are reset on error
+      setIsGeneratingAnswer(false);
+      console.error(`Error generating answer for ${field}:`, error);
+      toast({ title: "Answer generation failed", variant: "destructive" });
+      setIsGeneratingAnswer(false);
+      setGeneratingAnswerField(null);
     }
   };
 
   const handleGeneratePlan = async () => {
-     if (!projectId) {
-        toast({ title: "Project not initialized", description: "Please wait or refresh.", variant: "destructive" });
-        return;
-    }
     setIsGeneratingPlan(true);
     try {
-      if (!isTestUser && user && user.credits_remaining < 100) {
-        toast({ title: "Insufficient credits (100 needed)", variant: "destructive" });
+      if (!projectId) {
+        toast({ title: "Project not initialized", description: "Please wait or refresh.", variant: "destructive" });
         return;
       }
 
-      const idea = ideaForm.getValues("idea");
-      const details = detailsForm.getValues();
-
-      // --- Simulate API Call ---
-      console.log("Simulating AI Plan Generation for project:", projectId);
-      await new Promise((resolve) => setTimeout(resolve, 2500));
-      const generatedPlan = `# ${projectName} - AI Generated Plan\n\n## Phase 1: Foundation (Est. X weeks)\n- Define Core User Stories based on idea: "${idea.substring(0, 30)}..."\n- Setup project with tools: ${selectedTools.join(", ") || 'None specified'}\n- Key Detail Focus: Target Audience - ${details.targetAudience || 'N/A'}\n\n## Phase 2: MVP Development (Est. Y weeks)\n...\n\n## Phase 3: Testing & Launch (Est. Z weeks)\n...\n`;
-      // --- End Simulation ---
-
-      setProjectPlan(generatedPlan); // Update state
-
-      if (!isTestUser && user) {
-        // Update DB
-        const { error: updateError } = await supabase
-          .from("projects")
-          .update({ project_plan: generatedPlan })
-          .eq("id", projectId);
-        if (updateError) throw updateError;
-
-        // Log credit usage & update user credits
-        await logCreditUsage(user.id, projectId, "plan_generation", 100);
-        await updateUserCredits(user.id, user.credits_remaining - 100); // Refresh user context
+      // Let Step4 handle the API call and get the plan back
+      const generatedPlan = await step4Ref.current?.generateGeminiPlan();
+      
+      if (generatedPlan) {
+        setProjectPlan(generatedPlan); // Update state
+        
+        // Update DB for real users
+        if (!isTestUser && projectId) {
+          const { error: updateError } = await supabase
+            .from("projects")
+            .update({ project_plan: generatedPlan })
+            .eq("id", projectId);
+          if (updateError) throw updateError;
+        }
+        
+        toast({ title: "Project plan generated" });
       }
-
-      toast({ title: "Project plan generated" });
     } catch (error) {
       console.error("Error generating plan:", error);
       toast({ title: "Plan generation failed", variant: "destructive" });
     } finally {
       setIsGeneratingPlan(false);
-    }
-  };
-
-  const handleGenerateDocuments = async () => {
-    if (selectedDocuments.length === 0) {
-      toast({ title: "No documents selected", variant: "destructive" });
-      return;
-    }
-     if (!projectId) {
-        toast({ title: "Project not initialized", description: "Cannot generate documents.", variant: "destructive" });
-        return;
-    }
-
-    const requiredCredits = selectedDocuments.length * 200;
-    if (!isTestUser && user && user.credits_remaining < requiredCredits) {
-      toast({ title: `Insufficient credits (${requiredCredits} needed)`, variant: "destructive" });
-      return;
-    }
-
-    setIsSubmitting(true);
-    try {
-      if (isTestUser) {
-        console.log("Simulating document generation for test user (Project:", projectId, ") Documents:", selectedDocuments);
-        await new Promise((resolve) => setTimeout(resolve, 1500));
-        toast({ title: "Test document generation started" });
-        router.push("/dashboard/projects"); // Redirect test user
-        return;
-      }
-
-      // For real users
-      console.log("Starting document generation for project:", projectId, "Documents:", selectedDocuments);
-
-      // 1. Update project status (optional, maybe update after generation starts)
-      const { error: statusError } = await supabase
-        .from("projects")
-        .update({ status: "generating_docs", updated_at: new Date().toISOString() })
-        .eq("id", projectId);
-      if (statusError) {
-          console.warn("Failed to update project status before generation:", statusError);
-          // Decide if this is critical - maybe proceed anyway?
-      }
-
-
-      // 2. Call the generation function (this should ideally trigger a background job)
-      const result = await generateDocuments(projectId, selectedDocuments); // Assuming this function now handles its own errors/toasts for the *start* of generation
-
-      if (!result.success) {
-        // If generateDocuments indicates immediate failure (e.g., invalid input)
-        throw new Error(result.error || "Failed to start document generation process.");
-      }
-
-      // 3. Log credit usage & update user credits (only if generation *started* successfully)
-      if (user) {
-          await logCreditUsage(user.id, projectId, "document_generation", requiredCredits);
-          await updateUserCredits(user.id, user.credits_remaining - requiredCredits); // Refresh user context
-      }
-
-      toast({
-        title: "Document generation started",
-        description: `Generating ${selectedDocuments.length} document(s). You'll be redirected.`,
-      });
-
-      // 4. Redirect the user
-      router.push(`/dashboard/projects/${projectId}`);
-
-    } catch (error) {
-      console.error("Error in handleGenerateDocuments:", error);
-      toast({
-        title: "Document Generation Failed",
-        description: error instanceof Error ? error.message : "An unexpected error occurred.",
-        variant: "destructive",
-      });
-       // Optionally reset project status if it was set to 'generating_docs'
-        if (projectId && !isTestUser) {
-            await supabase.from("projects").update({ status: "draft" }).eq("id", projectId);
-        }
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -799,35 +686,42 @@ export default function CreateProjectPage() {
         {activeStep === 3 && (
           <Step3
             detailsForm={detailsForm}
-            isGeneratingAnswer={isGeneratingAnswer} // Pass correct state name
-            generatingAnswerField={generatingAnswerField} // Pass which field is loading
-            handleGenerateAnswer={handleGenerateAnswer} // Pass the correct handler
+            isGeneratingAnswer={isGeneratingAnswer}
+            generatingAnswerField={generatingAnswerField}
+            handleGenerateAnswer={handleGenerateAnswer}
             navigateToStep={navigateToStep}
-            projectId={projectId} // Pass projectId if needed for direct updates within Step3
+            projectId={projectId}
             isTestUser={isTestUser}
+            ideaText={ideaForm.getValues("idea")}
+            setIsGeneratingAnswer={setIsGeneratingAnswer}
           />
         )}
 
         {activeStep === 4 && (
           <Step4
-            ideaForm={ideaForm} // Pass forms to display values
+            ideaForm={ideaForm}
             detailsForm={detailsForm}
             selectedTools={selectedTools}
             projectPlan={projectPlan}
             isGeneratingPlan={isGeneratingPlan}
-            handleGeneratePlan={handleGeneratePlan} // Pass generator/regenerator
+            handleGeneratePlan={handleGeneratePlan}
             navigateToStep={navigateToStep}
+            projectId={projectId}
+            isTestUser={isTestUser}
+            ref={step4Ref}
           />
         )}
 
         {activeStep === 5 && (
           <Step5
-            user={user} // Pass user for credits display
+            user={user}
             selectedDocuments={selectedDocuments}
             setSelectedDocuments={setSelectedDocuments}
             isSubmitting={isSubmitting}
-            handleGenerateDocuments={handleGenerateDocuments} // Use correct handler name
+            setIsSubmitting={setIsSubmitting} // Pass setter instead of handler
             navigateToStep={navigateToStep}
+            projectId={projectId}
+            projectPlan={projectPlan}
           />
         )}
       </div>

@@ -29,20 +29,24 @@ export default function CompletedProjectPage() {
         const result = await getProject(projectId)
 
         if (result.success) {
-          setProject(result.project)
-          setDocuments(
-            result.documents.map((doc) => ({
-              id: doc.id,
-              title: doc.title,
-              type: doc.type,
-              icon: getDocumentIcon(doc.type),
-              status: doc.status,
-              content: doc.content,
-            })),
-          )
+          setProject(result.project);
+          if (result.documents) {
+            setDocuments(
+              result.documents.map((doc) => ({
+                id: doc.id,
+                title: doc.title,
+                type: doc.type,
+                icon: getDocumentIcon(doc.type),
+                status: doc.status,
+                content: doc.content,
+              })),
+            );
+          }
 
-          if (result.documents.length > 0) {
-            setActiveDocumentId(result.documents[0].id)
+          if (result.documents) {
+            if (result.documents.length > 0) {
+              setActiveDocumentId(result.documents[0].id)
+            }
           }
         } else {
           throw new Error(result.error || "Failed to fetch project")

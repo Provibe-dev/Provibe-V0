@@ -90,7 +90,7 @@ export default function DocumentDetailPage() {
         },
         body: JSON.stringify({
           documentId: document.id,
-          userId: user.id,
+          projectId: document.project_id,
         }),
       })
 
@@ -130,14 +130,14 @@ export default function DocumentDetailPage() {
     const url = URL.createObjectURL(blob)
 
     // Create a temporary link and trigger download
-    const a = document.createElement("a")
+    const a = window.document.createElement("a")
     a.href = url
     a.download = `${document.title.replace(/\s+/g, "-").toLowerCase()}.md`
-    document.body.appendChild(a)
+    window.document.body.appendChild(a)
     a.click()
 
     // Clean up
-    document.body.removeChild(a)
+    window.document.body.removeChild(a)
     URL.revokeObjectURL(url)
   }
 

@@ -5,6 +5,9 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { ArrowLeft, ArrowRight, Loader2, Edit2 } from "lucide-react" // Added Edit2
 import ReactMarkdown from "react-markdown"
 import { cn } from "@/lib/utils" // Import cn if needed for styling
+import { useAuth } from "@/components/auth-provider" // Add auth provider
+import { useToast } from "@/components/ui/use-toast" // Add toast
+import { forwardRef, useImperativeHandle } from 'react';
 
 // Define expected form data shapes (can be inferred or explicitly defined)
 type IdeaFormData = { idea: string; }
@@ -24,6 +27,8 @@ type Step4Props = {
   isGeneratingPlan: boolean;
   handleGeneratePlan: () => Promise<void>; // Correct handler name
   navigateToStep: (step: number) => void;
+  projectId?: string; // Add projectId prop
+  isTestUser?: boolean; // Add isTestUser prop
 }
 
 // Helper to format keys nicely
@@ -34,19 +39,108 @@ const formatDetailKey = (key: string): string => {
 };
 
 
-export default function Step4({
+const Step4 = forwardRef(({
   ideaForm,
   detailsForm,
   selectedTools,
   projectPlan,
   isGeneratingPlan,
   handleGeneratePlan,
-  navigateToStep
-}: Step4Props) {
+  navigateToStep,
+  projectId,
+  isTestUser
+}: Step4Props, ref) => {
+  const { user, refreshUser } = useAuth();
+  const { toast } = useToast();
 
   // Get form values directly for display
   const ideaValue = ideaForm.getValues().idea;
   const detailValues = detailsForm.getValues();
+
+  // Generate project plan using Gemini
+  const generateGeminiPlan = async (): Promise<string> => {
+    try {
+      console.log("Step4: Sending request to /api/gemini-plan with data:", {
+        idea: ideaValue,
+        details: detailValues,
+        tools: selectedTools
+      });
+      
+      const response = await fetch('/api/gemini-plan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          idea: ideaValue,
+          details: detailValues,
+          tools: selectedTools
+        }),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || `API call failed with status ${response.status}`);
+      }
+      
+      const data = await response.json();
+      console.log("Step4: Received plan from API");
+      
+      // After successful API call, log credit usage
+      if (!isTestUser && projectId && user) {
+        console.log(`Step4: Processing credit usage for project plan - User: ${user.id}, Credits: ${user.credits_remaining}`);
+        
+        try {
+          // First log the credit usage
+          await logCreditUsage(user.id, projectId, "plan_generation", 50);
+          console.log(`Step4: Credit usage logged for project plan`);
+          
+          // Then update the user's credits
+          await updateUserCredits(user.id, user.credits_remaining - 50);
+          console.log(`Step4: Credits updated: ${user.credits_remaining} -> ${user.credits_remaining - 50}`);
+          
+          // Refresh the user data
+          await refreshUser();
+          console.log(`Step4: User refreshed, new credits: ${user.credits_remaining}`);
+        } catch (error) {
+          console.error(`Step4: Error processing credit usage for project plan:`, error);
+          toast({ 
+            title: "Error updating credits", 
+            description: "Your plan was generated but we couldn't update your credits.",
+            variant: "destructive" 
+          });
+        }
+      }
+      
+      return data.plan;
+    } catch (error) {
+      console.error(`Error generating project plan with Gemini:`, error);
+      toast({
+        title: "Error generating plan",
+        description: "There was an error generating your project plan. Please try again.",
+        variant: "destructive"
+      });
+      throw error;
+    }
+  };
+
+  // Expose the generateGeminiPlan method to the parent component
+  useImperativeHandle(ref, () => ({
+    generateGeminiPlan
+  }));
+
+  // Handler that uses Gemini
+  const handleGenerateGeminiPlan = async () => {
+    try {
+      console.log("Step4: Starting plan generation/regeneration with Gemini");
+      
+      // Call the parent's handler which handles loading state
+      await handleGeneratePlan();
+      
+      console.log("Step4: Plan generation/regeneration completed successfully");
+    } catch (error) {
+      console.error(`Error in handleGenerateGeminiPlan:`, error);
+      throw error;
+    }
+  };
 
   return (
     <Card>
@@ -125,25 +219,25 @@ export default function Step4({
               <div className="prose prose-sm dark:prose-invert max-w-none mt-2">
                 <ReactMarkdown>{projectPlan}</ReactMarkdown>
               </div>
-               <Button
-                  onClick={handleGeneratePlan} // Allow regenerating
-                  disabled={isGeneratingPlan}
-                  variant="outline"
-                  size="sm"
-                  className="mt-4"
-                >
-                  {isGeneratingPlan ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Regenerating...
-                    </>
-                  ) : (
-                    "Regenerate Plan"
-                  )}
-                </Button>
+              <Button
+                onClick={handleGenerateGeminiPlan} // Using our Gemini handler for regeneration
+                disabled={isGeneratingPlan}
+                variant="outline"
+                size="sm"
+                className="mt-4"
+              >
+                {isGeneratingPlan ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Regenerating...
+                  </>
+                ) : (
+                  "Regenerate Plan"
+                )}
+              </Button>
             </div>
           ) : (
             <Button
-              onClick={handleGeneratePlan}
+              onClick={handleGenerateGeminiPlan} // Using our Gemini handler for initial generation
               disabled={isGeneratingPlan}
               className="w-full"
               size="lg" // Make generate button prominent
@@ -173,4 +267,37 @@ export default function Step4({
       </CardFooter>
     </Card>
   )
+});
+
+export default Step4;
+
+
+async function updateUserCredits(userId: string, newCreditAmount: number) {
+  const { supabase } = await import("@/lib/supabase-client");
+  const { error } = await supabase
+    .from("profiles")
+    .update({ credits_remaining: newCreditAmount })
+    .eq("id", userId);
+  
+  if (error) console.error("Error updating user credits:", error);
+}
+
+async function logCreditUsage(userId: string, projectId: string, action: string, creditsUsed: number) {
+  console.log(`Logging credit usage: ${userId}, ${projectId}, ${action}, ${creditsUsed}`);
+  const { supabase } = await import("@/lib/supabase-client");
+  const { error } = await supabase.from("credit_usage_log").insert([
+    {
+      user_id: userId,
+      project_id: projectId,
+      action: action,
+      credits_used: creditsUsed,
+    },
+  ]);
+  
+  if (error) {
+    console.error("Error logging credit usage:", error);
+    throw error;
+  }
+  
+  return true;
 }
