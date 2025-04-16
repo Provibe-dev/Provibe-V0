@@ -96,7 +96,7 @@ const Step1 = forwardRef<Step1Ref, Step1Props>(({
       <CardHeader>
         <CardTitle>Step 1: Your Idea</CardTitle>
         <CardDescription>
-          Describe your product idea in detail. What problem does it solve? What makes it unique? Use text or record audio.
+          Describe your product idea in detail. What problem does it solve? What makes it unique? Use text or record audio. You can optionally refine your idea with AI assistance.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">

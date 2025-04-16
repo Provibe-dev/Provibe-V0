@@ -464,21 +464,21 @@ export default function CreateProjectPage() {
   const navigateToStep = (step: number) => {
     // Basic validation before moving forward
     if (step > activeStep) {
-        if (activeStep === 1) {
-            const result = ideaForm.trigger("idea"); // Trigger validation for the idea field
-            if (!result) return; // Don't navigate if invalid
-            const ideaValue = ideaForm.getValues("idea");
-             if (!ideaValue || ideaValue.length < 10) {
-                 toast({ title: "Idea must be at least 10 characters", variant: "destructive"});
-                 return;
-             }
+      if (activeStep === 1) {
+        const result = ideaForm.trigger("idea"); // Trigger validation for the idea field
+        if (!result) return; // Don't navigate if invalid
+        const ideaValue = ideaForm.getValues("idea");
+        if (!ideaValue || ideaValue.length < 10) {
+          toast({ title: "Idea must be at least 10 characters", variant: "destructive"});
+          return;
         }
-        // Add validation triggers for other steps if needed
-        // if (activeStep === 3) { detailsForm.trigger(); ... }
-        if (activeStep === 4 && !projectPlan) {
-             toast({ title: "Please generate the project plan first", variant: "destructive"});
-             return;
-        }
+        // Remove any validation that requires the idea to be refined
+      }
+      // Add validation triggers for other steps if needed
+      if (activeStep === 4 && !projectPlan) {
+        toast({ title: "Please generate the project plan first", variant: "destructive"});
+        return;
+      }
     }
     setActiveStep(step);
   };
