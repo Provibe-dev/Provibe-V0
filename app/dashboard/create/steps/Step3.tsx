@@ -197,7 +197,12 @@ export default function Step3({
         <Button variant="outline" type="button" onClick={() => navigateToStep(2)}>
           <ArrowLeft className="mr-2 h-4 w-4" /> Back
         </Button>
-        <Button type="button" onClick={() => navigateToStep(4)}>
+        <Button
+          type="button"
+          onClick={() => navigateToStep(4)}
+          disabled={isGeneratingAnswer}
+          className="opacity-100"
+        >
           Next <ArrowRight className="ml-2 h-4 w-4" />
         </Button>
       </CardFooter>

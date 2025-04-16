@@ -23,7 +23,11 @@ export default function Step2({ selectedTools, onSelectionChange, navigateToStep
         <Button variant="outline" type="button" onClick={() => navigateToStep(1)}>
           <ArrowLeft className="mr-2 h-4 w-4" /> Back
         </Button>
-        <Button type="button" onClick={() => navigateToStep(3)}>
+        <Button 
+          type="button" 
+          onClick={() => navigateToStep(3)}
+          className="opacity-100"
+        >
           Next <ArrowRight className="ml-2 h-4 w-4" />
         </Button>
       </CardFooter>

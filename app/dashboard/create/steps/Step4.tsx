@@ -157,7 +157,7 @@ const Step4 = forwardRef(({
           <div className="rounded-md border p-4 relative group">
             <div className="flex justify-between items-start">
                 <h3 className="text-lg font-medium mb-2">Your Idea</h3>
-                <Button variant="ghost" size="sm" onClick={() => navigateToStep(1)} className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <Button variant="ghost" size="sm" onClick={() => navigateToStep(1)} className="absolute top-2 right-2 transition-opacity">
                     <Edit2 className="h-4 w-4 mr-1" /> Edit
                 </Button>
             </div>
@@ -168,7 +168,7 @@ const Step4 = forwardRef(({
           <div className="rounded-md border p-4 relative group">
              <div className="flex justify-between items-start">
                 <h3 className="text-lg font-medium mb-2">Selected Tools</h3>
-                <Button variant="ghost" size="sm" onClick={() => navigateToStep(2)} className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <Button variant="ghost" size="sm" onClick={() => navigateToStep(2)} className="absolute top-2 right-2 transition-opacity">
                     <Edit2 className="h-4 w-4 mr-1" /> Edit
                 </Button>
             </div>
@@ -189,7 +189,7 @@ const Step4 = forwardRef(({
           <div className="rounded-md border p-4 relative group">
              <div className="flex justify-between items-start">
                 <h3 className="text-lg font-medium mb-2">Project Details</h3>
-                <Button variant="ghost" size="sm" onClick={() => navigateToStep(3)} className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <Button variant="ghost" size="sm" onClick={() => navigateToStep(3)} className="absolute top-2 right-2 transition-opacity">
                     <Edit2 className="h-4 w-4 mr-1" /> Edit
                 </Button>
             </div>
@@ -220,11 +220,11 @@ const Step4 = forwardRef(({
                 <ReactMarkdown>{projectPlan}</ReactMarkdown>
               </div>
               <Button
-                onClick={handleGenerateGeminiPlan} // Using our Gemini handler for regeneration
+                onClick={handleGenerateGeminiPlan}
                 disabled={isGeneratingPlan}
                 variant="outline"
                 size="sm"
-                className="mt-4"
+                className="mt-4 opacity-100"
               >
                 {isGeneratingPlan ? (
                   <>
@@ -237,10 +237,17 @@ const Step4 = forwardRef(({
             </div>
           ) : (
             <Button
-              onClick={handleGenerateGeminiPlan} // Using our Gemini handler for initial generation
+              onClick={handleGenerateGeminiPlan}
               disabled={isGeneratingPlan}
-              className="w-full"
-              size="lg" // Make generate button prominent
+              className="w-full !opacity-100 !visible"
+              style={{
+                opacity: '1 !important',
+                visibility: 'visible !important',
+                color: 'inherit !important',
+                backgroundColor: 'var(--primary) !important',
+                borderColor: 'var(--primary) !important'
+              }}
+              size="lg"
             >
               {isGeneratingPlan ? (
                 <>
@@ -260,7 +267,15 @@ const Step4 = forwardRef(({
         <Button
           type="button"
           onClick={() => navigateToStep(5)}
-          disabled={!projectPlan || isGeneratingPlan} // Disable next if no plan or currently generating
+          disabled={!projectPlan || isGeneratingPlan}
+          className="!opacity-100 !visible"
+          style={{
+            opacity: '1 !important',
+            visibility: 'visible !important',
+            color: 'inherit !important',
+            backgroundColor: 'var(--primary) !important',
+            borderColor: 'var(--primary) !important'
+          }}
         >
           Next <ArrowRight className="ml-2 h-4 w-4" />
         </Button>

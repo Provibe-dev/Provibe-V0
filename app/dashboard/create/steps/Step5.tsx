@@ -163,15 +163,16 @@ export default function Step5({
           <ArrowLeft className="mr-2 h-4 w-4" /> Back
         </Button>
         <Button
-          onClick={handleGenerateAndRedirect} // Use our new handler that calls API and redirects
-          disabled={isSubmitting || selectedDocuments.length === 0 || !canAfford} // Disable if submitting, nothing selected, or cannot afford
+          onClick={handleGenerateAndRedirect}
+          disabled={isSubmitting || selectedDocuments.length === 0 || !canAfford}
+          className="opacity-100"
         >
           {isSubmitting ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating...
             </>
           ) : (
-            `Generate (${totalCost} Credits)` // Show cost on button
+            `Generate (${totalCost} Credits)`
           )}
         </Button>
       </CardFooter>

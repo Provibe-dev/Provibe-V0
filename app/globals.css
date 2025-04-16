@@ -1,135 +1,113 @@
-/* Font imports - add these at the top of your file */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+/* Font imports */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
-/* Or if you prefer to self-host fonts, use @font-face declarations */
-/*
-@font-face {
-  font-family: 'Inter';
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url('/fonts/Inter-Regular.woff2') format('woff2');
-}
-
-@font-face {
-  font-family: 'Montserrat';
-  font-style: normal;
-  font-weight: 700;
-  font-display: swap;
-  src: url('/fonts/Montserrat-Bold.woff2') format('woff2');
-}
-*/
-
-/* Enable Tailwind CSS framework */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* theme.css - Variation 3: Ocean Depths */
 @layer base {
   :root {
-    /* Ocean Depths - Light Mode */
-    --background: 210 30% 98%;      /* Very light cool gray (original bg) */
-    --foreground: 220 15% 25%;      /* Dark cool gray */
+    /* Light Mode */
+    --background: 210 30% 98%;
+    --foreground: 220 20% 20%;
 
-    --card: 210 20% 100%;      /* Slightly cool white */
-    --card-foreground: 220 15% 20%; /* Dark cool gray */
+    --card: 0 0% 100%;
+    --card-foreground: 220 15% 15%;
 
-    --popover: 210 20% 100%;     /* Slightly cool white */
-    --popover-foreground: 220 15% 20%; /* Dark cool gray */
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 15% 15%;
 
-    --primary: 190 70% 45%;       /* Strong teal/cyan */
-    --primary-foreground: 190 20% 98%; /* Very light cyan/white */
+    --primary: 190 70% 45%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 25% 95%;      /* Light cool gray */
-    --secondary-foreground: 215 10% 35%; /* Medium cool gray */
+    --secondary: 210 20% 94%;
+    --secondary-foreground: 220 15% 20%;
 
-    --muted: 210 25% 95%;         /* Light cool gray */
-    --muted-foreground: 215 12% 50%; /* Lighter cool gray */
+    --muted: 210 20% 95%;
+    --muted-foreground: 215 10% 45%;
 
-    --accent: 190 60% 93%;        /* Very light teal accent bg */
-    --accent-foreground: 190 55% 35%; /* Darker teal text on accent */
+    --accent: 190 60% 90%;
+    --accent-foreground: 190 60% 25%;
 
-    --destructive: 355 75% 58%;     /* Slightly cooler red */
-    --destructive-foreground: 0 0% 100%; /* White */
+    --destructive: 355 70% 55%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 210 20% 90%;        /* Soft cool gray border */
-    --input: 210 20% 92%;         /* Soft cool gray input bg */
-    --ring: 190 70% 50%;         /* Primary teal for focus */
+    --border: 210 20% 88%;
+    --input: 210 20% 90%;
+    --ring: 190 70% 45%;
+
+    --gradient-start: 190 70% 45%;
+    --gradient-end: 160 84% 39%;
 
     --radius: 0.5rem;
-
-    /* Color scheme variables */
-    --bg-primary: var(--background);
-    --bg-secondary: 210 25% 98%;  /* Light gray for alternating sections */
-    --bg-accent: var(--accent);
-  
-    --text-primary: var(--foreground);
-    --text-secondary: 215 12% 50%;
-    --text-accent: var(--primary);
-  
-    --gradient-start: 190 70% 45%;  /* Teal/cyan */
-    --gradient-end: 160 84% 39%;    /* Emerald */
   }
 
   .dark {
-    /* Ocean Depths - Dark Mode (using some original dark values) */
-    --background: 222.2 84% 4.9%; /* Original dark blue/gray */
-    --foreground: 210 40% 98%;    /* Original light text */
+    /* Dark Mode */
+    --background: 222 47% 6%;
+    --foreground: 210 30% 92%;
 
-    --card: 220 40% 9%;        /* Darker blue/gray card */
-    --card-foreground: 210 40% 98%; /* Original light text */
+    --card: 223 47% 11%;
+    --card-foreground: 210 30% 92%;
 
-    --popover: 225 50% 7%;       /* Even darker popover */
-    --popover-foreground: 210 40% 98%; /* Original light text */
+    --popover: 223 47% 9%;
+    --popover-foreground: 210 30% 92%;
 
-    --primary: 185 75% 65%;       /* Bright, vibrant teal/cyan */
-    --primary-foreground: 190 90% 5%; /* Very dark teal/black */
+    --primary: 185 70% 60%;
+    --primary-foreground: 222 47% 10%;
 
-    --secondary: 217.2 32.6% 17.5%; /* Original dark secondary */
-    --secondary-foreground: 210 30% 80%; /* Lighter cool gray */
+    --secondary: 223 47% 15%;
+    --secondary-foreground: 210 30% 85%;
 
-    --muted: 217.2 32.6% 17.5%;    /* Original dark muted */
-    --muted-foreground: 215 20.2% 65.1%; /* Original dark muted text */
+    --muted: 223 47% 13%;
+    --muted-foreground: 215 20% 65%;
 
-    --accent: 190 40% 25%;        /* Dark teal accent bg */
-    --accent-foreground: 185 70% 75%; /* Bright teal text on accent */
+    --accent: 185 60% 20%;
+    --accent-foreground: 185 70% 80%;
 
-    --destructive: 0 62.8% 30.6%;  /* Original dark destructive */
-    --destructive-foreground: 0 20% 95%; /* Light cool gray */
+    --destructive: 0 70% 45%;
+    --destructive-foreground: 210 30% 92%;
 
-    --border: 217.2 32.6% 17.5%;   /* Original dark border */
-    --input: 217.2 32.6% 17.5%;    /* Original dark input */
-    --ring: 185 75% 70%;         /* Brighter teal focus ring */
+    --border: 223 47% 16%;
+    --input: 223 47% 14%;
+    --ring: 185 70% 60%;
 
-    /* --radius: 0.5rem; */
+    --gradient-start: 185 70% 60%;
+    --gradient-end: 160 84% 39%;
+
+    --radius: 0.5rem;
   }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1 { @apply text-4xl font-bold mb-6; }
+  h2 { @apply text-3xl font-semibold mb-5; }
+  h3 { @apply text-2xl font-semibold mb-4; }
+  h4 { @apply text-xl font-medium mb-3; }
+  h5 { @apply text-lg font-medium mb-2; }
+  h6 { @apply text-base font-medium mb-2; }
+  p  { @apply text-base mb-4; }
 }
 
-/* Utility classes for backgrounds */
-.bg-primary {
-  background-color: hsl(var(--bg-primary));
-}
+/* Properly defined Utility classes */
+.bg-primary { background-color: hsl(var(--primary)); }
+.bg-secondary { background-color: hsl(var(--secondary)); }
+.bg-accent { background-color: hsl(var(--accent)); }
 
-.bg-secondary {
-  background-color: hsl(var(--bg-secondary));
-}
-
-.bg-accent {
-  background-color: hsl(var(--bg-accent));
-}
-
-.text-primary {
-  color: hsl(var(--text-primary));
-}
-
-.text-secondary {
-  color: hsl(var(--text-secondary));
-}
-
-.text-accent {
-  color: hsl(var(--text-accent));
-}
+.text-primary { color: hsl(var(--primary)); }
+.text-secondary { color: hsl(var(--secondary-foreground)); }
+.text-accent { color: hsl(var(--accent-foreground)); }
 
 .gradient-text {
   background: linear-gradient(to right, hsl(var(--gradient-start)), hsl(var(--gradient-end)));
@@ -143,91 +121,26 @@
   background: linear-gradient(to bottom right, hsl(var(--gradient-start)), hsl(var(--gradient-end)));
 }
 
-@layer base {
-  * {
-    @apply border-border;
-  }
-  body {
-    @apply bg-background text-foreground font-sans antialiased;
-  }
-  
-  h1 {
-    @apply font-heading text-heading-1 mb-6;
-  }
-  
-  h2 {
-    @apply font-heading text-heading-2 mb-5;
-  }
-  
-  h3 {
-    @apply font-heading text-heading-3 mb-4;
-  }
-  
-  h4 {
-    @apply font-heading text-heading-4 mb-3;
-  }
-  
-  h5 {
-    @apply font-heading text-heading-5 mb-2;
-  }
-  
-  h6 {
-    @apply font-heading text-heading-6 mb-2;
-  }
-  
-  p {
-    @apply text-body mb-4;
-  }
-  
-  /* Add font smoothing for better text rendering */
-  html {
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
-}
-
-/* Animation for floating particles */
+/* Animations */
 @keyframes float {
-  0% {
-    transform: translateY(0) translateX(0);
-  }
-  50% {
-    transform: translateY(-10px) translateX(10px);
-  }
-  100% {
-    transform: translateY(0) translateX(0);
-  }
+  0% { transform: translate(0, 0); }
+  50% { transform: translate(-10px, -10px); }
+  100% { transform: translate(0, 0); }
 }
 
-/* Animation for fade in up */
 @keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .animate-fade-in-up {
   animation: fadeInUp 0.5s ease-out forwards;
 }
 
-.animation-delay-150 {
-  animation-delay: 150ms;
-}
+.animation-delay-150 { animation-delay: 150ms; }
+.animation-delay-300 { animation-delay: 300ms; }
+.animation-delay-450 { animation-delay: 450ms; }
 
-.animation-delay-300 {
-  animation-delay: 300ms;
-}
-
-.animation-delay-450 {
-  animation-delay: 450ms;
-}
-
-/* Document carousel animation */
 .document-carousel-container {
   mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
 }
@@ -238,18 +151,12 @@
 }
 
 @keyframes document-scroll {
-  0% {
-    transform: translateX(0);
-  }
-  100% {
-    transform: translateX(-50%);
-  }
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
 }
 
-/* Logo carousel animation */
 .logo-carousel {
   overflow: hidden;
-  width: 100%;
   position: relative;
 }
 
@@ -259,35 +166,27 @@
 }
 
 @keyframes logoScroll {
-  0% {
-    transform: translateX(0);
-  }
-  100% {
-    transform: translateX(calc(-100% + 0px));
-  }
+  from { transform: translateX(0); }
+  to { transform: translateX(-100%); }
 }
 
-/* Grid patterns */
+/* Grid Patterns */
 .bg-grid-pattern {
   background-size: 40px 40px;
-  background-image: linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-image: linear-gradient(to right, rgba(255,255,255,0.05) 1px, transparent 1px),
+                    linear-gradient(to bottom, rgba(255,255,255,0.05) 1px, transparent 1px);
 }
 
 .bg-binary-pattern {
-  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/svg%3E");
 }
 
 /* Marquee animation */
 @keyframes scroll {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(calc(-50% - 0.5rem));
-  }
+  from { transform: translateX(0); }
+  to { transform: translateX(calc(-50% - 0.5rem)); }
 }
 
 .animate-scroll {
-  animation: scroll var(--animation-duration, 40s) linear infinite;
+  animation: scroll 40s linear infinite;
 }

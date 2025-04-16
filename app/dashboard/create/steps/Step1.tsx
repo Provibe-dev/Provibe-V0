@@ -175,8 +175,8 @@ const Step1 = forwardRef<Step1Ref, Step1Props>(({
         <Button
           type="button"
           onClick={() => navigateToStep(2)}
-          // Use the watched value for disabling
           disabled={!ideaValue || ideaValue.length < 10}
+          className="opacity-100" // Force full opacity
         >
           Next <ArrowRight className="ml-2 h-4 w-4" />
         </Button>
