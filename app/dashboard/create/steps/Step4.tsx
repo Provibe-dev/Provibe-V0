@@ -240,13 +240,6 @@ const Step4 = forwardRef(({
               onClick={handleGenerateGeminiPlan}
               disabled={isGeneratingPlan}
               className="w-full !opacity-100 !visible"
-              style={{
-                opacity: '1 !important',
-                visibility: 'visible !important',
-                color: 'inherit !important',
-                backgroundColor: 'var(--primary) !important',
-                borderColor: 'var(--primary) !important'
-              }}
               size="lg"
             >
               {isGeneratingPlan ? (
@@ -269,13 +262,6 @@ const Step4 = forwardRef(({
           onClick={() => navigateToStep(5)}
           disabled={!projectPlan || isGeneratingPlan}
           className="!opacity-100 !visible"
-          style={{
-            opacity: '1 !important',
-            visibility: 'visible !important',
-            color: 'inherit !important',
-            backgroundColor: 'var(--primary) !important',
-            borderColor: 'var(--primary) !important'
-          }}
         >
           Next <ArrowRight className="ml-2 h-4 w-4" />
         </Button>

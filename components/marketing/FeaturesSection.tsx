@@ -13,8 +13,8 @@ const features = [
     href: "#",
     cta: "See how it works",
     background: (
-      <div className="absolute inset-0 flex items-center justify-center opacity-10">
-        <div className="h-64 w-64 rounded-full bg-emerald-500 blur-3xl"></div>
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div className="h-64 w-64 rounded-full bg-primary opacity-10 blur-3xl"></div>
       </div>
     ),
     className: "lg:row-start-1 lg:row-end-4 lg:col-start-2 lg:col-end-3",
@@ -27,8 +27,8 @@ const features = [
     href: "#",
     cta: "Explore the tech",
     background: (
-      <div className="absolute inset-0 flex items-center justify-center opacity-10">
-        <div className="h-64 w-64 rounded-full bg-cyan-500 blur-3xl"></div>
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div className="h-64 w-64 rounded-full bg-primary opacity-10 blur-3xl"></div>
       </div>
     ),
     className: "lg:col-start-1 lg:col-end-2 lg:row-start-1 lg:row-end-3",
@@ -41,8 +41,8 @@ const features = [
     href: "#",
     cta: "View integrations",
     background: (
-      <div className="absolute inset-0 flex items-center justify-center opacity-10">
-        <div className="h-64 w-64 rounded-full bg-purple-500 blur-3xl"></div>
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div className="h-64 w-64 rounded-full bg-primary opacity-10 blur-3xl"></div>
       </div>
     ),
     className: "lg:col-start-1 lg:col-end-2 lg:row-start-3 lg:row-end-4",
@@ -55,8 +55,8 @@ const features = [
     href: "#",
     cta: "See a sample plan",
     background: (
-      <div className="absolute inset-0 flex items-center justify-center opacity-10">
-        <div className="h-64 w-64 rounded-full bg-blue-500 blur-3xl"></div>
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div className="h-64 w-64 rounded-full bg-primary opacity-10 blur-3xl"></div>
       </div>
     ),
     className: "lg:col-start-3 lg:col-end-4 lg:row-start-1 lg:row-end-2",
@@ -69,8 +69,8 @@ const features = [
     href: "#",
     cta: "Learn more",
     background: (
-      <div className="absolute inset-0 flex items-center justify-center opacity-10">
-        <div className="h-64 w-64 rounded-full bg-pink-500 blur-3xl"></div>
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div className="h-64 w-64 rounded-full bg-primary opacity-10 blur-3xl"></div>
       </div>
     ),
     className: "lg:col-start-3 lg:col-end-4 lg:row-start-2 lg:row-end-4",
@@ -82,7 +82,11 @@ export default function FeaturesSection() {
   return (
     <BentoGrid className="lg:grid-rows-3">
       {features.map((feature) => (
-        <BentoCard key={feature.name} {...feature} />
+        <BentoCard 
+          key={feature.name} 
+          {...feature} 
+          className={`group hover:border-primary hover:border-opacity-20 transition-all duration-300 ${feature.className}`}
+        />
       ))}
     </BentoGrid>
   )

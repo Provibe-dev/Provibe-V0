@@ -30,7 +30,7 @@ export function TypewriterHeadline() {
         transition={{ duration: 0.8 }}
       >
         <motion.span
-          className="block bg-gradient-to-r from-emerald-400 to-cyan-500 bg-clip-text text-transparent"
+          className="block gradient-text-high-contrast"
           initial={{ y: 20 }}
           animate={{ y: isVisible ? 0 : 20 }}
           transition={{ duration: 0.6, delay: 0.2 }}
@@ -39,7 +39,7 @@ export function TypewriterHeadline() {
         </motion.span>
         
         <motion.span
-          className="block bg-gradient-to-r from-emerald-400 to-cyan-500 bg-clip-text text-transparent"
+          className="block gradient-text-high-contrast"
           initial={{ y: 20 }}
           animate={{ y: isVisible ? 0 : 20 }}
           transition={{ duration: 0.6, delay: 0.4 }}

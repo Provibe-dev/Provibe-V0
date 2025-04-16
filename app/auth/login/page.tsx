@@ -162,14 +162,14 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-950 px-4 py-12">
+    <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <div className="flex items-center justify-center mb-6">
             <Link href="/" className="flex items-center">
               <img src="/logo.png" alt="ProVibe Logo" className="h-8 w-8 mr-2" />
-              <span className="text-2xl font-bold text-emerald-500">ProVibe</span>
-              <span className="ml-1 text-xs text-emerald-400">LITE</span>
+              <span className="text-2xl font-bold text-primary">ProVibe</span>
+              <span className="ml-1 text-xs text-primary/80">LITE</span>
             </Link>
           </div>
           <CardTitle className="text-2xl font-bold text-center">Sign in to your account</CardTitle>
@@ -244,7 +244,7 @@ export default function LoginPage() {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="password">Password</Label>
-                <Link href="/auth/reset-password" className="text-sm text-emerald-500 hover:text-emerald-400">
+                <Link href="/auth/reset-password" className="text-sm text-primary hover:text-primary/80">
                   Forgot password?
                 </Link>
               </div>
@@ -257,7 +257,7 @@ export default function LoginPage() {
                 disabled={isLoading}
               />
             </div>
-            <Button type="submit" className="w-full bg-emerald-500 hover:bg-emerald-600" disabled={isLoading}>
+            <Button type="submit" className="w-full bg-primary hover:bg-primary/90" disabled={isLoading}>
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Signing in...
@@ -270,7 +270,7 @@ export default function LoginPage() {
               <button
                 type="button"
                 onClick={fillTestCredentials}
-                className="text-emerald-500 hover:text-emerald-400 hover:underline"
+                className="text-primary hover:text-primary/80 hover:underline"
               >
                 Use test account: test@example.com / password123
               </button>
@@ -280,7 +280,7 @@ export default function LoginPage() {
         <CardFooter className="flex flex-col space-y-4">
           <div className="text-center text-sm">
             Don&apos;t have an account?{" "}
-            <Link href="/auth/register" className="text-emerald-500 hover:text-emerald-400">
+            <Link href="/auth/register" className="text-primary hover:text-primary/80">
               Sign up
             </Link>
           </div>

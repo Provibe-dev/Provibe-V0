@@ -122,26 +122,26 @@ export default function Home() {
       */}
 
       {/* Footer */}
-      <footer className="bg-slate-950 py-12 text-slate-400">
+      <footer className="bg-accent py-12 text-muted-foreground">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col items-center justify-between md:flex-row">
             <div className="mb-6 md:mb-0">
               <div className="flex items-center">
-                <span className="text-2xl font-bold text-white">ProVibe</span>
+                <span className="text-2xl font-bold text-foreground">ProVibe</span>
               </div>
               <p className="mt-2 text-body">Transform ideas into products with AI</p>
             </div>
             <div className="flex flex-wrap gap-8">
               <div>
-                <h3 className="mb-3 text-sm font-semibold text-white">Product</h3>
+                <h3 className="mb-3 text-sm font-semibold text-foreground">Product</h3>
                 <ul className="space-y-2 text-body">
                   <li>
-                    <Link href="#features" className="transition-colors hover:text-emerald-400">
+                    <Link href="#features" className="transition-colors hover:text-primary">
                       Features
                     </Link>
                   </li>
                   <li>
-                    <Link href="#how-it-works" className="transition-colors hover:text-emerald-400">
+                    <Link href="#how-it-works" className="transition-colors hover:text-primary">
                       How It Works
                     </Link>
                   </li>

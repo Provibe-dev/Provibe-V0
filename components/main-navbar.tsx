@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { useRouter, usePathname } from "next/navigation"
 import Link from "next/link"
 import { useAuth } from "@/components/auth-provider"
+import { ThemeToggle } from "@/components/theme-toggle"
 import {
   Navbar,
   NavBody,
@@ -72,6 +73,7 @@ export function MainNavbar() {
         <NavbarLogo />
         <NavItems items={navItems} />
         <div className="flex items-center gap-4">
+          <ThemeToggle />
           {user ? (
             <>
               <NavbarButton variant="secondary" onClick={handleDashboard}>
@@ -113,6 +115,7 @@ export function MainNavbar() {
             </Link>
           ))}
           <div className="mt-4 flex w-full flex-col gap-4">
+            <ThemeToggle className="self-start mb-2" />
             {user ? (
               <>
                 <NavbarButton onClick={handleDashboard} variant="secondary" className="w-full">

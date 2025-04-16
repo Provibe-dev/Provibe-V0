@@ -27,7 +27,7 @@ export function HeroSection() {
   }, []);
 
   return (
-    <section className="relative w-full overflow-hidden bg-primary text-primary">
+    <section className="relative w-full overflow-hidden bg-background text-foreground">
       <div className="absolute inset-0 z-0"> {/* Removed opacity-10 */}
         <div className="absolute inset-0 bg-grid-pattern"></div>
         <div className="h-full w-full bg-binary-pattern opacity-5"></div>
