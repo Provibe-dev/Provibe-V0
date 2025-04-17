@@ -9,6 +9,8 @@ import { Badge } from "@/components/ui/badge"
 import { useAuth } from "@/components/auth-provider"
 import { createClient } from "@supabase/supabase-js"
 import { formatDistanceToNow } from "date-fns"
+import { DashboardShell } from "@/components/dashboard/dashboard-shell";
+import { PageHeader } from "@/components/dashboard/page-header";
 
 // Initialize Supabase client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ""
@@ -115,15 +117,17 @@ export default function ProjectsPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold tracking-tight">Projects</h1>
+    <DashboardShell>
+      <PageHeader 
+        title="Projects" 
+        description="Manage your documentation projects"
+      >
         <Button asChild>
           <Link href="/dashboard/create">
             <Plus className="mr-2 h-4 w-4" /> New Project
           </Link>
         </Button>
-      </div>
+      </PageHeader>
 
       {loading ? (
         <div className="flex h-[200px] items-center justify-center">
@@ -192,6 +196,6 @@ export default function ProjectsPage() {
           ))}
         </div>
       )}
-    </div>
+    </DashboardShell>
   )
 }

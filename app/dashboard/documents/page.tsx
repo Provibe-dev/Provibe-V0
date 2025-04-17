@@ -2,15 +2,16 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import { FileText, FileCode, FileSpreadsheet, Search, Filter, Loader2, Star, Trash2, Clock } from "lucide-react"
+import { FileText, Search, Filter, Loader2, Star, Trash2, Clock, FileCode, FileSpreadsheet } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { useAuth } from "@/components/auth-provider"
-import { createClient } from "@supabase/supabase-js"
 import { formatDistanceToNow } from "date-fns"
+import { DashboardShell } from "@/components/dashboard/dashboard-shell"
+import { PageHeader } from "@/components/dashboard/page-header"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,6 +19,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { createClient } from "@supabase/supabase-js"
 
 // Initialize Supabase client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ""
@@ -209,18 +211,17 @@ export default function DocumentsPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col justify-between space-y-4 md:flex-row md:items-center md:space-y-0">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Documents</h1>
-          <p className="text-muted-foreground">Create and manage your documentation</p>
-        </div>
+    <DashboardShell>
+      <PageHeader
+        title="Documents"
+        description="Create and manage your documentation"
+      >
         <Button asChild>
           <Link href="/dashboard/create">
             <FileText className="mr-2 h-4 w-4" /> New Document
           </Link>
         </Button>
-      </div>
+      </PageHeader>
 
       <div className="flex flex-col space-y-4 md:flex-row md:items-center md:space-y-0 md:space-x-4">
         <div className="relative flex-1">
@@ -495,6 +496,6 @@ export default function DocumentsPage() {
           </div>
         </TabsContent>
       </Tabs>
-    </div>
+    </DashboardShell>
   )
 }

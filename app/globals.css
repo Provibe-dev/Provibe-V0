@@ -7,77 +7,78 @@
 
 @layer base {
   :root {
-    /* ─── LIGHT ─────────────────────────── */
-    --background:              40 23%  98%;   /* warm off‑white */
-    --foreground:             215 15%  18%;   /* deep slate text */
+    /* ─── LIGHT MODE ───────────────────────── */
+    --background:          225 40%  98%;   /* off‑white */
+    --foreground:          230 15%  15%;   /* deep slate text */
 
-    --card:                     0  0% 100%;
-    --card-foreground:        215 15%  18%;
+    --card:                 0   0% 100%;
+    --card-foreground:     var(--foreground);
 
-    --popover:                  0  0% 100%;
-    --popover-foreground:     215 15%  18%;
+    --popover:              0   0% 100%;
+    --popover-foreground:  var(--foreground);
 
-    --primary:                185 55%  46%;   /* soft aqua */
-    --primary-foreground:       0  0% 100%;
+    /* Ultraviolet core */
+    --primary:             235 85%  60%;   /* mid‑point of the gradient */
+    --primary-foreground:    0   0% 100%;
 
-    --secondary:               42 34%  92%;   /* pale sand */
-    --secondary-foreground:   215 15%  28%;
+    --secondary:           220 12%  94%;   /* subtle gray section bg */
+    --secondary-foreground:230 15%  25%;
 
-    --muted:                   42 28%  95%;   /* lighter sand */
-    --muted-foreground:       215 10%  45%;
+    --muted:               220 12%  95%;
+    --muted-foreground:    230 10%  45%;
 
-    --accent:                 185 45%  94%;   /* hint‑of‑aqua surface */
-    --accent-foreground:      185 35%  35%;
+    --accent:              240 100% 97%;   /* whisper‑violet surface */
+    --accent-foreground:   245 45%  35%;
 
-    --destructive:             4 70%  55%;
-    --destructive-foreground:   0  0% 100%;
+    --destructive:           0 70%  55%;
+    --destructive-foreground:0  0% 100%;
 
-    --border:                 42  20%  88%;
-    --input:                  42  22%  93%;
-    --ring:                  185 55%  46%;
+    --border:              220 12%  88%;
+    --input:               220 12%  92%;
+    --ring:                var(--primary);
 
-    --gradient-start:        185 55%  46%;
-    --gradient-end:          185 40%  58%;
+    /* Hero / progress gradient */
+    --gradient-start:      253 83%  65%;   /* #7B5CF0 */
+    --gradient-end:        215 92%  58%;   /* #3182F6 */
 
     --radius: 0.5rem;
   }
 
   .dark {
-    /* ─── DARK ──────────────────────────── */
-    --background:            220 12%   8%;    /* charcoal‑ink */
-    --foreground:              42 30%  92%;   /* warm sand text */
+    /* ─── DARK MODE ───────────────────────── */
+    --background:          234 37%  10%;   /* #101223 charcoal‑ink */
+    --foreground:            0  0%  95%;
 
-    --card:                  220 12%  12%;
-    --card-foreground:         42 30%  92%;
+    --card:                234 30%  14%;
+    --card-foreground:     var(--foreground);
 
-    --popover:               220 12%  10%;
-    --popover-foreground:      42 30%  92%;
+    --popover:             234 30%  12%;
+    --popover-foreground:  var(--foreground);
 
-    --primary:               185 55%  60%;
-    --primary-foreground:    220 12%  12%;
+    --primary:             235 85%  65%;   /* brighter ultraviolet */
+    --primary-foreground:  234 37%  12%;
 
-    --secondary:              42 25%  20%;
-    --secondary-foreground:    42 25%  85%;
+    --secondary:           232 20%  18%;
+    --secondary-foreground:  0  0%  90%;
 
-    --muted:                  42 20%  16%;
-    --muted-foreground:      42  15%  65%;
+    --muted:               232 18%  15%;
+    --muted-foreground:    232 12%  65%;
 
-    --accent:                185 30%  22%;
-    --accent-foreground:     185 65%  85%;
+    --accent:              235 30%  22%;
+    --accent-foreground:   235 70%  85%;
 
-    --destructive:             4 65%  52%;
-    --destructive-foreground:   0  0%  96%;
+    --destructive:           0 65%  52%;
+    --destructive-foreground: 0  0%  96%;
 
-    --border:                220 12%  18%;
-    --input:                 220 12%  16%;
-    --ring:                  185 55%  60%;
+    --border:              232 20%  24%;
+    --input:               232 20%  22%;
+    --ring:                var(--primary);
 
-    --gradient-start:        185 55%  60%;
-    --gradient-end:          185 40%  50%;
+    --gradient-start:      235 85%  65%;
+    --gradient-end:        215 90%  60%;
 
     --radius: 0.5rem;
   }
-
 
   * {
     @apply border-border;

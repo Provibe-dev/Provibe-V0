@@ -23,6 +23,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import { DashboardShell } from "@/components/dashboard/dashboard-shell"
+import { PageHeader } from "@/components/dashboard/page-header"
 
 export default function SettingsPage() {
   const { user, logout } = useAuth()
@@ -187,11 +189,11 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
-        <p className="text-muted-foreground">Manage your application settings and preferences</p>
-      </div>
+    <DashboardShell>
+      <PageHeader
+        title="Settings"
+        description="Manage your account settings and preferences"
+      />
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
         <TabsList>
@@ -472,6 +474,6 @@ export default function SettingsPage() {
           </Card>
         </TabsContent>
       </Tabs>
-    </div>
+    </DashboardShell>
   )
 }

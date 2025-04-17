@@ -30,7 +30,7 @@ export default function Home() {
        <WhyProVibeSection /> 
 
       {/* How It Works Section */}
-      <AnimatedSection id="how-it-works" className="bg-primary py-20">
+      <AnimatedSection id="how-it-works" className="bg-background py-20">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <SectionHeader 
             title="How ProVibe Works"
@@ -41,7 +41,7 @@ export default function Home() {
       </AnimatedSection>
 
       {/* Features Section */}
-      <AnimatedSection id="features" className="bg-secondary py-20">
+      <AnimatedSection id="features" className="bg-background py-20">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <SectionHeader 
             title="Everything you need to build your next big idea"
@@ -57,7 +57,7 @@ export default function Home() {
         {/* <ExampleOutputSection /> */}
 
       {/* Tools Section */}
-      <AnimatedSection id="tools" className="bg-primary py-12" delay={0.2}>
+      <AnimatedSection id="tools" className="bg-background py-12" delay={0.2}>
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <SectionHeader 
             title="Compatible Tools"
@@ -68,14 +68,14 @@ export default function Home() {
       </AnimatedSection>
 
       {/* Pricing Section */}
-      <AnimatedSection id="pricing" className="bg-primary py-20" delay={0.2}>
+      <AnimatedSection id="pricing" className="bg-background py-20" delay={0.2}>
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <PricingSection />
         </div>
       </AnimatedSection>
 
       {/* Sticky Scroll Section */}
-      {/* <AnimatedSection id="features-detail" className="bg-primary py-20" delay={0.2}>
+      {/* <AnimatedSection id="features-detail" className="bg-background py-20" delay={0.2}>
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <StickyScrollRevealDemo />
         </div>
@@ -83,7 +83,7 @@ export default function Home() {
       */}
 
       {/* Testimonials Section */}
-      <AnimatedSection id="testimonials" className="bg-secondary py-20" delay={0.2}>
+      <AnimatedSection id="testimonials" className="bg-background py-20" delay={0.2}>
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <SectionHeader 
             title="What Our Users Say"
@@ -96,7 +96,7 @@ export default function Home() {
 
       {/* CTA Section */}
       {/*
-      <AnimatedSection id="cta" className="bg-secondary py-20" delay={0.2}>
+      <AnimatedSection id="cta" className="bg-background py-20" delay={0.2}>
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-3xl text-center">
             <h2 className="mb-6 text-section-title font-heading text-primary">

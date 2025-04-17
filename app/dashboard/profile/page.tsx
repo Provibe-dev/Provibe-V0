@@ -1,21 +1,21 @@
 "use client"
 
-import type React from "react"
-
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/components/auth-provider"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { useToast } from "@/components/ui/use-toast"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Badge } from "@/components/ui/badge"
 import { Loader2, Save, User, Mail, CreditCard, Shield, Key } from "lucide-react"
 import { supabase } from "@/lib/supabase-client"
+import { DashboardShell } from "@/components/dashboard/dashboard-shell"
+import { PageHeader } from "@/components/dashboard/page-header"
 
 export default function ProfilePage() {
   const { user, refreshUser } = useAuth()
@@ -96,11 +96,11 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Profile</h1>
-        <p className="text-muted-foreground">Manage your account settings and preferences</p>
-      </div>
+    <DashboardShell>
+      <PageHeader
+        title="Profile"
+        description="Manage your personal information and account settings"
+      />
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
         <TabsList>
@@ -284,6 +284,6 @@ export default function ProfilePage() {
           </Card>
         </TabsContent>
       </Tabs>
-    </div>
+    </DashboardShell>
   )
 }
