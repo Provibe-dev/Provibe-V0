@@ -58,8 +58,7 @@ Please structure your response as a detailed markdown document with the followin
 3. Development Phases with timeline estimates
 4. Key Features and Implementation Details
 5. Testing Strategy
-6. Deployment Plan
-7. Potential Challenges and Mitigations
+6. Potential Challenges and Mitigations
 
 Make the plan specific to the project idea and selected tools. Be concise but thorough.
 `;
