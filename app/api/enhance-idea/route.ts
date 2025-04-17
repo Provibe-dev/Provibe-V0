@@ -1,82 +1,108 @@
-import { NextResponse } from 'next/server';
-import OpenAI from 'openai';
+// /app/api/enhance-idea/route.ts
+// v1.0 – April 17 2025
+// ----------------------------------------------------------------------------
+// POST  /api/enhance-idea
+// Body: { idea: string; techStackHint?: string }
+// Returns: { enhancedIdea: string; clarifyingQuestions: {question: string; suggestedAnswer: string}[] }
+// ----------------------------------------------------------------------------
 
-// Initialize OpenAI client
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+import { NextResponse } from "next/server";
+import OpenAI from "openai";
+
+// Initialise OpenAI client ------------------------------------------------------------------
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 export async function POST(request: Request) {
   try {
-    // Log the start of the API call
-    console.log("API: enhance-idea endpoint called");
-    
-    // Parse the request body
-    let idea;
+    console.log("[enhance-idea] ► endpoint hit");
+
+    // ---------------------------------------------------------------- request parsing -----
+    let body: { idea?: string; techStackHint?: string } = {};
     try {
-      const body = await request.json();
-      idea = body.idea;
-      console.log("API: Received idea:", idea?.substring(0, 30) + "...");
-    } catch (parseError) {
-      console.error("API: Error parsing request body:", parseError);
-      return NextResponse.json(
-        { error: 'Invalid request body' },
-        { status: 400 }
-      );
+      body = await request.json();
+    } catch (err) {
+      console.error("[enhance-idea] ✖ bad JSON", err);
+      return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
     }
 
-    // Validate the idea
+    const { idea, techStackHint = "" } = body;
     if (!idea || idea.length < 10) {
-      console.log("API: Idea validation failed - too short");
       return NextResponse.json(
-        { error: 'Idea must be at least 10 characters long' },
+        { error: "Idea must be at least 10 characters long" },
         { status: 400 }
       );
     }
 
-    // Check if OpenAI API key is configured
     if (!process.env.OPENAI_API_KEY) {
-      console.error("API: Missing OpenAI API key");
+      console.error("[enhance-idea] ✖ OPENAI_API_KEY missing");
       return NextResponse.json(
-        { error: 'OpenAI API key is not configured' },
+        { error: "OpenAI API key not configured" },
         { status: 500 }
       );
     }
 
-    console.log("API: Calling OpenAI API");
-    
-    // Call OpenAI to enhance the idea
+    // -------------------------------------------------------------- build system prompt ----
+    const systemPrompt = `
+You are an expert product strategist.
+
+◆ TASK
+1. Transform the raw idea into a concise, well‑structured product concept → enhancedIdea.
+2. Produce 3‑5 clarifying questions that surface *target audience, problem solved, feature list, suggested tech stack and key design decisions*.
+   • Provide a thoughtful suggestedAnswer for each question. 
+   • Respond to possible target audience with brief demographic and psychographic profile, feature variations as a list, suggested tech stack with list of tools & technology, and divergent possibilities as a clarifying questions
+
+◆ OUTPUT — MUST be valid JSON (no markdown, no extra keys)
+{
+  "enhancedIdea": "<string>",
+  "clarifyingQuestions": [
+    { "question": "<string>", "suggestedAnswer": "<string>" }
+  ]
+}
+
+◆ RULES
+* Do NOT add comments, markdown fences, or keys beyond those above.
+* Keep enhancedIdea ≤ 120 words.
+
+◆ INPUT
+RAW_IDEA:
+---
+${idea}
+---
+OPTIONAL_HINTS:
+${techStackHint || "None"}
+    `.trim();
+
+    // ------------------------------------------------------------------- call OpenAI -----
+    console.log("[enhance-idea] ► calling OpenAI");
     const completion = await openai.chat.completions.create({
       model: "gpt-4o",
-      messages: [
-        {
-          role: "system",
-          content: "You are a product development expert. Your task is to take a brief product idea and expand it into a well-structured product idea. Focus on key elements: the problem being solved, target audience, unique value proposition. Keep your response concise (max 200 words) and focused on the core concept."
-        },
-        {
-          role: "user",
-          content: `Here's my product idea: ${idea}\n\nPlease enhance this into a well-structured product concept.`
-        }
-      ],
       temperature: 0.7,
-      max_tokens: 500,
+      max_tokens: 900,
+      response_format: { type: "json_object" },
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: "Respond with JSON only." },
+      ],
     });
 
-    // Extract the enhanced idea from the response
-    const enhancedIdea = completion.choices[0].message.content;
-    
-    console.log("API: Successfully enhanced idea, returning response");
-    
-    return NextResponse.json({ enhancedIdea });
-  } catch (error) {
-    console.error('API: Error enhancing idea:', error);
-    
-    // Return a more detailed error message
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    
-    return NextResponse.json(
-      { error: `Failed to enhance idea: ${errorMessage}` },
-      { status: 500 }
-    );
+    // ----------------------------------------------------------- parse & return response ---
+    const aiContent = completion.choices[0]?.message?.content ?? "{}";
+    let parsed;
+    try {
+      parsed = JSON.parse(aiContent);
+    } catch (err) {
+      console.error("[enhance-idea] ✖ JSON parse fail", err, "RAW:", aiContent);
+      return NextResponse.json(
+        { error: "Failed to parse AI response" },
+        { status: 500 }
+      );
+    }
+
+    console.log("[enhance-idea] ✓ success");
+    return NextResponse.json(parsed);
+  } catch (err) {
+    console.error("[enhance-idea] ✖ unexpected", err);
+    const message = err instanceof Error ? err.message : "Unknown error";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

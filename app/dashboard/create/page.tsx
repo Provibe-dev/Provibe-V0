@@ -75,6 +75,9 @@ export default function CreateProjectPage() {
 
   const [isInitializing, setIsInitializing] = useState(false);
 
+  // Add state for clarifying questions
+  const [clarifyingQuestions, setClarifyingQuestions] = useState<any[]>([]);
+
   // Initialize forms
   const ideaForm = useForm<z.infer<typeof ideaFormSchema>>({
     resolver: zodResolver(ideaFormSchema),
@@ -224,7 +227,7 @@ export default function CreateProjectPage() {
   const debouncedUpdateIdea = useRef(
     debounce(async (id: string, ideaValue: string) => {
       if (id && !isTestUser) {
-        console.log("Debounced update idea:", id, ideaValue.substring(0, 20) + "...");
+        console.log("Debounced update idea:", id, typeof ideaValue === 'string' ? ideaValue.substring(0, 20) + "..." : "Invalid idea value");
         const { error } = await supabase
           .from("projects")
           .update({ idea: ideaValue })
@@ -328,28 +331,12 @@ export default function CreateProjectPage() {
     setIsRefining(true);
     try {
       const idea = ideaForm.getValues("idea");
-      
-      // Basic validation
       if (!idea || idea.length < 10) {
-        toast({
-          title: "Idea too short",
-          description: "Please provide a more detailed idea before refining.",
-          variant: "destructive",
-        });
+        toast({ title: "Please provide a more detailed idea (at least 10 characters)", variant: "destructive" });
         return;
       }
 
-      // Credit check
-      if (!isTestUser && user && user.credits_remaining < 50) {
-        toast({
-          title: "Insufficient credits",
-          description: "You need 50 credits to refine your idea.",
-          variant: "destructive",
-        });
-        return;
-      }
-      
-      // Let Step1 handle the API call and get the refined idea back
+      // Call the refineIdea method exposed by the Step1 component
       const refinedIdea = await step1Ref.current?.refineIdea(idea);
       
       if (refinedIdea) {
@@ -358,30 +345,55 @@ export default function CreateProjectPage() {
         
         // Update database for real users
         if (!isTestUser && projectId) {
-          const { error: updateError } = await supabase
-            .from("projects")
-            .update({ refined_idea: refinedIdea })
-            .eq("id", projectId);
-          if (updateError) throw updateError;
+          // Add a small delay to ensure state is updated
+          setTimeout(async () => {
+            // Get the current clarifying questions from Step1
+            const currentQuestions = step1Ref.current?.getClarifyingQuestions() || [];
+            
+            console.log("Questions to save to database:", JSON.stringify(currentQuestions));
+            
+            if (currentQuestions.length === 0) {
+              console.warn("Warning: No clarifying questions to save. This might indicate a state timing issue.");
+            }
+            
+            try {
+              const { error: updateError } = await supabase
+                .from("projects")
+                .update({ 
+                  refined_idea: refinedIdea,
+                  clarifying_questions: currentQuestions 
+                })
+                .eq("id", projectId);
+                
+              if (updateError) {
+                console.error("Error updating project:", updateError);
+                throw updateError;
+              }
+              
+              console.log("Successfully updated project with refined idea and questions");
 
-          // Log credit usage & update user credits
-          if (user) {
-            await logCreditUsage(user.id, projectId, "idea_refinement", 50);
-            await updateUserCredits(user.id, user.credits_remaining - 50);
-          }
+              // Log credit usage & update user credits
+              if (user) {
+                await logCreditUsage(user.id, projectId, "idea_refinement", 50);
+                await updateUserCredits(user.id, user.credits_remaining - 50);
+              }
+            } catch (error) {
+              console.error("Error in database update:", error);
+              toast({
+                title: "Error saving to database",
+                description: "Your refined idea was generated but couldn't be saved.",
+                variant: "destructive"
+              });
+            }
+          }, 500); // Small delay to ensure state is updated
         }
-        
-        toast({
-          title: "Idea refined",
-          description: "Your idea has been enhanced with AI assistance.",
-        });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error refining idea:", error);
       toast({
-        title: "Refinement failed",
-        description: error instanceof Error ? error.message : "Unknown error occurred",
-        variant: "destructive",
+        title: "Error refining idea",
+        description: error.message || "Please try again later",
+        variant: "destructive"
       });
     } finally {
       setIsRefining(false);
@@ -526,16 +538,26 @@ export default function CreateProjectPage() {
   };
 
   const logCreditUsage = async (userId: string, projId: string, action: string, credits: number) => {
-      if (!projId) {
-          console.warn("Cannot log credit usage: Project ID is missing.");
-          return;
-      }
-      console.log(`Logging credit usage: User ${userId}, Project ${projId}, Action ${action}, Credits ${credits}`);
-      const { error } = await supabase.from("credit_usage_log").insert([
-          { user_id: userId, project_id: projId, action: action, credits_used: credits },
-      ]);
-      if (error) console.error("Error logging credit usage:", error);
-      // Consider returning success/failure or throwing error if critical
+    if (!projId) {
+        console.warn("Cannot log credit usage: Project ID is missing.");
+        return;
+    }
+    
+    try {
+        console.log(`Logging credit usage: User ${userId}, Project ${projId}, Action ${action}, Credits ${credits}`);
+        const { error } = await supabase.from("credit_usage_log").insert([
+            { user_id: userId, project_id: projId, action: action, credits_used: credits },
+        ]);
+        
+        if (error) {
+            console.error("Error logging credit usage:", error);
+            // Consider showing a toast here, but don't throw an error to prevent blocking the main flow
+        }
+    } catch (err) {
+        // Catch any unexpected errors to prevent them from bubbling up
+        console.error("Unexpected error in logCreditUsage:", err);
+        // Don't throw the error - this is a non-critical operation
+    }
   };
 
   const updateUserCredits = async (userId: string, newCreditAmount: number) => {
@@ -667,10 +689,11 @@ export default function CreateProjectPage() {
             toggleRecording={toggleRecording}
             handleTranscription={handleTranscription}
             navigateToStep={navigateToStep}
-            isRefining={isRefining} // Pass refining state
-            handleRefineIdea={handleRefineIdea} // Pass refine handler
-            projectId={projectId} // Pass projectId if needed for direct updates within Step1 (though debouncing here is better)
+            isRefining={isRefining}
+            handleRefineIdea={handleRefineIdea}
+            projectId={projectId}
             isTestUser={isTestUser}
+            clarifyingQuestionsData={clarifyingQuestions}
             ref={step1Ref}
           />
         )}

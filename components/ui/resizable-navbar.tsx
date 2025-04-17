@@ -209,8 +209,8 @@ export const MobileNavToggle = ({
 export const NavbarLogo = ({ logoText }: { logoText?: string }) => {
   return (
     <Link href="/" className="relative z-20 mr-4 flex items-center space-x-2 px-2 py-1 text-sm font-normal text-black">
-      <img src="/logo.png" alt="ProVibe Logo" className="h-14 w-14 object-contain" />
-      <span className="font-heading text-3xl font-bold text-black dark:text-white">{logoText || "ProVibe"}</span>
+      <img src="/logo.png" alt="ProVibe Logo" className="h-8 w-8 object-contain" />
+      <span className="font-heading text-2xl font-bold text-black dark:text-white">{logoText || "ProVibe"}</span>
     </Link>
   )
 }

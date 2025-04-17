@@ -16,7 +16,7 @@ export function PageHeader({
 }: PageHeaderProps) {
   return (
     <div className={cn(
-      "flex flex-col md:flex-row md:items-center justify-between gap-4",
+      "flex flex-col justify-between space-y-4 md:flex-row md:items-center md:space-y-0",
       className
     )}>
       <div>
@@ -25,7 +25,11 @@ export function PageHeader({
           <p className="text-base text-muted-foreground mt-1">{description}</p>
         )}
       </div>
-      {children && <div className="flex items-center gap-4">{children}</div>}
+      {children && (
+        <div className="flex space-x-4">
+          {children}
+        </div>
+      )}
     </div>
   );
 }
