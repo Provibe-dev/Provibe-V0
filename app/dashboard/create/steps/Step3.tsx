@@ -8,6 +8,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Textarea } from "@/components/ui/textarea"; // Use Textarea for potentially longer answers
 import { ArrowLeft, ArrowRight, Sparkles, Loader2 } from "lucide-react" // Import Loader2
 import { useAuth } from "@/components/auth-provider";
+import { useEffect, useState } from "react"; // Add useState and useEffect
 
 // Define the expected shape of the form data (matches the schema in page.tsx)
 const detailsFormSchema = z.object({
@@ -23,6 +24,13 @@ type DetailsFormData = z.infer<typeof detailsFormSchema>;
 // Define field names type based on the schema keys
 type DetailField = keyof DetailsFormData;
 
+// Add ClarifyingQuestion type
+type ClarifyingQuestion = {
+  question: string;
+  suggestedAnswer: string;
+  userAnswer?: string;
+};
+
 type Step3Props = {
   detailsForm: UseFormReturn<DetailsFormData>;
   isGeneratingAnswer: boolean;
@@ -33,6 +41,7 @@ type Step3Props = {
   isTestUser?: boolean;
   ideaText?: string; // Add this prop to get the idea text from parent
   setIsGeneratingAnswer: (isGenerating: boolean) => void;
+  clarifyingQuestions?: ClarifyingQuestion[]; // Add this prop
 }
 
 export default function Step3({
@@ -44,19 +53,64 @@ export default function Step3({
     projectId,
     isTestUser,
     ideaText = "", // Default to empty string if not provided
-    setIsGeneratingAnswer
+    setIsGeneratingAnswer,
+    clarifyingQuestions = [] // Default to empty array
 }: Step3Props) {
   const { user, refreshUser } = useAuth();
   const { toast } = useToast();
+  
+  // State to store the mapped fields from clarifying questions
+  const [fields, setFields] = useState<{ name: DetailField; label: string; placeholder: string }[]>([]);
 
-  // Define the fields based on the schema for iteration
-  const fields: { name: DetailField; label: string; placeholder: string }[] = [
-    { name: "targetAudience", label: "Who is your target audience?", placeholder: "Describe your target users..." },
-    { name: "problemSolved", label: "What problem does your product solve?", placeholder: "Describe the problem your product addresses..." },
-    { name: "keyFeatures", label: "What are the key features?", placeholder: "List the main features..." },
-    { name: "successMetrics", label: "How will you measure success?", placeholder: "Describe your success metrics..." },
-    { name: "timeline", label: "What is your expected timeline?", placeholder: "Describe your project timeline..." },
-  ];
+  // Map clarifying questions to fields when component mounts or clarifyingQuestions changes
+  useEffect(() => {
+    if (clarifyingQuestions && clarifyingQuestions.length > 0) {
+      // Map the first 5 questions to our form fields
+      const mappedFields: { name: DetailField; label: string; placeholder: string }[] = [];
+      
+      // Map to specific fields based on question content or position
+      const fieldMapping: Record<number, DetailField> = {
+        0: "targetAudience",
+        1: "problemSolved",
+        2: "keyFeatures",
+        3: "successMetrics",
+        4: "timeline"
+      };
+      
+      // Use up to 5 questions
+      const questionsToUse = clarifyingQuestions.slice(0, 5);
+      
+      questionsToUse.forEach((q, index) => {
+        const fieldName = fieldMapping[index];
+        if (fieldName) {
+          mappedFields.push({
+            name: fieldName,
+            label: q.question,
+            placeholder: "Type your answer or use AI to generate one..."
+          });
+          
+          // If there's a user answer, set it in the form
+          if (q.userAnswer) {
+            detailsForm.setValue(fieldName, q.userAnswer);
+          } else if (q.suggestedAnswer) {
+            // Otherwise use the suggested answer if available
+            detailsForm.setValue(fieldName, q.suggestedAnswer);
+          }
+        }
+      });
+      
+      setFields(mappedFields);
+    } else {
+      // Fallback to default fields if no clarifying questions
+      setFields([
+        { name: "targetAudience", label: "Who is your target audience?", placeholder: "Describe your target users..." },
+        { name: "problemSolved", label: "What problem does your product solve?", placeholder: "Describe the problem your product addresses..." },
+        { name: "keyFeatures", label: "What are the key features?", placeholder: "List the main features..." },
+        { name: "successMetrics", label: "How will you measure success?", placeholder: "Describe your success metrics..." },
+        { name: "timeline", label: "What is your expected timeline?", placeholder: "Describe your project timeline..." },
+      ]);
+    }
+  }, [clarifyingQuestions, detailsForm]);
 
   // New function to generate answer using Gemini API
   const generateGeminiAnswer = async (field: DetailField): Promise<string> => {

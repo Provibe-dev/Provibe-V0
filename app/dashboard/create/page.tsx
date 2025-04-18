@@ -76,7 +76,7 @@ export default function CreateProjectPage() {
   const [isInitializing, setIsInitializing] = useState(false);
 
   // Add state for clarifying questions
-  const [clarifyingQuestions, setClarifyingQuestions] = useState<any[]>([]);
+  const [clarifyingQuestions, setClarifyingQuestions] = useState<ClarifyingQuestion[]>([]);
 
   // Initialize forms
   const ideaForm = useForm<z.infer<typeof ideaFormSchema>>({
@@ -491,6 +491,34 @@ export default function CreateProjectPage() {
         toast({ title: "Please generate the project plan first", variant: "destructive"});
         return;
       }
+    } else if (step < activeStep) {
+      // When navigating back to Step 1, refresh clarifying questions
+      if (step === 1 && projectId && !isTestUser) {
+        // Refresh clarifying questions when navigating back to Step 1
+        const refreshClarifyingQuestions = async () => {
+          try {
+            const { data, error } = await supabase
+              .from("projects")
+              .select("clarifying_questions")
+              .eq("id", projectId)
+              .single();
+            
+            if (error) {
+              console.error("Error refreshing clarifying questions:", error);
+              return;
+            }
+            
+            if (data && data.clarifying_questions) {
+              console.log("Refreshed clarifying questions:", JSON.stringify(data.clarifying_questions));
+              setClarifyingQuestions(data.clarifying_questions);
+            }
+          } catch (error) {
+            console.error("Error in refreshClarifyingQuestions:", error);
+          }
+        };
+        
+        refreshClarifyingQuestions();
+      }
     }
     setActiveStep(step);
   };
@@ -717,6 +745,7 @@ export default function CreateProjectPage() {
             isTestUser={isTestUser}
             ideaText={ideaForm.getValues("idea")}
             setIsGeneratingAnswer={setIsGeneratingAnswer}
+            clarifyingQuestions={clarifyingQuestions} // Pass the clarifying questions
           />
         )}
 
