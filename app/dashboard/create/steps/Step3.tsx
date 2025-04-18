@@ -19,9 +19,16 @@ const detailsFormSchema = z.object({
   timeline: z.string().optional(),
 });
 
-type DetailsFormData = z.infer<typeof detailsFormSchema>;
+type DetailsFormData = {
+  targetAudience: string;
+  problemSolved: string;
+  keyFeatures: string;
+  successMetrics: string;
+  timeline: string;
+  additionalInfo1: string; // Add this field
+  additionalInfo2: string; // Add this field
+};
 
-// Define field names type based on the schema keys
 type DetailField = keyof DetailsFormData;
 
 // Add ClarifyingQuestion type
@@ -64,8 +71,10 @@ export default function Step3({
 
   // Map clarifying questions to fields when component mounts or clarifyingQuestions changes
   useEffect(() => {
+    console.log("Step3: Received clarifyingQuestions:", JSON.stringify(clarifyingQuestions));
+    
     if (clarifyingQuestions && clarifyingQuestions.length > 0) {
-      // Map the first 5 questions to our form fields
+      // Map the questions to our form fields
       const mappedFields: { name: DetailField; label: string; placeholder: string }[] = [];
       
       // Map to specific fields based on question content or position
@@ -74,11 +83,13 @@ export default function Step3({
         1: "problemSolved",
         2: "keyFeatures",
         3: "successMetrics",
-        4: "timeline"
+        4: "timeline",
+        5: "additionalInfo1", // New field for 6th question
+        6: "additionalInfo2"  // New field for 7th question
       };
       
-      // Use up to 5 questions
-      const questionsToUse = clarifyingQuestions.slice(0, 5);
+      // Use up to 7 questions
+      const questionsToUse = clarifyingQuestions.slice(0, 7);
       
       questionsToUse.forEach((q, index) => {
         const fieldName = fieldMapping[index];
@@ -86,21 +97,21 @@ export default function Step3({
           mappedFields.push({
             name: fieldName,
             label: q.question,
-            placeholder: "Type your answer or use AI to generate one..."
+            placeholder: q.suggestedAnswer ? "Suggested: " + q.suggestedAnswer.substring(0, 50) + "..." : "Type your answer or use AI to generate one..."
           });
           
           // If there's a user answer, set it in the form
           if (q.userAnswer) {
             detailsForm.setValue(fieldName, q.userAnswer);
-          } else if (q.suggestedAnswer) {
-            // Otherwise use the suggested answer if available
-            detailsForm.setValue(fieldName, q.suggestedAnswer);
           }
+          // Don't automatically set suggested answers - show them as placeholders instead
         }
       });
       
+      console.log("Step3: Setting fields from clarifying questions:", JSON.stringify(mappedFields));
       setFields(mappedFields);
     } else {
+      console.log("Step3: No clarifying questions available, using default fields");
       // Fallback to default fields if no clarifying questions
       setFields([
         { name: "targetAudience", label: "Who is your target audience?", placeholder: "Describe your target users..." },
@@ -235,9 +246,19 @@ export default function Step3({
                         {isGeneratingAnswer && generatingAnswerField === item.name ? 'Generating...' : 'AI Answer'}
                       </Button>
                     </div>
+                    
                     <FormControl>
-                      {/* Use Textarea instead of Input for potentially longer answers */}
-                      <Textarea placeholder={item.placeholder} rows={3} {...field} />
+                      <Textarea 
+                        placeholder={
+                          clarifyingQuestions && 
+                          clarifyingQuestions.length > 0 && 
+                          clarifyingQuestions[fields.findIndex(f => f.name === item.name)]?.suggestedAnswer
+                            ? `Suggested: ${clarifyingQuestions[fields.findIndex(f => f.name === item.name)].suggestedAnswer}`
+                            : item.placeholder
+                        } 
+                        rows={3} 
+                        {...field} 
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

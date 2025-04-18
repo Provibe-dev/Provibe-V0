@@ -41,7 +41,7 @@ const nextConfig = {
     webpackBuildWorker: true,
     parallelServerBuildTraces: true,
     parallelServerCompiles: true,
-    serverFunctionTimeout: 60, // 60 seconds timeout
+    //serverFunctionTimeout: 60, // 60 seconds timeout
   },
   // Add caching configuration using ES module path
   cacheHandler: cacheHandlerPath,
