@@ -27,6 +27,15 @@ import Step4 from "./steps/Step4"
 import Step5, { DOCUMENT_TYPES } from "./steps/Step5" // Ensure DOCUMENT_TYPES is exported if needed here, otherwise just import Step5
 import { Step1Ref } from "./steps/Step1";
 
+// Clarifying question type
+type ClarifyingQuestion = {
+  question: string;
+  suggestedAnswer: string;
+  userAnswer?: string;
+  isEditing?: boolean;
+  isDeleted?: boolean;
+};
+
 // Form schemas (keep these here as the forms are managed in this parent component)
 const ideaFormSchema = z.object({
   idea: z.string().min(10, { message: "Your idea must be at least 10 characters" }),
