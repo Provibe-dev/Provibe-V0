@@ -5,6 +5,8 @@ import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
 import { ArrowLeft, FileText, RefreshCw, Loader2, CheckCircle2, Clock, AlertCircle, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { DashboardShell } from "@/components/dashboard/dashboard-shell"
+import { PageHeader } from "@/components/dashboard/page-header"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,6 +24,7 @@ import { Badge } from "@/components/ui/badge"
 import { useAuth } from "@/components/auth-provider"
 import { supabase } from "@/lib/supabase-client"
 import { formatDistanceToNow } from "date-fns"
+// import { DashboardShell, PageHeader } from "@/components/shell"
 
 // Mock project data for preview environment
 const MOCK_PROJECT = {
@@ -312,222 +315,231 @@ export default function ProjectDetailPage() {
 
   if (loading) {
     return (
-      <div className="flex h-[400px] items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-      </div>
+      <DashboardShell>
+        <div className="flex h-[400px] items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      </DashboardShell>
     )
   }
 
   if (error) {
     return (
-      <div className="space-y-6">
-        <Button variant="ghost" size="sm" asChild className="mb-6">
-          <Link href="/dashboard/projects">
-            <ArrowLeft className="mr-2 h-4 w-4" /> Back to Projects
-          </Link>
-        </Button>
-        <Card>
-          <CardContent className="flex h-[300px] flex-col items-center justify-center p-6">
-            <AlertCircle className="h-12 w-12 text-red-500" />
-            <p className="mt-4 text-center text-muted-foreground">{error}</p>
-            <Button variant="outline" className="mt-4" onClick={() => window.location.reload()}>
-              Try Again
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
+      <DashboardShell>
+        <div className="space-y-6">
+          <Button variant="ghost" size="sm" asChild className="mb-6">
+            <Link href="/dashboard/projects">
+              <ArrowLeft className="mr-2 h-4 w-4" /> Back to Projects
+            </Link>
+          </Button>
+          <Card>
+            <CardContent className="flex h-[300px] flex-col items-center justify-center p-6">
+              <AlertCircle className="h-12 w-12 text-red-500" />
+              <p className="mt-4 text-center text-muted-foreground">{error}</p>
+              <Button variant="outline" className="mt-4" onClick={() => window.location.reload()}>
+                Try Again
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </DashboardShell>
     )
   }
 
   if (!project) {
     return (
-      <div className="space-y-6">
-        <Button variant="ghost" size="sm" asChild className="mb-6">
-          <Link href="/dashboard/projects">
-            <ArrowLeft className="mr-2 h-4 w-4" /> Back to Projects
-          </Link>
-        </Button>
-        <Card>
-          <CardContent className="flex h-[300px] flex-col items-center justify-center p-6">
-            <p className="text-center text-muted-foreground">Project not found</p>
-            <Button asChild className="mt-4">
-              <Link href="/dashboard/projects">Back to Projects</Link>
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    )
-  }
-
-  return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center">
-          <Button variant="ghost" size="sm" asChild className="mr-4">
+      <DashboardShell>
+        <div className="space-y-6">
+          <Button variant="ghost" size="sm" asChild className="mb-6">
             <Link href="/dashboard/projects">
               <ArrowLeft className="mr-2 h-4 w-4" /> Back to Projects
             </Link>
           </Button>
-          <h1 className="text-3xl font-bold tracking-tight">{project?.name || "Project"}</h1>
-          <div className="ml-4">{project?.status ? getStatusBadge(project.status) : null}</div>
+          <Card>
+            <CardContent className="flex h-[300px] flex-col items-center justify-center p-6">
+              <p className="text-center text-muted-foreground">Project not found</p>
+              <Button asChild className="mt-4">
+                <Link href="/dashboard/projects">Back to Projects</Link>
+              </Button>
+            </CardContent>
+          </Card>
         </div>
-        
-        <AlertDialog>
-          <AlertDialogTrigger asChild>
-            <Button variant="destructive" disabled={deleting}>
-              {deleting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Deleting...
-                </>
-              ) : (
-                <>
-                  <Trash2 className="mr-2 h-4 w-4" /> Delete Project
-                </>
-              )}
-            </Button>
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-              <AlertDialogDescription>
-                This will permanently delete this project and all associated documents. This action cannot be undone.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={handleDeleteProject}>Delete</AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      </div>
+      </DashboardShell>
+    )
+  }
 
-      <div className="grid gap-6 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Project Overview</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <h3 className="font-medium">Idea</h3>
-              <p className="mt-1 text-sm text-muted-foreground">{project?.idea || "No idea specified"}</p>
+  return (
+    <DashboardShell>
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">{project?.name || "Project"}</h1>
+            <div className="flex items-center mt-2">
+              <Button variant="ghost" size="sm" asChild className="mr-2 -ml-2">
+                <Link href="/dashboard/projects">
+                  <ArrowLeft className="mr-2 h-4 w-4" /> Back to Projects
+                </Link>
+              </Button>
+              {project?.status ? getStatusBadge(project.status) : null}
             </div>
-            <div>
-              <h3 className="font-medium">Refined Idea</h3>
-              <p className="mt-1 text-sm text-muted-foreground">{project?.refined_idea || "No refined idea available"}</p>
-            </div>
-            <div>
-              <h3 className="font-medium">Selected Tools</h3>
-              <div className="mt-1 flex flex-wrap gap-2">
-                {project?.selected_tools && project.selected_tools.length > 0 ? (
-                  project.selected_tools.map((tool: string) => (
-                    <Badge key={tool} variant="outline">
-                      {tool}
-                    </Badge>
-                  ))
+          </div>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive" disabled={deleting}>
+                {deleting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Deleting...
+                  </>
                 ) : (
-                  <p className="text-sm text-muted-foreground">No tools selected</p>
+                  <>
+                    <Trash2 className="mr-2 h-4 w-4" /> Delete Project
+                  </>
                 )}
-              </div>
-            </div>
-            <div>
-              <h3 className="font-medium">Created</h3>
-              <p className="mt-1 text-sm text-muted-foreground">
-                {project?.created_at ? formatDistanceToNow(new Date(project.created_at), { addSuffix: true }) : "Unknown"}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Product Details</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {project?.product_details ? (
-              Object.entries(project.product_details).map(([key, value]: [string, any]) => (
-                <div key={key}>
-                  <h3 className="font-medium">
-                    {key.replace(/([A-Z])/g, " $1").replace(/^./, (str) => str.toUpperCase())}
-                  </h3>
-                  <p className="mt-1 text-sm text-muted-foreground">{value || "Not specified"}</p>
-                </div>
-              ))
-            ) : (
-              <p className="text-muted-foreground">No product details available</p>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
-      {project.project_plan && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Project Plan</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="prose prose-sm max-w-none dark:prose-invert">
-              <pre className="whitespace-pre-wrap text-sm">{project.project_plan}</pre>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      <h2 className="text-2xl font-bold tracking-tight mt-8">Documents</h2>
-
-      {documents.length === 0 ? (
-        <Card>
-          <CardContent className="flex h-[200px] flex-col items-center justify-center p-6">
-            <FileText className="h-12 w-12 text-muted-foreground" />
-            <p className="mt-4 text-center text-muted-foreground">No documents available for this project.</p>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {documents.map((document) => (
-            <Card key={document.id}>
-              <CardHeader className="pb-3">
-                <div className="flex items-start justify-between">
-                  <CardTitle className="text-lg">{document.title}</CardTitle>
-                  {getStatusBadge(document.status)}
-                </div>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground line-clamp-3">
-                  {document.content ? document.content.substring(0, 150) + "..." : "Content not available"}
-                </p>
-              </CardContent>
-              <CardFooter className="border-t bg-muted/50 px-6 py-3">
-                <div className="flex w-full items-center justify-between">
-                  <p className="text-xs text-muted-foreground">
-                    Updated {formatDistanceToNow(new Date(document.updated_at), { addSuffix: true })}
-                  </p>
-                  <div className="flex gap-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleRegenerateDocument(document.id)}
-                      disabled={regenerating[document.id] || document.status === "generating"}
-                    >
-                      {regenerating[document.id] ? (
-                        <>
-                          <Loader2 className="mr-1 h-3 w-3 animate-spin" /> Regenerating...
-                        </>
-                      ) : (
-                        <>
-                          <RefreshCw className="mr-1 h-3 w-3" /> Regenerate
-                        </>
-                      )}
-                    </Button>
-                    <Button variant="ghost" size="sm" asChild>
-                      <Link href={`/dashboard/documents/${document.id}`}>View</Link>
-                    </Button>
-                  </div>
-                </div>
-              </CardFooter>
-            </Card>
-          ))}
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This will permanently delete this project and all associated documents. This action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleDeleteProject}>Delete</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
-      )}
-    </div>
+
+        <div className="grid gap-6 md:grid-cols-2">
+          <Card>
+            <CardHeader>
+              <CardTitle>Project Overview</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <h3 className="font-medium">Idea</h3>
+                <p className="mt-1 text-sm text-muted-foreground">{project?.idea || "No idea specified"}</p>
+              </div>
+              <div>
+                <h3 className="font-medium">Refined Idea</h3>
+                <p className="mt-1 text-sm text-muted-foreground">{project?.refined_idea || "No refined idea available"}</p>
+              </div>
+              <div>
+                <h3 className="font-medium">Selected Tools</h3>
+                <div className="mt-1 flex flex-wrap gap-2">
+                  {project?.selected_tools && project.selected_tools.length > 0 ? (
+                    project.selected_tools.map((tool: string) => (
+                      <Badge key={tool} variant="outline">
+                        {tool}
+                      </Badge>
+                    ))
+                  ) : (
+                    <p className="text-sm text-muted-foreground">No tools selected</p>
+                  )}
+                </div>
+              </div>
+              <div>
+                <h3 className="font-medium">Created</h3>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {project?.created_at ? formatDistanceToNow(new Date(project.created_at), { addSuffix: true }) : "Unknown"}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Product Details</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {project?.product_details ? (
+                Object.entries(project.product_details).map(([key, value]: [string, any]) => (
+                  <div key={key}>
+                    <h3 className="font-medium">
+                      {key.replace(/([A-Z])/g, " $1").replace(/^./, (str) => str.toUpperCase())}
+                    </h3>
+                    <p className="mt-1 text-sm text-muted-foreground">{value || "Not specified"}</p>
+                  </div>
+                ))
+              ) : (
+                <p className="text-muted-foreground">No product details available</p>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {project.project_plan && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Project Plan</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="prose prose-sm max-w-none dark:prose-invert">
+                <pre className="whitespace-pre-wrap text-sm">{project.project_plan}</pre>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        <h2 className="text-2xl font-bold tracking-tight mt-8">Documents</h2>
+
+        {documents.length === 0 ? (
+          <Card>
+            <CardContent className="flex h-[200px] flex-col items-center justify-center p-6">
+              <FileText className="h-12 w-12 text-muted-foreground" />
+              <p className="mt-4 text-center text-muted-foreground">No documents available for this project.</p>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {documents.map((document) => (
+              <Card key={document.id}>
+                <CardHeader className="pb-3">
+                  <div className="flex items-start justify-between">
+                    <CardTitle className="text-lg">{document.title}</CardTitle>
+                    {getStatusBadge(document.status)}
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground line-clamp-3">
+                    {document.content ? document.content.substring(0, 150) + "..." : "Content not available"}
+                  </p>
+                </CardContent>
+                <CardFooter className="border-t bg-muted/50 px-6 py-3">
+                  <div className="flex w-full items-center justify-between">
+                    <p className="text-xs text-muted-foreground">
+                      Updated {formatDistanceToNow(new Date(document.updated_at), { addSuffix: true })}
+                    </p>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleRegenerateDocument(document.id)}
+                        disabled={regenerating[document.id] || document.status === "generating"}
+                      >
+                        {regenerating[document.id] ? (
+                          <>
+                            <Loader2 className="mr-1 h-3 w-3 animate-spin" /> Regenerating...
+                          </>
+                        ) : (
+                          <>
+                            <RefreshCw className="mr-1 h-3 w-3" /> Regenerate
+                          </>
+                        )}
+                      </Button>
+                      <Button variant="ghost" size="sm" asChild>
+                        <Link href={`/dashboard/documents/${document.id}`}>View</Link>
+                      </Button>
+                    </div>
+                  </div>
+                </CardFooter>
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
+    </DashboardShell>
   )
 }

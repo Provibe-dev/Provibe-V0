@@ -575,20 +575,22 @@ export default function CreateProjectPage() {
   };
 
   const logCreditUsage = async (userId: string, projId: string, action: string, credits: number) => {
-    if (!projId) {
-        console.warn("Cannot log credit usage: Project ID is missing.");
+    if (!projId || !userId) {
+        console.warn("Cannot log credit usage: Project ID or User ID is missing.");
         return;
     }
     
     try {
         console.log(`Logging credit usage: User ${userId}, Project ${projId}, Action ${action}, Credits ${credits}`);
-        const { error } = await supabase.from("credit_usage_log").insert([
+        const { data, error } = await supabase.from("credit_usage_log").insert([
             { user_id: userId, project_id: projId, action: action, credits_used: credits },
         ]);
         
         if (error) {
             console.error("Error logging credit usage:", error);
             // Consider showing a toast here, but don't throw an error to prevent blocking the main flow
+        } else {
+            console.log("Credit usage logged successfully:", data);
         }
     } catch (err) {
         // Catch any unexpected errors to prevent them from bubbling up
@@ -752,16 +754,13 @@ export default function CreateProjectPage() {
 
         {activeStep === 4 && (
           <Step4
-            ideaForm={ideaForm}
-            detailsForm={detailsForm}
-            selectedTools={selectedTools}
-            projectPlan={projectPlan}
-            isGeneratingPlan={isGeneratingPlan}
-            handleGeneratePlan={handleGeneratePlan}
-            navigateToStep={navigateToStep}
-            projectId={projectId}
-            isTestUser={isTestUser}
-            ref={step4Ref}
+          projectId={projectId}
+          selectedTools={selectedTools}
+          projectPlan={projectPlan}
+          setProjectPlan={setProjectPlan}
+          isGeneratingPlan={isGeneratingPlan}
+          setIsGeneratingPlan={setIsGeneratingPlan}
+          navigateToStep={navigateToStep}
           />
         )}
 
