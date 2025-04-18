@@ -745,17 +745,9 @@ export default function CreateProjectPage() {
 
         {activeStep === 3 && (
           <Step3
-            detailsForm={detailsForm}
-            isGeneratingAnswer={isGeneratingAnswer}
-            generatingAnswerField={generatingAnswerField}
-            handleGenerateAnswer={handleGenerateAnswer}
-            navigateToStep={navigateToStep}
-            projectId={projectId}
-            isTestUser={isTestUser}
-            ideaText={ideaForm.getValues("idea")}
-            setIsGeneratingAnswer={setIsGeneratingAnswer}
-            clarifyingQuestions={clarifyingQuestions} // Pass the clarifying questions
-          />
+          projectId={projectId}
+          navigateToStep={navigateToStep}
+        />
         )}
 
         {activeStep === 4 && (
