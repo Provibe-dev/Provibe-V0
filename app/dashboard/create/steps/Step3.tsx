@@ -124,7 +124,11 @@ export default function Step3({
   }, [clarifyingQuestions, detailsForm]);
 
   // New function to generate answer using Gemini API
-  const generateGeminiAnswer = async (field: DetailField): Promise<string> => {
+  const generateGeminiAnswer = async (
+    field: DetailField, 
+    question?: string, 
+    suggestedAnswer?: string
+  ): Promise<string> => {
     // Get current form values to provide context
     const currentDetails = detailsForm.getValues();
     
@@ -135,7 +139,9 @@ export default function Step3({
         body: JSON.stringify({
           field,
           idea: ideaText,
-          projectDetails: currentDetails
+          projectDetails: currentDetails,
+          question, // Pass the actual question text
+          suggestedAnswer // Pass the suggested answer if available
         }),
       });
       
@@ -183,10 +189,6 @@ export default function Step3({
       if (typeof setIsGeneratingAnswer === 'function') {
         setIsGeneratingAnswer(false);
       }
-    // Corrected the function name here
-    if (typeof generatingAnswerField !== 'undefined') {
-      // setGeneratingAnswerField(null); // This is now handled by the parent
-      }
     }
   };
 
@@ -196,8 +198,23 @@ export default function Step3({
       // Call the parent's handler which handles loading state, credits, etc.
       await handleGenerateAnswer(field);
       
+      // Find the actual question text from our fields array
+      const fieldItem = fields.find(f => f.name === field);
+      const questionText = fieldItem ? fieldItem.label : undefined;
+      
+      console.log(`Generating answer for field ${field} with question: "${questionText}"`);
+      
+      // Find any suggested answer if available
+      let suggestedAnswerText;
+      if (clarifyingQuestions && clarifyingQuestions.length > 0) {
+        const fieldIndex = fields.findIndex(f => f.name === field);
+        if (fieldIndex >= 0 && fieldIndex < clarifyingQuestions.length) {
+          suggestedAnswerText = clarifyingQuestions[fieldIndex].suggestedAnswer;
+        }
+      }
+      
       // Generate the answer with Gemini
-      const answer = await generateGeminiAnswer(field);
+      const answer = await generateGeminiAnswer(field, questionText, suggestedAnswerText);
       
       // Update the form with the generated answer
       detailsForm.setValue(field, answer, { shouldValidate: true });

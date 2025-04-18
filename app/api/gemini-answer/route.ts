@@ -20,71 +20,29 @@ export async function POST(req: Request) {
       return Response.json({ error: "API key configuration error" }, { status: 500 });
     }
     
-    // Find the matching clarifying question if available
-    let matchingQuestion = null;
-    if (projectDetails && projectDetails.clarifyingQuestions) {
-      const fieldMapping: Record<string, number> = {
-        "targetAudience": 0,
-        "problemSolved": 1,
-        "keyFeatures": 2,
-        "successMetrics": 3,
-        "timeline": 4,
-        "additionalInfo1": 5,
-        "additionalInfo2": 6
-      };
-      
-      const questionIndex = fieldMapping[field];
-      if (questionIndex !== undefined && 
-          projectDetails.clarifyingQuestions.length > questionIndex) {
-        matchingQuestion = projectDetails.clarifyingQuestions[questionIndex];
-      }
-    }
-    
     // Construct a prompt that includes the clarifying question if available
     let prompt = "";
     
-    if (matchingQuestion) {
-      // Use the actual clarifying question
-      prompt = `Based on this product idea: "${idea}", please provide a detailed answer to the following question: "${matchingQuestion.question}".`;
-      
-      if (matchingQuestion.suggestedAnswer) {
-        prompt += ` Here's a suggested answer that you can improve upon: "${matchingQuestion.suggestedAnswer}".`;
-      }
-    } else if (question) {
-      // Use the provided question parameter
+    // First priority: Use the explicitly provided question parameter
+    if (question) {
+      console.log("Using provided question:", question);
       prompt = `Based on this product idea: "${idea}", please provide a detailed answer to the following question: "${question}".`;
       
       if (suggestedAnswer) {
         prompt += ` Here's a suggested answer that you can improve upon: "${suggestedAnswer}".`;
       }
-    } else {
-      // Fallback to generic prompts based on field name
-      switch (field) {
-        case "targetAudience":
-          prompt = `Based on this product idea: "${idea}", who would be the target audience?`;
-          break;
-        case "problemSolved":
-          prompt = `Based on this product idea: "${idea}", what problem does this product solve?`;
-          break;
-        case "keyFeatures":
-          prompt = `Based on this product idea: "${idea}", what would be the key features?`;
-          break;
-        case "successMetrics":
-          prompt = `Based on this product idea: "${idea}", what would be appropriate success metrics?`;
-          break;
-        case "timeline":
-          prompt = `Based on this product idea: "${idea}", what would be a realistic timeline for development?`;
-          break;
-        default:
-          prompt = `Based on this product idea: "${idea}", please provide more details about ${field}.`;
-      }
+    } 
+    // Fallback to generic prompts
+    else {
+      console.log("No question provided, using fallback prompt for field:", field);
+      prompt = getFallbackPrompt(field, idea);
     }
     
     // Add context from other fields if available
     if (projectDetails) {
       prompt += " Consider these other details about the project: ";
       for (const [key, value] of Object.entries(projectDetails)) {
-        if (key !== field && key !== "clarifyingQuestions" && value) {
+        if (key !== field && key !== "clarifyingQuestions" && typeof value === 'string' && value) {
           prompt += `${key}: ${value}. `;
         }
       }
@@ -114,7 +72,7 @@ export async function POST(req: Request) {
 async function generateGeminiResponse(prompt: string): Promise<string> {
   try {
     // Create a model instance
-    const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
     
     // Generate content with safety settings and timeout
     const result = await model.generateContent({
@@ -136,5 +94,23 @@ async function generateGeminiResponse(prompt: string): Promise<string> {
   } catch (error) {
     console.error("Error generating content from Gemini API:", error);
     throw new Error("Failed to generate content from Gemini API");
+  }
+}
+
+// Helper function to get fallback prompts
+function getFallbackPrompt(field: string, idea: string): string {
+  switch (field) {
+    case "targetAudience":
+      return `Based on this product idea: "${idea}", who would be the target audience?`;
+    case "problemSolved":
+      return `Based on this product idea: "${idea}", what problem does this product solve?`;
+    case "keyFeatures":
+      return `Based on this product idea: "${idea}", what would be the key features?`;
+    case "successMetrics":
+      return `Based on this product idea: "${idea}", what would be appropriate success metrics?`;
+    case "timeline":
+      return `Based on this product idea: "${idea}", what would be a realistic timeline for development?`;
+    default:
+      return `Based on this product idea: "${idea}", please provide more details about ${field}.`;
   }
 }
