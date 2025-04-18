@@ -100,21 +100,28 @@ export async function POST(request: NextRequest) {
         // --- Conditional API Call ---
         let aiResponseContent: string | null = null;
 
-        if (model.startsWith("gpt-")) {
+        if (model.startsWith("gpt-") || model.startsWith("o4-")) {
             console.log(`[enhance-idea] ► calling OpenAI with model ${model}`);
             if (!process.env.OPENAI_API_KEY) throw new Error("OpenAI API Key missing");
-            const completion = await openai.chat.completions.create({
-                model: model,
-                temperature: temperature,
-                max_tokens: max_tokens,
-                response_format: { type: "json_object" },
-                messages: [
-                    { role: "system", content: systemPrompt },
-                    { role: "user", content: "Respond with JSON only." }
-                ],
-            });
-            aiResponseContent = completion.choices[0]?.message?.content;
-
+            try {
+                const completion = await openai.chat.completions.create({
+                    model: model,
+                    temperature: temperature,
+                    max_tokens: max_tokens,
+                    response_format: { type: "json_object" },
+                    messages: [
+                        { role: "system", content: systemPrompt },
+                        { role: "user", content: "Respond with JSON only." }
+                    ],
+                });
+                aiResponseContent = completion.choices[0]?.message?.content;
+                if (!aiResponseContent) {
+                    throw new Error("Empty response from OpenAI API");
+                }
+            } catch (openaiError: any) {
+                console.error("[enhance-idea] ✖ OpenAI API error:", openaiError);
+                throw new Error(openaiError.message || "Error calling OpenAI API");
+            }
         } else if (model.startsWith("gemini-")) {
             console.log(`[enhance-idea] ► calling Gemini with model ${model}`);
             if (!process.env.GOOGLE_GEMINI_API_KEY) throw new Error("Gemini API Key missing");
@@ -130,7 +137,7 @@ export async function POST(request: NextRequest) {
             // Construct prompt suitable for Gemini (might need adjustment)
             const promptForGemini = `${systemPrompt}\n\nRespond with JSON only.`;
 
-            const result = await geminiModel.generateContent(promptForGemini, generationConfig);
+            const result = await geminiModel.generateContent({contents: [{role: "user", parts: [{text: promptForGemini}]}], generationConfig});
             const response = result.response;
             aiResponseContent = response.text();
 

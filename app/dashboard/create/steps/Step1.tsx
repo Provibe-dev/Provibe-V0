@@ -128,8 +128,9 @@ const Step1 = forwardRef<Step1Ref, Step1Props>((props, ref) => {
         });
 
         if (!resp.ok) {
-          const err = await resp.json().catch(() => ({}));
-          throw new Error(err.error ?? `Enhance‑idea failed (${resp.status})`);
+          const errorData = await resp.json().catch(() => ({}));
+          console.error("API error response:", resp.status, errorData);
+          throw new Error(errorData.error ?? `Enhance-idea failed (${resp.status})`);
         }
         
         const data: { 
