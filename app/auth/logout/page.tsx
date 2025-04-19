@@ -13,17 +13,14 @@ export default function LogoutPage() {
   useEffect(() => {
     const performLogout = async () => {
       try {
-        // Use the logout function from auth provider
         await logout()
         
-        // The router.push is already handled in the logout function,
-        // but we'll add a fallback just in case
+        // Keep only the real logout logic
         if (window.location.pathname !== "/auth/login") {
           router.push("/auth/login")
         }
       } catch (error) {
         console.error("Logout error:", error)
-        // Even if there's an error, force redirect to login
         router.push("/auth/login")
       }
     }

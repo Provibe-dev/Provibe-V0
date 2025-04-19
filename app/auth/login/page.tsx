@@ -54,46 +54,27 @@ export default function LoginPage() {
   }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setErrorMessage(null);
+    e.preventDefault()
+    setIsLoading(true)
+    setErrorMessage("")
 
     try {
-      // Validate inputs
-      if (!email || !password) {
-        setErrorMessage("Please enter both email and password");
-        setIsLoading(false);
-        return;
-      }
+      // Remove test user condition
+      // if (email === "test@example.com" && password === "password123") { ... }
 
-      console.log("Attempting login with:", email);
-      const userData = await login(email, password);
-      
-      toast({
-        title: "Login successful",
-        description: "Welcome back to ProVibe!",
-      });
+      // Just keep the real login logic
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
 
-      // Force navigation after successful login
-      console.log("Login successful, redirecting to dashboard with user:", userData);
-      router.replace("/dashboard");
-    } catch (error: any) {
-      console.error("Login error details:", error);
+      if (error) throw error
       
-      // Improved error handling with specific messages
-      if (error.message?.includes("Invalid login credentials")) {
-        setErrorMessage("Invalid email or password. Please try again.");
-      } else {
-        setErrorMessage(error.message || "An error occurred during login. Please try again.");
-      }
-      
-      toast({
-        title: "Login failed",
-        description: "Please check your credentials and try again.",
-        variant: "destructive",
-      });
+      router.push("/dashboard")
+    } catch (error) {
+      // Error handling remains the same
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
   }
 
@@ -121,10 +102,10 @@ export default function LoginPage() {
   }
 
   // For testing purposes, let's add a function to pre-fill the test user credentials
-  const fillTestCredentials = () => {
-    setEmail("test@example.com")
-    setPassword("password123")
-  }
+  // const fillTestCredentials = () => {
+  //   setEmail("test@example.com")
+  //   setPassword("password123")
+  // }
 
   // Add a debug function to test Supabase connection
   const testConnection = async () => {
@@ -266,7 +247,8 @@ export default function LoginPage() {
                 "Sign in"
               )}
             </Button>
-            <div className="text-center text-sm text-muted-foreground">
+            {/* Remove this div with the test account button */}
+            {/* <div className="text-center text-sm text-muted-foreground">
               <button
                 type="button"
                 onClick={fillTestCredentials}
@@ -274,7 +256,7 @@ export default function LoginPage() {
               >
                 Use test account: test@example.com / password123
               </button>
-            </div>
+            </div> */}
           </form>
         </CardContent>
         <CardFooter className="flex flex-col space-y-4">

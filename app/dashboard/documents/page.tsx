@@ -26,64 +26,6 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ""
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ""
 const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
-// Mock documents data for preview environment
-const MOCK_DOCUMENTS = [
-  {
-    id: "doc-1",
-    title: "Product Requirements Document",
-    type: "prd",
-    project: { name: "Mobile App Documentation", id: "mock-project-1" },
-    updated_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-    status: "completed",
-    starred: false,
-  },
-  {
-    id: "doc-2",
-    title: "User Flow",
-    type: "user_flow",
-    project: { name: "Mobile App Documentation", id: "mock-project-1" },
-    updated_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-    status: "completed",
-    starred: true,
-  },
-  {
-    id: "doc-3",
-    title: "Architecture Document",
-    type: "architecture",
-    project: { name: "Mobile App Documentation", id: "mock-project-1" },
-    updated_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-    status: "completed",
-    starred: false,
-  },
-  {
-    id: "doc-4",
-    title: "API Specification",
-    type: "api_spec",
-    project: { name: "E-commerce Platform", id: "mock-project-2" },
-    updated_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-    status: "completed",
-    starred: false,
-  },
-  {
-    id: "doc-5",
-    title: "Database Schema",
-    type: "schema",
-    project: { name: "E-commerce Platform", id: "mock-project-2" },
-    updated_at: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
-    status: "completed",
-    starred: false,
-  },
-  {
-    id: "doc-6",
-    title: "Product Requirements Document",
-    type: "prd",
-    project: { name: "Task Management Tool", id: "mock-project-3" },
-    updated_at: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
-    status: "pending",
-    starred: false,
-  },
-]
-
 export default function DocumentsPage() {
   const { user } = useAuth()
   const [documents, setDocuments] = useState<any[]>([])
@@ -103,14 +45,7 @@ export default function DocumentsPage() {
       }
 
       try {
-        // Use mock data for test user or preview environment
-        if (user.id === "test_user_id" || isV0Preview) {
-          console.log("Using mock documents data for test user or preview")
-          setDocuments(MOCK_DOCUMENTS)
-          setLoading(false)
-          return
-        }
-
+        // Remove mock data handling
         // Validate UUID format before querying
         const isValidUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(user.id)
 

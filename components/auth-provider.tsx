@@ -141,19 +141,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Refresh user data from Supabase
   const refreshUser = async () => {
     try {
-      // In v0 preview, return test user
-      if (isV0Preview) {
-        setUser(TEST_USER)
-        return TEST_USER
-      }
-
+      // Remove v0 preview condition
       const {
         data: { session },
       } = await supabase.auth.getSession()
 
       if (session?.user) {
         const { data: profile } = await supabase.from("profiles").select("*").eq("id", session.user.id).single()
-
         const formattedUser = formatUser(session.user, profile)
         setUser(formattedUser)
         return formattedUser
