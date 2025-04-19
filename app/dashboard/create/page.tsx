@@ -700,6 +700,35 @@ export default function CreateProjectPage() {
       // e.g., refreshUserContext();
   };
 
+  // Add a function to mark the project as completed
+  const markProjectAsCompleted = async () => {
+    if (!projectId || isTestUser) return;
+    
+    console.log("Marking project as completed:", projectId);
+    try {
+      const { error } = await supabase
+        .from("projects")
+        .update({ status: "completed" })
+        .eq("id", projectId);
+        
+      if (error) {
+        console.error("Error marking project as completed:", error);
+        throw error;
+      }
+      
+      console.log("Project successfully marked as completed");
+      // Optionally refresh user data if needed
+      if (refreshUser) await refreshUser();
+    } catch (err) {
+      console.error("Failed to mark project as completed:", err);
+      toast({ 
+        title: "Status update failed", 
+        description: "Could not update project status, but your document was generated successfully.",
+        variant: "destructive" 
+      });
+    }
+  };
+
   // Debounce utility
   function debounce<T extends (...args: any[]) => any>(func: T, wait: number): (...args: Parameters<T>) => void {
     let timeout: NodeJS.Timeout | null = null;
@@ -855,13 +884,10 @@ export default function CreateProjectPage() {
         {activeStep === 5 && (
           <Step5
             user={user}
-            selectedDocuments={selectedDocuments}
-            setSelectedDocuments={setSelectedDocuments}
-            isSubmitting={isSubmitting}
-            setIsSubmitting={setIsSubmitting} // Pass setter instead of handler
             navigateToStep={navigateToStep}
             projectId={projectId}
             projectPlan={projectPlan}
+            markProjectAsCompleted={markProjectAsCompleted}
           />
         )}
       </div>

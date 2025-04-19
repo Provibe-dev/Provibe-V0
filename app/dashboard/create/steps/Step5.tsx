@@ -60,13 +60,50 @@ interface Step5Props {
   navigateToStep: (step: number) => void
   projectId: string
   projectPlan: string
+  markProjectAsCompleted?: () => Promise<void> // Add this prop
 }
 
 // -----------------------------------------------------------------------------
 // Component
 // -----------------------------------------------------------------------------
-export default function Step5({ user, navigateToStep, projectId, projectPlan }: Step5Props) {
+export default function Step5({ 
+  user, 
+  navigateToStep, 
+  projectId, 
+  projectPlan,
+  markProjectAsCompleted 
+}: Step5Props) {
   const { toast } = useToast()
+
+  // Add a state to track if we've already marked the project as completed
+  const [hasMarkedCompleted, setHasMarkedCompleted] = useState(false)
+  
+  // Add a state to track if any document has been generated
+  const [hasGeneratedAnyDocument, setHasGeneratedAnyDocument] = useState(false)
+
+  // Check if any document is already generated when component mounts
+  useEffect(() => {
+    const checkExistingDocuments = async () => {
+      if (!projectId) return
+      
+      try {
+        const { data } = await supabase
+          .from("project_documents")
+          .select("type")
+          .eq("project_id", projectId)
+          .eq("status", "done")
+          .limit(1)
+        
+        if (data && data.length > 0) {
+          setHasGeneratedAnyDocument(true)
+        }
+      } catch (err) {
+        console.error("Error checking existing documents:", err)
+      }
+    }
+    
+    checkExistingDocuments()
+  }, [projectId])
 
   // ------------------------------------------------------------------------------------------------
   // Local State
@@ -188,6 +225,21 @@ export default function Step5({ user, navigateToStep, projectId, projectPlan }: 
         await loadDocContent(docId);                               // fallback
       }
       setActiveDocId(docId)
+      
+      // Mark as having generated at least one document
+      const isFirstGeneration = !hasGeneratedAnyDocument
+      setHasGeneratedAnyDocument(true)
+      
+      // If this is the first document generated and we haven't marked the project as completed yet
+      if (isFirstGeneration && !hasMarkedCompleted && markProjectAsCompleted) {
+        try {
+          await markProjectAsCompleted()
+          setHasMarkedCompleted(true)
+          console.log("Project marked as completed after first document generation")
+        } catch (err) {
+          console.error("Failed to mark project as completed:", err)
+        }
+      }
     } catch (err) {
       console.error(err)
       setDocStatus((prev) => ({ ...prev, [docId]: "error" }))
@@ -204,10 +256,24 @@ export default function Step5({ user, navigateToStep, projectId, projectPlan }: 
       .on(
         "postgres_changes",
         { event: "UPDATE", schema: "public", table: "project_documents", filter: `project_id=eq.${projectId}` },
-        (payload) => {
-          const { id, status, content } = payload.new as { id: string; status: GenerationStatus; content: string }
-          setDocStatus((prev) => ({ ...prev, [id]: status }))
-          if (status === "done") setDocContent((prev) => ({ ...prev, [id]: content }))
+        async (payload) => {
+          const { type, status, content } = payload.new as { type: string; status: GenerationStatus; content: string }
+          setDocStatus((prev) => ({ ...prev, [type]: status }))
+          if (status === "done") {
+            setDocContent((prev) => ({ ...prev, [type]: content }))
+            
+            // If this is the first document completed and we haven't marked the project as completed yet
+            if (!hasGeneratedAnyDocument && !hasMarkedCompleted && markProjectAsCompleted) {
+              try {
+                await markProjectAsCompleted()
+                setHasMarkedCompleted(true)
+                setHasGeneratedAnyDocument(true)
+                console.log("Project marked as completed after real-time document update")
+              } catch (err) {
+                console.error("Failed to mark project as completed:", err)
+              }
+            }
+          }
         }
       )
       .subscribe()
@@ -215,7 +281,7 @@ export default function Step5({ user, navigateToStep, projectId, projectPlan }: 
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [projectId])
+  }, [projectId, hasGeneratedAnyDocument, hasMarkedCompleted, markProjectAsCompleted])
 
   // ------------------------------------------------------------------------------------------------
   // Render helpers
