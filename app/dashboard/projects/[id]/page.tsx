@@ -25,6 +25,7 @@ import { cn } from "@/lib/utils"
 import { useAuth } from "@/components/auth-provider"
 import { EditorContent, useEditor } from "@tiptap/react"
 import StarterKit from "@tiptap/starter-kit"
+import { Markdown } from "tiptap-markdown"
 
 export const DOCUMENT_TYPES = [
   { id: "prd", title: "Product Requirements Document", icon: "📄" },
@@ -52,7 +53,10 @@ export default function Page() {
   const [activeDocId, setActiveDocId] = useState<string | null>(null)
 
   const editor = useEditor({
-    extensions: [StarterKit],
+    extensions: [
+      StarterKit,
+      Markdown
+    ],
     content: "",
     editable: true,
   })
