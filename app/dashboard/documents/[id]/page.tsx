@@ -161,6 +161,7 @@ export default function DocumentDetailPage() {
       await supabase.from("project_documents").delete().eq("id", document.id)
       router.push("/dashboard/documents")
     } catch (err) {
+      console.error("Error deleting document:", err)
       setError("Failed to delete document")
       setIsDeleting(false)
     }

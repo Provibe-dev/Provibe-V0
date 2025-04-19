@@ -13,7 +13,8 @@ import {
   Loader2,
   RefreshCw,
   XCircle,
-  Sparkles
+  Sparkles,
+  Trash2
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -26,6 +27,16 @@ import { useAuth } from "@/components/auth-provider"
 import { EditorContent, useEditor } from "@tiptap/react"
 import StarterKit from "@tiptap/starter-kit"
 import { Markdown } from "tiptap-markdown"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 export const DOCUMENT_TYPES = [
   { id: "prd", title: "Product Requirements Document", icon: "📄" },
@@ -51,6 +62,8 @@ export default function Page() {
   )
   const [docContent, setDocContent] = useState<Record<string, string>>({})
   const [activeDocId, setActiveDocId] = useState<string | null>(null)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   const editor = useEditor({
     extensions: [
@@ -129,6 +142,18 @@ export default function Page() {
     editor.commands.insertContentAt(editor.state.selection, rewritten)
   }
 
+  const handleDeleteProject = async () => {
+    if (!project?.id) return
+    setIsDeleting(true)
+    try {
+      await supabase.from("projects").delete().eq("id", project.id)
+      router.push("/dashboard/projects")
+    } catch (err) {
+      toast({ title: "Failed to delete project", variant: "destructive" })
+      setIsDeleting(false)
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex h-[60vh] items-center justify-center">
@@ -148,8 +173,18 @@ export default function Page() {
             <h1 className="ml-2 text-2xl font-bold tracking-tight">{project?.name}</h1>
           </div>
         </div>
-        <div className="text-sm text-muted-foreground">
-          {user && <span>Credits: <span className="font-medium">{user.credits_remaining ?? '...'}</span></span>}
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-muted-foreground">
+            {user && <span>Credits: <span className="font-medium">{user.credits_remaining ?? '...'}</span></span>}
+          </span>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="text-red-500 border-red-200 hover:bg-red-50 hover:text-red-600"
+            onClick={() => setShowDeleteDialog(true)}
+          >
+            <Trash2 className="mr-2 h-4 w-4" /> Delete Project
+          </Button>
         </div>
       </div>
 
@@ -204,6 +239,34 @@ export default function Page() {
           </Card>
         </main>
       </div>
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete this project and all associated documents.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteProject}
+              className="bg-red-600 hover:bg-red-700"
+              disabled={isDeleting}
+            >
+              {isDeleting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Deleting...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="mr-2 h-4 w-4" /> Delete
+                </>
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
