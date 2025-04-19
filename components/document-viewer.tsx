@@ -26,6 +26,16 @@ export function DocumentViewer({ document, onRegenerateDocument, onDownloadDocum
   const [activeTab, setActiveTab] = useState("preview")
   const { toast } = useToast()
 
+  // Add null check for document
+  if (!document) {
+    return (
+      <div className="flex h-full flex-col items-center justify-center">
+        <p className="text-lg font-medium">No document selected</p>
+        <p className="text-sm text-muted-foreground mt-2">Please select a document to view.</p>
+      </div>
+    )
+  }
+
   const handleRegenerate = async () => {
     if (onRegenerateDocument) {
       setIsRegenerating(true)
