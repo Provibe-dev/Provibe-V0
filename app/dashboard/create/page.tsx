@@ -80,9 +80,7 @@ export default function CreateProjectPage() {
   const projectNameInputRef = useRef<HTMLInputElement>(null)
   const [projectId, setProjectId] = useState<string>("")
   const [isTestUser, setIsTestUser] = useState(false)
-  const [hasCheckedLimits, setHasCheckedLimits] = useState(false)
-
-  const [isInitializing, setIsInitializing] = useState(false);
+  const [isInitializingProject, setIsInitializingProject] = useState(false); // New state for creation process
 
   // Add state for clarifying questions
   const [clarifyingQuestions, setClarifyingQuestions] = useState<ClarifyingQuestion[]>([]);
@@ -112,129 +110,136 @@ export default function CreateProjectPage() {
     }
   }, [isEditingName])
 
-  // /Users/aravindtambad/Documents/Provibe Projects/Provibe-V0-v2/app/dashboard/create/page.tsx
-
-  // --- useEffect hook for project initialization and limit checking ---
+  // --- Simplified useEffect hook for initial setup (like test user check) ---
   useEffect(() => {
-    // Log entry into the effect hook
-    console.log("Project creation effect triggered. User:", !!user, "hasCheckedLimits:", hasCheckedLimits, "projectId:", projectId, "isInitializing:", isInitializing);
+    console.log("Project creation effect triggered (simplified). User:", !!user);
+    // Only check for test user initially. Project creation is deferred.
+    if (user && user.email === "test@example.com" && !projectId) {
+        setIsTestUser(true);
+        // We won't set a test projectId here yet, will do it in initializeProject
+        console.log("Test user detected.");
+    }
+     // Project creation and limit checks are now handled by initializeProject
+  }, [user, projectId]); // Depend on user and projectId
 
-    const checkProjectLimits = async () => {
-      // Log entry into the async function
-      console.log("checkProjectLimits started. Current projectId:", projectId, "hasCheckedLimits:", hasCheckedLimits);
-
-      // Early exit conditions (already checked, has ID, or no user)
-      if (!user || hasCheckedLimits || projectId) {
-        console.log("checkProjectLimits bailing out early (already checked/has ID/no user).");
-        return;
-      }
-
-      // Set the initializing flag to prevent concurrent runs
-      setIsInitializing(true);
-      console.log("--> Setting isInitializing = true");
-
-      try {
-        // --- Handle Test User ---
-        if (user.email === "test@example.com") {
-          setIsTestUser(true);
-          const testId = `test-project-${Date.now()}`;
-          console.log("Test user detected, using mock project ID:", testId);
-          setProjectId(testId); // Set the mock project ID
-          setHasCheckedLimits(true); // Mark limits as checked for the test user
-          console.log("--> Test user setup complete. Setting hasCheckedLimits = true.");
-          // No database interaction needed, so we can return here.
-          return;
-        }
-
-        // --- Handle Real User ---
-        // 1. Check current project count against limit
-        const { data: projects, error: fetchError } = await supabase
-          .from("projects")
-          .select("id", { count: 'exact', head: true }) // More efficient count query
-          .eq("user_id", user.id);
-
-        if (fetchError) {
-          console.error("Error fetching project count:", fetchError);
-          throw fetchError; // Propagate error to catch block
-        }
-
-        const projectCount = projects?.length ?? 0;
-        console.log(`User ${user.id} has ${projectCount} projects. Limit: ${user.projects_limit}`);
-
-        if (projectCount >= user.projects_limit) {
-          toast({
-            title: "Project limit reached",
-            description: `You've reached your limit of ${user.projects_limit} projects. Please upgrade your plan or delete existing projects.`,
-            variant: "destructive",
-          });
-          router.push("/dashboard/projects");
-          // Note: We don't set hasCheckedLimits here because the check failed due to limit.
-          // If they navigate back, the check should ideally run again.
-          return;
-        }
-
-        // 2. Create the new project if limit not reached
-        console.log("--> Limit check passed. Attempting to create a new project...");
-        const result = await createNewProject(user.id, projectName);
-
-        if (!result.success || !result.project) {
-          toast({
-            title: "Error creating project",
-            description: result.error || "There was an error creating your project. Please try again.",
-            variant: "destructive",
-          });
-          router.push("/dashboard/projects"); // Redirect if creation fails
-          // Note: Don't set hasCheckedLimits on failure.
-          return;
-        }
-
-        // 3. Success: Update state with new project ID and mark check as complete
-        console.log("--> Project created successfully. New projectId:", result.project.id);
-        setProjectId(result.project.id);
-        setHasCheckedLimits(true); // Mark check as complete *after* successful creation
-        console.log("--> Setting hasCheckedLimits = true after successful creation.");
-
-      } catch (error) {
-        // Handle any errors during the process
-        console.error("Error in checkProjectLimits:", error);
-        toast({
-          title: "Error setting up project",
-          description: "There was an error initializing your project. Please try again or contact support.",
-          variant: "destructive",
-        });
-        // Consider redirecting or disabling functionality
-        router.push("/dashboard/projects");
-      } finally {
-        // Always clear the initializing flag when done (success or error)
-        setIsInitializing(false);
-        console.log("--> Setting isInitializing = false in finally block.");
-      }
-    };
-
-    // Condition to call the async function:
-    // User exists, limits haven't been checked, no project ID yet, and not already initializing.
-    if (user && !hasCheckedLimits && !projectId && !isInitializing) {
-      console.log("--> Conditions met. Calling checkProjectLimits.");
-      checkProjectLimits();
-    } else {
-      console.log("--> Skipping checkProjectLimits call due to conditions.");
+  // --- NEW FUNCTION: Initialize Project ---
+  const initializeProject = async (idea: string): Promise<string | null> => {
+    // Exit if already initializing or if project ID already exists
+    if (isInitializingProject || projectId) {
+      console.log("Initialization skipped (already initializing or project exists). Current projectId:", projectId);
+      return projectId || null; // Return existing ID if available
+    }
+    // Exit if no user context yet
+    if (!user) {
+        console.error("Cannot initialize project: User context not available.");
+        toast({ title: "User session error", description: "Please refresh the page.", variant: "destructive"});
+        return null;
     }
 
-    // Dependency array includes all external variables used in the effect
-  }, [
-      user,
-      hasCheckedLimits,
-      projectId,
-      isInitializing, // Added isInitializing
-      projectName,    // Needed for createNewProject
-      router,         // Needed for redirects
-      toast,          // Needed for notifications
-      refreshUser     // Although not directly called here, it's related to user state updates
-  ]);
+    console.log("Attempting to initialize project...");
+    setIsInitializingProject(true);
+
+    try {
+      // Handle Test User (set temporary ID)
+      if (user.email === "test@example.com") {
+        const testId = `test-project-${Date.now()}`;
+        console.log("Test user: Setting mock project ID:", testId);
+        setProjectId(testId);
+        setIsTestUser(true); // Ensure this is set
+        return testId; // Return mock ID
+      }
+
+      // Handle Real User
+      // 1. Check project limit
+      console.log(`Checking project limit for user ${user.id}. Limit: ${user.projects_limit}`);
+      const { count: projectCount, error: countError } = await supabase
+        .from("projects")
+        .select("id", { count: 'exact', head: true })
+        .eq("user_id", user.id);
+
+      if (countError) {
+        console.error("Error fetching project count:", countError);
+        throw countError;
+      }
+
+      console.log(`User has ${projectCount ?? 0} projects.`);
+      if (projectCount !== null && projectCount >= user.projects_limit) {
+        toast({
+          title: "Project limit reached",
+          description: `You've reached your limit of ${user.projects_limit} projects. Please upgrade or delete projects.`,
+          variant: "destructive",
+        });
+        router.push("/dashboard/projects");
+        return null; // Indicate failure
+      }
+
+      // 2. Create the new project
+      console.log("--> Limit check passed. Creating new project...");
+      // Use current projectName state, might be "Untitled Project" initially
+      const createResult = await createNewProject(user.id, projectName);
+
+      if (!createResult.success || !createResult.project) {
+        toast({
+          title: "Error creating project",
+          description: createResult.error || "Failed to create project record.",
+          variant: "destructive",
+        });
+        router.push("/dashboard/projects");
+        return null; // Indicate failure
+      }
+
+      const newProjectId = createResult.project.id;
+      console.log("--> Project created successfully. New projectId:", newProjectId);
+      setProjectId(newProjectId); // Set the new project ID state
+
+      // 3. Automatic Naming Logic
+      if (projectName === "Untitled Project") {
+        const words = idea.split(/\s+/).filter(Boolean); // Split by whitespace and remove empty strings
+        const autoName = words.slice(0, 3).join(" "); // Take first 3 words
+        const finalAutoName = autoName.length > 0 ? autoName : "New Project"; // Fallback if idea was empty/short
+
+        console.log(`Project name is 'Untitled Project'. Attempting auto-name: "${finalAutoName}"`);
+        setProjectName(finalAutoName); // Update local state
+
+        // Update name in the database
+        console.log("Updating project name in DB:", newProjectId, finalAutoName);
+        const { error: nameUpdateError } = await supabase
+          .from("projects")
+          .update({ name: finalAutoName })
+          .eq("id", newProjectId);
+
+        if (nameUpdateError) {
+          console.error("Error auto-updating project name:", nameUpdateError);
+          // Non-critical error, maybe show a warning toast but proceed
+          toast({ title: "Warning", description: "Could not auto-update project name.", variant: "default" });
+        } else {
+          console.log("Project name auto-updated successfully in DB.");
+        }
+      }
+
+      return newProjectId; // Return the new project ID
+
+    } catch (error) {
+      console.error("Error during project initialization:", error);
+      toast({
+        title: "Error setting up project",
+        description: "Could not initialize your project. Please try again.",
+        variant: "destructive",
+      });
+      // Consider redirecting
+      // router.push("/dashboard/projects");
+      return null; // Indicate failure
+    } finally {
+      setIsInitializingProject(false); // Clear the initializing flag
+      console.log("--> Project initialization process finished.");
+    }
+  };
+
 
   // Debounced update function for idea
   const debouncedUpdateIdea = useRef(
     debounce(async (id: string, ideaValue: string) => {
+      // Check for id and non-test user remains the same
       if (id && !isTestUser) {
         console.log("Debounced update idea:", id, typeof ideaValue === 'string' ? ideaValue.substring(0, 20) + "..." : "Invalid idea value");
         const { error } = await supabase
@@ -242,24 +247,28 @@ export default function CreateProjectPage() {
           .update({ idea: ideaValue })
           .eq("id", id);
         if (error) console.error("Error debounced updating idea:", error);
+      } else if (!id) {
+         console.log("Debounced update idea skipped: No project ID yet.");
       }
-    }, 1000) // Update after 1 second of inactivity
+    }, 1000)
   ).current;
 
   // Watch idea changes for debounced update
   useEffect(() => {
     const subscription = ideaForm.watch((value, { name }) => {
+      // Now it correctly waits for projectId to be set
       if (name === 'idea' && projectId && value.idea !== undefined) {
         debouncedUpdateIdea(projectId, value.idea);
       }
     });
     return () => subscription.unsubscribe();
-  }, [ideaForm, debouncedUpdateIdea, projectId, isTestUser]);
+  }, [ideaForm, debouncedUpdateIdea, projectId, isTestUser]); // Added projectId dependency
 
 
   // Debounced update function for details
   const debouncedUpdateDetails = useRef(
     debounce(async (id: string, detailsValue: any) => {
+      // Check for id and non-test user remains the same
       if (id && !isTestUser) {
         console.log("Debounced update details:", id, detailsValue);
         const { error } = await supabase
@@ -267,26 +276,29 @@ export default function CreateProjectPage() {
           .update({ product_details: detailsValue })
           .eq("id", id);
         if (error) console.error("Error debounced updating details:", error);
+       } else if (!id) {
+         console.log("Debounced update details skipped: No project ID yet.");
       }
-    }, 1000) // Update after 1 second of inactivity
+    }, 1000)
   ).current;
 
    // Watch details changes for debounced update
   useEffect(() => {
     const subscription = detailsForm.watch((value) => {
+       // Now it correctly waits for projectId to be set
       if (projectId) {
         debouncedUpdateDetails(projectId, value);
       }
     });
     return () => subscription.unsubscribe();
-  }, [detailsForm, debouncedUpdateDetails, projectId, isTestUser]);
+  }, [detailsForm, debouncedUpdateDetails, projectId, isTestUser]); // Added projectId dependency
 
 
-  // Update project tools immediately on change (less frequent action)
+  // Update project tools immediately on change
   useEffect(() => {
     const updateProjectTools = async () => {
-      // Only update if projectId exists, it's not the test user, and tools have actually changed
-      if (projectId && !isTestUser && selectedTools.length > 0) { // Check length > 0 maybe redundant if initial state is []
+      // Condition remains the same: needs projectId
+      if (projectId && !isTestUser && selectedTools.length > 0) {
          console.log("Updating project tools:", projectId, selectedTools);
          const { error } = await supabase
           .from("projects")
@@ -295,11 +307,10 @@ export default function CreateProjectPage() {
 
         if (error) {
           console.error("Error updating project tools:", error);
-          // Optionally show a toast here
         }
       }
     };
-    // Avoid running on initial mount if projectId isn't set yet
+    // Condition remains the same: needs projectId
     if(projectId) {
         updateProjectTools();
     }
@@ -307,7 +318,6 @@ export default function CreateProjectPage() {
 
 
   // --- Handlers for project name, AI features, steps, submission ---
-  // (Keep these handlers here as they orchestrate the multi-step process)
 
   const toggleEditName = () => setIsEditingName(!isEditingName);
 
@@ -317,8 +327,9 @@ export default function CreateProjectPage() {
     setProjectName(finalName);
     setIsEditingName(false);
 
+    // Only update if projectId exists (project has been initialized)
     if (projectId && !isTestUser) {
-      console.log("Saving project name:", projectId, finalName);
+      console.log("Saving project name (manual):", projectId, finalName);
       try {
         const { error } = await supabase.from("projects").update({ name: finalName }).eq("id", projectId);
         if (error) throw error;
@@ -327,6 +338,8 @@ export default function CreateProjectPage() {
         console.error("Error updating project name:", error);
         toast({ title: "Error updating name", variant: "destructive" });
       }
+    } else if (!projectId) {
+        console.log("Project name saved locally, DB update skipped (no project ID yet).")
     }
   };
 
@@ -338,6 +351,8 @@ export default function CreateProjectPage() {
   // Handle idea refinement
   const handleRefineIdea = async () => {
     setIsRefining(true);
+    let currentProjectId = projectId; // Capture current projectId
+
     try {
       const idea = ideaForm.getValues("idea");
       if (!idea || idea.length < 10) {
@@ -345,56 +360,77 @@ export default function CreateProjectPage() {
         return;
       }
 
+      // *** Initialize project if not already done ***
+      if (!currentProjectId) {
+        console.log("handleRefineIdea: Project not initialized, calling initializeProject...");
+        currentProjectId = await initializeProject(idea);
+        if (!currentProjectId) {
+          console.error("handleRefineIdea: Project initialization failed.");
+          // initializeProject should show a toast, so just return
+          return;
+        }
+        console.log("handleRefineIdea: Project initialized with ID:", currentProjectId);
+      } else {
+        console.log("handleRefineIdea: Project already initialized with ID:", currentProjectId);
+      }
+
+      // Ensure we have a valid project ID before proceeding
+       if (!currentProjectId) {
+           console.error("handleRefineIdea: Aborting refine, project ID is still missing after initialization attempt.");
+           toast({ title: "Error", description: "Could not associate idea with a project.", variant: "destructive"});
+           return;
+       }
+
       // Call the refineIdea method exposed by the Step1 component
       const refinedIdea = await step1Ref.current?.refineIdea(idea);
-      
+
       if (refinedIdea) {
         // Update form with refined idea
         ideaForm.setValue("idea", refinedIdea);
-        
-        // Update database for real users
-        if (!isTestUser && projectId) {
-          // Add a small delay to ensure state is updated
+
+        // Update database for real users (using the potentially newly acquired currentProjectId)
+        if (!isTestUser && currentProjectId) {
+          // Add a small delay to ensure state is updated (optional, might not be needed if state updates are reliable)
           setTimeout(async () => {
-            // Get the current clarifying questions from Step1
             const currentQuestions = step1Ref.current?.getClarifyingQuestions() || [];
-            
             console.log("Questions to save to database:", JSON.stringify(currentQuestions));
-            
-            if (currentQuestions.length === 0) {
-              console.warn("Warning: No clarifying questions to save. This might indicate a state timing issue.");
-            }
-            
+
+             if (currentQuestions.length === 0) {
+               console.warn("Warning: No clarifying questions to save.");
+             }
+
             try {
+              console.log("Updating project in DB with refined idea/questions. Project ID:", currentProjectId);
               const { error: updateError } = await supabase
                 .from("projects")
-                .update({ 
+                .update({
                   refined_idea: refinedIdea,
-                  clarifying_questions: currentQuestions 
+                  clarifying_questions: currentQuestions
+                  // Note: 'idea' field is updated via debouncer based on form change
                 })
-                .eq("id", projectId);
-                
+                .eq("id", currentProjectId); // Use the correct project ID
+
               if (updateError) {
                 console.error("Error updating project:", updateError);
                 throw updateError;
               }
-              
+
               console.log("Successfully updated project with refined idea and questions");
 
-              // Log credit usage & update user credits
+              // Log credit usage & update user credits (using the correct project ID)
               if (user) {
-                await logCreditUsage(user.id, projectId, "idea_refinement", 50);
+                await logCreditUsage(user.id, currentProjectId, "idea_refinement", 50);
                 await updateUserCredits(user.id, user.credits_remaining - 50);
               }
             } catch (error) {
               console.error("Error in database update:", error);
               toast({
-                title: "Error saving to database",
-                description: "Your refined idea was generated but couldn't be saved.",
+                title: "Error saving refined data",
+                description: "Your refined idea was generated but couldn't be fully saved.",
                 variant: "destructive"
               });
             }
-          }, 500); // Small delay to ensure state is updated
+          }, 100); // Slightly reduced delay
         }
       }
     } catch (error: any) {
@@ -409,69 +445,72 @@ export default function CreateProjectPage() {
     }
   };
 
-  // *** FIX: Ensure the 'field' parameter uses the DetailField type ***
+  // handleGenerateAnswer needs to ensure projectId exists
   const handleGenerateAnswer = async (field: DetailField) => {
     const idea = ideaForm.getValues("idea");
     if (!idea || idea.length < 10) {
       toast({ title: "Please provide your idea first", variant: "destructive" });
       return;
     }
+    // *** Crucially, check if projectId exists ***
     if (!projectId) {
-      toast({ title: "Project not initialized", description: "Please wait or refresh.", variant: "destructive" });
+      toast({ title: "Project not ready", description: "Please refine your idea or move to the next step first.", variant: "destructive" });
+      // Or potentially call initializeProject here? Depends on desired UX.
+      // For now, we require the project to be initialized before generating details.
       return;
     }
 
-    setGeneratingAnswerField(field); // Indicate which field is loading
-    setIsGeneratingAnswer(true); // General loading state for Step 3
+    setGeneratingAnswerField(field);
+    setIsGeneratingAnswer(true);
 
     try {
       if (!isTestUser && user && user.credits_remaining < 25) {
         toast({ title: "Insufficient credits (25 needed)", variant: "destructive" });
+        setIsGeneratingAnswer(false); // Reset loading state early
+        setGeneratingAnswerField(null);
         return;
       }
 
-      // No simulation here - we'll let Step3's handleGenerateGeminiAnswer handle the API call
-      // and update the form value. We're just setting up loading states and checking credits.
-      
-      // Credit usage will be handled after successful API call
+      // Logic remains mostly the same, Step3 component needs the projectId
       console.log(`Preparing to generate AI answer for ${field} (Project: ${projectId})`);
 
-      // No need to refresh here, it's done in Step3 after the API call
-      // await refreshUser();
-      // console.log(`User credits after update: ${user.credits_remaining}`);
+      // Delegate the actual call to Step3, passing projectId is essential
+      // Ensure Step3 component receives and uses the projectId prop correctly
+
     } catch (error) {
-      // Ensure loading states are reset on error
       setIsGeneratingAnswer(false);
+      setGeneratingAnswerField(null); // Reset field-specific loading state on error too
       console.error(`Error generating answer for ${field}:`, error);
       toast({ title: "Answer generation failed", variant: "destructive" });
-      setIsGeneratingAnswer(false);
-      setGeneratingAnswerField(null);
     }
+    // Note: Resetting loading state should happen within Step3 upon completion/error
   };
 
-  const handleGeneratePlan = async () => {
-    setIsGeneratingPlan(true);
-    try {
-      if (!projectId) {
-        toast({ title: "Project not initialized", description: "Please wait or refresh.", variant: "destructive" });
-        return;
-      }
+  // handleGeneratePlan needs to ensure projectId exists
+   const handleGeneratePlan = async () => {
+     setIsGeneratingPlan(true);
+     try {
+       // *** Crucially, check if projectId exists ***
+       if (!projectId) {
+         toast({ title: "Project not ready", description: "Cannot generate plan without a project.", variant: "destructive" });
+         setIsGeneratingPlan(false);
+         return;
+       }
 
-      // Let Step4 handle the API call and get the plan back
-      const generatedPlan = await step4Ref.current?.generateGeminiPlan();
-      
+      // Delegate to Step4, passing projectId is essential
+      const generatedPlan = await step4Ref.current?.generateGeminiPlan(); // Assumes Step4 uses the projectId prop
+
       if (generatedPlan) {
-        setProjectPlan(generatedPlan); // Update state
-        
-        // Update DB for real users
+        setProjectPlan(generatedPlan);
+
         if (!isTestUser && projectId) {
           const { error: updateError } = await supabase
             .from("projects")
             .update({ project_plan: generatedPlan })
-            .eq("id", projectId);
+            .eq("id", projectId); // Use projectId
           if (updateError) throw updateError;
         }
-        
+
         toast({ title: "Project plan generated" });
       }
     } catch (error) {
@@ -482,80 +521,129 @@ export default function CreateProjectPage() {
     }
   };
 
-  const navigateToStep = (step: number) => {
+
+  const navigateToStep = async (step: number) => { // Make async
+    let currentProjectId = projectId; // Capture current projectId
+
     // Basic validation before moving forward
     if (step > activeStep) {
       if (activeStep === 1) {
-        const result = ideaForm.trigger("idea"); // Trigger validation for the idea field
-        if (!result) return; // Don't navigate if invalid
+        const isValid = await ideaForm.trigger("idea"); // Trigger validation
+        if (!isValid) return; // Stop if validation fails
         const ideaValue = ideaForm.getValues("idea");
+        // Check length again just in case
         if (!ideaValue || ideaValue.length < 10) {
           toast({ title: "Idea must be at least 10 characters", variant: "destructive"});
           return;
         }
-        // Remove any validation that requires the idea to be refined
+
+        // *** Initialize Project if moving from Step 1 to Step 2 ***
+        if (step === 2 && !currentProjectId) {
+          console.log("navigateToStep (1->2): Project not initialized, calling initializeProject...");
+          currentProjectId = await initializeProject(ideaValue);
+          if (!currentProjectId) {
+              console.error("navigateToStep (1->2): Project initialization failed.");
+              // initializeProject shows toast, so just return
+              return;
+          }
+           console.log("navigateToStep (1->2): Project initialized with ID:", currentProjectId);
+        }
       }
       // Add validation triggers for other steps if needed
-      if (activeStep === 4 && !projectPlan) {
-        toast({ title: "Please generate the project plan first", variant: "destructive"});
-        return;
+      if (activeStep === 3 && step === 4) {
+          // Potentially trigger validation for detailsForm if required fields exist
+          // const detailsValid = await detailsForm.trigger();
+          // if (!detailsValid) return;
+      }
+      if (activeStep === 4 && step === 5 && !projectPlan) {
+          toast({ title: "Please generate the project plan first", variant: "destructive"});
+          return;
       }
     } else if (step < activeStep) {
-      // When navigating back to Step 1, refresh clarifying questions
-      if (step === 1 && projectId && !isTestUser) {
-        // Refresh clarifying questions when navigating back to Step 1
-        const refreshClarifyingQuestions = async () => {
-          try {
-            const { data, error } = await supabase
-              .from("projects")
-              .select("clarifying_questions")
-              .eq("id", projectId)
-              .single();
-            
-            if (error) {
-              console.error("Error refreshing clarifying questions:", error);
-              return;
-            }
-            
-            if (data && data.clarifying_questions) {
-              console.log("Refreshed clarifying questions:", JSON.stringify(data.clarifying_questions));
-              setClarifyingQuestions(data.clarifying_questions);
-            }
-          } catch (error) {
-            console.error("Error in refreshClarifyingQuestions:", error);
-          }
-        };
-        
-        refreshClarifyingQuestions();
-      }
+        // When navigating back to Step 1, refresh clarifying questions (if project exists)
+        if (step === 1 && currentProjectId && !isTestUser) {
+            const refreshClarifyingQuestions = async () => {
+                try {
+                    console.log("Refreshing clarifying questions for project:", currentProjectId);
+                    const { data, error } = await supabase
+                      .from("projects")
+                      .select("clarifying_questions")
+                      .eq("id", currentProjectId) // Use currentProjectId
+                      .single();
+
+                    if (error) {
+                      console.error("Error refreshing clarifying questions:", error);
+                      return;
+                    }
+
+                    if (data?.clarifying_questions) {
+                       console.log("Refreshed clarifying questions:", JSON.stringify(data.clarifying_questions));
+                       // Ensure questions have UI state properties when setting
+                       const formatted = data.clarifying_questions.map((q: any) => ({ ...q, isEditing: false, isDeleted: false }));
+                       setClarifyingQuestions(formatted);
+                    } else {
+                       console.log("No clarifying questions found in DB to refresh.");
+                       setClarifyingQuestions([]); // Clear local state if none found
+                    }
+                } catch (error) {
+                    console.error("Error in refreshClarifyingQuestions:", error);
+                }
+            };
+            refreshClarifyingQuestions();
+        }
     }
+
+    // Ensure project ID exists before moving past step 1
+    if (step > 1 && !currentProjectId) {
+        console.warn(`Navigation to step ${step} blocked: Project ID is missing.`);
+        toast({ title: "Project Error", description: "Please complete the idea step first.", variant: "destructive"});
+        return;
+    }
+
     setActiveStep(step);
   };
 
   const toggleRecording = () => setIsRecording(!isRecording);
 
   const handleTranscription = async (text: string, audioUrl: string) => {
-    if (!projectId) {
-        toast({ title: "Project not initialized", description: "Cannot save transcription.", variant: "destructive" });
-        return;
-    }
+     // Update form value first
     const currentIdea = ideaForm.getValues("idea");
     const updatedIdea = currentIdea ? `${currentIdea}\n\n--- Transcription ---\n${text}` : text;
-    ideaForm.setValue("idea", updatedIdea, { shouldValidate: true });
-    setVoiceNoteUrl(audioUrl); // Store URL if needed
+    ideaForm.setValue("idea", updatedIdea, { shouldValidate: true }); // Trigger validation
+    setVoiceNoteUrl(audioUrl);
 
-    // Update DB (idea is handled by debouncer, update voice_note_url)
-    if (!isTestUser) {
-        console.log("Updating voice note URL:", projectId, audioUrl);
+    // Check if idea is now long enough to potentially initialize project
+    if (updatedIdea.length >= 10 && !projectId) {
+        console.log("Transcription resulted in sufficient idea length. Initializing project...");
+        const newProjectId = await initializeProject(updatedIdea);
+        if (newProjectId && !isTestUser) {
+            // Project initialized, now update the voice note URL
+            console.log("Updating voice note URL after transcription init:", newProjectId, audioUrl);
+            const { error } = await supabase
+                .from("projects")
+                .update({ voice_note_url: audioUrl })
+                .eq("id", newProjectId);
+            if (error) console.error("Error updating project with voice note URL:", error);
+        } else if (projectId && !isTestUser) {
+             // Project already existed, just update URL
+            console.log("Updating voice note URL (project already exists):", projectId, audioUrl);
+            const { error } = await supabase
+                .from("projects")
+                .update({ voice_note_url: audioUrl })
+                .eq("id", projectId);
+            if (error) console.error("Error updating project with voice note URL:", error);
+        }
+    } else if (projectId && !isTestUser) {
+        // Project existed before transcription, just update URL
+        console.log("Updating voice note URL (project existed):", projectId, audioUrl);
         const { error } = await supabase
             .from("projects")
             .update({ voice_note_url: audioUrl })
             .eq("id", projectId);
-        if (error) {
-            console.error("Error updating project with voice note URL:", error);
-        }
+        if (error) console.error("Error updating project with voice note URL:", error);
     }
-    setIsRecording(false); // Stop recording UI after transcription
+
+    setIsRecording(false);
   };
 
   // --- Helper functions for DB interaction ---
