@@ -1,181 +1,284 @@
-// /Users/aravindtambad/Documents/Provibe Projects/Provibe-V0-v2/app/dashboard/create/steps/Step5.tsx
+// /app/dashboard/create/steps/Step5.tsx
+// v2.0 – April 19 2025 – Vertical progress bar, per‑doc generation & rich‑text viewer
+
+"use client"
+
+import { useEffect, useMemo, useState } from "react"
+import dynamic from "next/dynamic"
+import {
+  ArrowLeft,
+  CheckCircle2,
+  Circle,
+  FileText,
+  Loader2,
+  PlayCircle,
+  XCircle,
+} from "lucide-react"
+
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { ArrowLeft, Loader2 } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { Card } from "@/components/ui/card"
 import { useToast } from "@/components/ui/use-toast"
-import { useRouter } from "next/navigation"
+import { cn } from "@/lib/utils"
 import { supabase } from "@/lib/supabase-client"
 
-// Document types available for generation
+// Dynamically import to avoid SSR markdown issues
+const ReactMarkdown = dynamic(() => import("react-markdown"), { ssr: false })
+
+// -----------------------------------------------------------------------------
+// Types & Constants
+// -----------------------------------------------------------------------------
 export const DOCUMENT_TYPES = [
   { id: "prd", title: "Product Requirements Document", icon: "📄", cost: 200 },
   { id: "user_flow", title: "User Flow Diagram", icon: "🔄", cost: 200 },
   { id: "architecture", title: "System Architecture", icon: "🏗️", cost: 200 },
   { id: "schema", title: "Database Schema", icon: "🗄️", cost: 200 },
   { id: "api_spec", title: "API Specification", icon: "🔌", cost: 200 },
-]
+] as const
 
-// Placeholder for the actual user type from your useAuth hook
-type UserType = any; // Replace 'any' with your actual User type
+const WIZARD_STAGES = [
+  { id: 1, label: "Idea" },
+  { id: 2, label: "Tools" },
+  { id: 3, label: "Details" },
+  { id: 4, label: "Plan" },
+  { id: 5, label: "Generate" },
+] as const
 
-type Step5Props = {
-  user: UserType | null;
-  selectedDocuments: string[];
-  setSelectedDocuments: (docs: string[]) => void;
-  isSubmitting: boolean;
-  setIsSubmitting: (isSubmitting: boolean) => void; // Add setter for isSubmitting
-  navigateToStep: (step: number) => void;
-  projectId: string;
-  projectPlan: string;
+type GenerationStatus = "idle" | "generating" | "done" | "error"
+
+// -----------------------------------------------------------------------------
+// Props
+// -----------------------------------------------------------------------------
+interface UserType {
+  credits_remaining?: number
+  id?: string
 }
 
-export default function Step5({
-  user,
-  selectedDocuments,
-  setSelectedDocuments,
-  isSubmitting,
-  setIsSubmitting,
-  navigateToStep,
-  projectId,
-  projectPlan
-}: Step5Props) {
+interface Step5Props {
+  user: UserType | null
+  navigateToStep: (step: number) => void
+  projectId: string
+  projectPlan: string
+}
+
+// -----------------------------------------------------------------------------
+// Component
+// -----------------------------------------------------------------------------
+export default function Step5({ user, navigateToStep, projectId, projectPlan }: Step5Props) {
   const { toast } = useToast()
-  const router = useRouter()
 
-  const totalCost = selectedDocuments.reduce((sum, docId) => {
-    const doc = DOCUMENT_TYPES.find(d => d.id === docId);
-    return sum + (doc?.cost || 0);
-  }, 0);
+  // ------------------------------------------------------------------------------------------------
+  // Local State
+  // ------------------------------------------------------------------------------------------------
+  const [docStatus, setDocStatus] = useState<Record<string, GenerationStatus>>(() =>
+    Object.fromEntries(DOCUMENT_TYPES.map((d) => [d.id, "idle"]))
+  )
+  const [docContent, setDocContent] = useState<Record<string, string>>({})
+  const [activeDocId, setActiveDocId] = useState<string | null>(null)
 
-  const canAfford = user ? (user.credits_remaining ?? 0) >= totalCost : false;
+  // ------------------------------------------------------------------------------------------------
+  // Helpers
+  // ------------------------------------------------------------------------------------------------
+  const creditsRemaining = user?.credits_remaining ?? 0
+  const generationInProgress = useMemo(() => Object.values(docStatus).some((s) => s === "generating"), [docStatus])
 
-  const handleSelectDocument = (docId: string) => {
-    if (selectedDocuments.includes(docId)) {
-      setSelectedDocuments(selectedDocuments.filter((d) => d !== docId));
-    } else {
-      setSelectedDocuments([...selectedDocuments, docId]);
-    }
-  };
+  // fetch a single document's content from Supabase
+  const loadDocContent = async (docId: string) => {
+    const { data, error } = await supabase
+      .from("project_documents")
+      .select("content")
+      .eq("project_id", projectId)
+      .eq("type", docId)  // Changed from "id" to "type"
+      .single();
 
-  // Handle document generation and redirect to documents page
-  const handleGenerateAndRedirect = async () => {
-    setIsSubmitting(true);
-    try {
-      if (!projectId) {
-        toast({
-          title: "Project not initialized",
-          description: "Please wait or refresh the page.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // Call the API to generate documents
-      const response = await fetch(`/api/projects/${projectId}/documents`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          selectedDocuments,
-          projectPlan
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to generate documents');
-      }
-
-      const result = await response.json();
-      console.log("Document generation result:", result);
-      setIsSubmitting(false);
-
-      // Show success toast
+    if (!error && data?.content) {
+      setDocContent((prev) => ({ ...prev, [docId]: data.content }));
+    } else if (error) {
+      console.error("Error loading document content:", error);
       toast({
-        title: "Documents Generated",
-        description: "Your project documents have been created successfully.",
-      });
-
-      // Redirect to the documents page for this project
-      router.push(`/dashboard/projects/${projectId}/documents`);
-    } catch (error) {
-      console.error("Error generating documents:", error);
-      setIsSubmitting(false); // Ensure loading state is reset on error
-
-      // Show error toast
-      toast({
-        title: "Generation Failed",
-        description: "There was an error generating your documents. Please try again.",
+        title: "Failed to load document",
+        description: "Could not retrieve the document content.",
         variant: "destructive",
       });
     }
   };
 
+  const handleGenerateDocument = async (docId: string) => {
+    if (docStatus[docId] === "generating") return
+
+    // Deduct credits check (simple client‑side guard)
+    if (creditsRemaining < DOCUMENT_TYPES.find((d) => d.id === docId)!.cost) {
+      toast({
+        title: "Insufficient credits",
+        description: "You don't have enough credits to generate this document.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    setDocStatus((prev) => ({ ...prev, [docId]: "generating" }))
+
+    try {
+      const res = await fetch(`/api/projects/${projectId}/documents`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ selectedDocuments: [docId], projectPlan }),
+      })
+
+      if (!res.ok) throw new Error("Failed to trigger generation")
+      const { content } = await res.json()
+
+      setDocStatus((prev) => ({ ...prev, [docId]: "done" }))
+      setDocContent((prev) => ({ ...prev, [docId]: content }))
+      setActiveDocId(docId)
+    } catch (err) {
+      console.error(err)
+      setDocStatus((prev) => ({ ...prev, [docId]: "error" }))
+      toast({ title: "Generation failed", description: "Please try again.", variant: "destructive" })
+    }
+  }
+
+  // Real‑time listener (optional – updates status/content when Supabase function finishes)
+  useEffect(() => {
+    if (!projectId) return
+
+    const channel = supabase
+      .channel("doc‑updates")
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "project_documents", filter: `project_id=eq.${projectId}` },
+        (payload) => {
+          const { id, status, content } = payload.new as { id: string; status: GenerationStatus; content: string }
+          setDocStatus((prev) => ({ ...prev, [id]: status }))
+          if (status === "done") setDocContent((prev) => ({ ...prev, [id]: content }))
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [projectId])
+
+  // ------------------------------------------------------------------------------------------------
+  // Render helpers
+  // ------------------------------------------------------------------------------------------------
+  const StatusIcon = ({ status }: { status: GenerationStatus }) => {
+    switch (status) {
+      case "done":
+        return <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+      case "generating":
+        return <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
+      case "error":
+        return <XCircle className="h-4 w-4 text-red-600" />
+      default:
+        return <Circle className="h-4 w-4 text-muted-foreground" />
+    }
+  }
+
+  // ------------------------------------------------------------------------------------------------
+  // JSX
+  // ------------------------------------------------------------------------------------------------
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Step 5: Generate Documents</CardTitle>
-        <CardDescription>
-          Select the documents you want AI to generate for your project. Review the credit cost below.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="mb-6 rounded-md border border-yellow-300 bg-yellow-50 p-4 dark:border-yellow-700 dark:bg-yellow-950">
-          <p className="text-sm font-medium text-yellow-800 dark:text-yellow-200">
-            Credits Available: {user?.credits_remaining ?? 'Loading...'}
-          </p>
-          <p className="mt-1 text-sm text-yellow-700 dark:text-yellow-300">
-            Selected Documents Cost: {totalCost} credits
-          </p>
-          {selectedDocuments.length > 0 && !canAfford && (
-             <p className="mt-1 text-sm font-semibold text-red-600 dark:text-red-400">
-                Insufficient credits to generate selected documents.
-             </p>
-          )}
+    <div className="flex gap-6">
+      {/* -------------------------------------------------------------------- */}
+      {/* Sidebar ‑ Progress & Docs                                           */}
+      {/* -------------------------------------------------------------------- */}
+      <aside className="w-64 shrink-0">
+        <ol className="relative border-l border-muted-foreground/20">
+          {WIZARD_STAGES.map((stage, idx) => {
+            const completed = stage.id < 5 // first 4 are completed
+            const isCurrent = stage.id === 5
+            return (
+              <li key={stage.id} className="ml-4 mb-8 last:mb-0">
+                {/* Bullet */}
+                <span
+                  className={cn(
+                    "absolute -left-[0.6rem] flex h-3 w-3 items-center justify-center rounded-full ring-8 ring-background",
+                    completed ? "bg-emerald-500" : isCurrent ? "bg-blue-500" : "bg-muted-foreground/40"
+                  )}
+                />
+                <p className={cn("text-sm font-medium", completed && "text-emerald-600", isCurrent && "text-blue-600")}>{
+                  stage.label
+                }</p>
+              </li>
+            )
+          })}
+
+          {/* Document list under Generate */}
+          <li className="ml-4 mt-4">
+            <p className="mb-2 text-xs font-semibold uppercase text-muted-foreground">Documents</p>
+            <ul className="space-y-2">
+              {DOCUMENT_TYPES.map((doc) => (
+                <li key={doc.id} className="flex items-start gap-2">
+                  <button
+                    onClick={async () => {
+                      if (docStatus[doc.id] === "done") {
+                        setActiveDocId(doc.id);
+                        if (!docContent[doc.id]) await loadDocContent(doc.id);
+                      } else {
+                        await handleGenerateDocument(doc.id);
+                      }
+                    }}
+                    className={cn(
+                      "group flex flex-1 items-center gap-2 rounded-md py-1 pr-2 text-left transition",
+                      docStatus[doc.id] === "done" && "hover:bg-accent/40",
+                      docStatus[doc.id] === "generating" && "opacity-70 cursor-not-allowed"
+                    )}
+                    disabled={docStatus[doc.id] === "generating" || generationInProgress}
+                  >
+                    <StatusIcon status={docStatus[doc.id]} />
+                    <span className="truncate text-sm">
+                      {doc.icon} {doc.title.replace("Document", "") /* shorter label */}
+                    </span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </li>
+        </ol>
+
+        {/* Credits info */}
+        <div className="mt-6 rounded-md border p-3 text-xs">
+          Credits Remaining: <span className="font-semibold">{creditsRemaining}</span>
         </div>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {DOCUMENT_TYPES.map((doc) => (
-            <div
-              key={doc.id}
-              className={cn(
-                "flex flex-col items-center justify-center rounded-lg border p-6 text-center transition-all duration-150 ease-in-out cursor-pointer",
-                selectedDocuments.includes(doc.id)
-                  ? "border-emerald-500 bg-emerald-50 ring-2 ring-emerald-500 dark:bg-emerald-900/50 dark:border-emerald-700" // Enhanced selected style
-                  : "border-border bg-background hover:bg-accent hover:text-accent-foreground hover:shadow-md", // Hover effect
-                !user && "opacity-50 cursor-not-allowed" // Dim if user/credits not loaded
-              )}
-              onClick={() => user && handleSelectDocument(doc.id)} // Only allow click if user loaded
-              role="checkbox"
-              aria-checked={selectedDocuments.includes(doc.id)}
-              tabIndex={user ? 0 : -1} // Make focusable only if interactive
-            >
-              <div className="text-4xl mb-2">{doc.icon}</div>
-              <h3 className="mt-2 font-semibold text-base">{doc.title}</h3>
-              <p className="mt-1 text-xs text-muted-foreground">{doc.cost} credits</p>
-            </div>
-          ))}
-        </div>
-      </CardContent>
-      <CardFooter className="flex justify-between">
-        <Button variant="outline" type="button" onClick={() => navigateToStep(4)}>
-          <ArrowLeft className="mr-2 h-4 w-4" /> Back
-        </Button>
+
+        {/* Back Button */}
         <Button
-          onClick={handleGenerateAndRedirect}
-          disabled={isSubmitting || selectedDocuments.length === 0 || !canAfford}
-          className="opacity-100"
+          variant="outline"
+          className="mt-4 w-full"
+          onClick={() => navigateToStep(4)}
+          disabled={generationInProgress}
         >
-          {isSubmitting ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating...
-            </>
-          ) : (
-            `Generate (${totalCost} Credits)`
-          )}
+          <ArrowLeft className="mr-2 h-4 w-4" /> Back to Plan
         </Button>
-      </CardFooter>
-    </Card>
+      </aside>
+
+      {/* -------------------------------------------------------------------- */}
+      {/* Viewer                                                              */}
+      {/* -------------------------------------------------------------------- */}
+      <main className="flex-1 overflow-hidden">
+        <Card className="h-full max-h-[80vh] overflow-hidden">
+          {activeDocId ? (
+            docStatus[activeDocId] === "generating" ? (
+              <div className="flex h-full items-center justify-center p-10 text-center text-sm text-muted-foreground">
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating {DOCUMENT_TYPES.find((d) => d.id === activeDocId)?.title}…
+              </div>
+            ) : (
+              <div className="prose prose-sm max-w-none h-full overflow-y-auto p-6 dark:prose-invert">
+                {docContent[activeDocId] ? (
+                  <ReactMarkdown>{docContent[activeDocId]}</ReactMarkdown>
+                ) : (
+                  <p className="text-muted-foreground">No content available. Generate the document first.</p>
+                )}
+              </div>
+            )
+          ) : (
+            <div className="flex h-full items-center justify-center p-10 text-center text-muted-foreground">
+              Select a document on the left to preview or click it to generate.
+            </div>
+          )}
+        </Card>
+      </main>
+    </div>
   )
 }
