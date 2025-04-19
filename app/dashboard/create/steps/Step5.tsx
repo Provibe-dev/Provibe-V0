@@ -13,6 +13,8 @@ import {
   Loader2,
   PlayCircle,
   XCircle,
+  RefreshCw,
+  Download,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -81,6 +83,58 @@ export default function Step5({ user, navigateToStep, projectId, projectPlan }: 
   const creditsRemaining = user?.credits_remaining ?? 0
   const generationInProgress = useMemo(() => Object.values(docStatus).some((s) => s === "generating"), [docStatus])
 
+  // Download document as markdown file
+  const handleDownloadDocument = () => {
+    if (!activeDocId || !docContent[activeDocId]) return;
+    
+    // Create a blob from the document content
+    const blob = new Blob([docContent[activeDocId]], { type: "text/markdown" });
+    const url = URL.createObjectURL(blob);
+    
+    // Create a temporary link and trigger download
+    const a = document.createElement("a");
+    const docType = DOCUMENT_TYPES.find(d => d.id === activeDocId);
+    const filename = `${docType?.title.replace(/\s+/g, "-").toLowerCase() || activeDocId}.md`;
+    
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    
+    // Clean up
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  // Regenerate document
+  const handleRegenerateDocument = async () => {
+    if (!activeDocId || docStatus[activeDocId] === "generating") return;
+    
+    setDocStatus(prev => ({ ...prev, [activeDocId]: "generating" }));
+    
+    try {
+      const res = await fetch(`/api/projects/${projectId}/documents`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ selectedDocuments: [activeDocId], projectPlan }),
+      });
+      
+      if (!res.ok) throw new Error("Failed to regenerate document");
+      const { content } = await res.json();
+      
+      setDocStatus(prev => ({ ...prev, [activeDocId]: "done" }));
+      setDocContent(prev => ({ ...prev, [activeDocId]: content }));
+    } catch (err) {
+      console.error(err);
+      setDocStatus(prev => ({ ...prev, [activeDocId]: "error" }));
+      toast({ 
+        title: "Regeneration failed", 
+        description: "Please try again.", 
+        variant: "destructive" 
+      });
+    }
+  };
+
   // fetch a single document's content from Supabase
   const loadDocContent = async (docId: string) => {
     const { data, error } = await supabase
@@ -128,7 +182,11 @@ export default function Step5({ user, navigateToStep, projectId, projectPlan }: 
       const { content } = await res.json()
 
       setDocStatus((prev) => ({ ...prev, [docId]: "done" }))
-      setDocContent((prev) => ({ ...prev, [docId]: content }))
+      if (content) {
+        setDocContent((prev) => ({ ...prev, [docId]: content }));
+      } else {
+        await loadDocContent(docId);                               // fallback
+      }
       setActiveDocId(docId)
     } catch (err) {
       console.error(err)
@@ -259,19 +317,46 @@ export default function Step5({ user, navigateToStep, projectId, projectPlan }: 
       <main className="flex-1 overflow-hidden">
         <Card className="h-full max-h-[80vh] overflow-hidden">
           {activeDocId ? (
-            docStatus[activeDocId] === "generating" ? (
-              <div className="flex h-full items-center justify-center p-10 text-center text-sm text-muted-foreground">
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating {DOCUMENT_TYPES.find((d) => d.id === activeDocId)?.title}…
-              </div>
-            ) : (
-              <div className="prose prose-sm max-w-none h-full overflow-y-auto p-6 dark:prose-invert">
-                {docContent[activeDocId] ? (
-                  <ReactMarkdown>{docContent[activeDocId]}</ReactMarkdown>
-                ) : (
-                  <p className="text-muted-foreground">No content available. Generate the document first.</p>
-                )}
-              </div>
-            )
+            <>
+              {/* Document actions */}
+              {docStatus[activeDocId] === "done" && docContent[activeDocId] && (
+                <div className="flex items-center justify-end gap-2 p-2 border-b">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={handleRegenerateDocument}
+                    disabled={docStatus[activeDocId] === "generating" || false}
+                  >
+                    {docStatus[activeDocId] === "generating" ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Regenerating...
+                      </>
+                    ) : (
+                      <>
+                        <RefreshCw className="mr-2 h-4 w-4" /> Regenerate
+                      </>
+                    )}
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={handleDownloadDocument}>
+                    <Download className="mr-2 h-4 w-4" /> Download
+                  </Button>
+                </div>
+              )}
+              
+              {docStatus[activeDocId] === "generating" ? (
+                <div className="flex h-full items-center justify-center p-10 text-center text-sm text-muted-foreground">
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating {DOCUMENT_TYPES.find((d) => d.id === activeDocId)?.title}…
+                </div>
+              ) : (
+                <div className="prose prose-sm max-w-none h-full overflow-y-auto p-6 dark:prose-invert">
+                  {docContent[activeDocId] ? (
+                    <ReactMarkdown>{docContent[activeDocId]}</ReactMarkdown>
+                  ) : (
+                    <p className="text-muted-foreground">No content available. Generate the document first.</p>
+                  )}
+                </div>
+              )}
+            </>
           ) : (
             <div className="flex h-full items-center justify-center p-10 text-center text-muted-foreground">
               Select a document on the left to preview or click it to generate.
